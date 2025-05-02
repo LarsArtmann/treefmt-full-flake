@@ -1,0 +1,24 @@
+# List available commands
+default:
+    @just --list
+
+# Format all files in the repository using Nix
+format:
+    @echo "Formatting all files..."
+    @nix fmt
+    @echo "All formatting complete!"
+
+# Check if all files are properly formatted
+format-check:
+    @echo "Checking formatting..."
+    @nix fmt -- --check
+
+# Run linters on all files (if you have linters configured)
+lint:
+    @echo "Running linters..."
+    @nix run .#linters
+    @echo "Linting complete!"
+
+# Run both formatters and linters
+check: format-check lint
+    @echo "All code quality checks complete!"
