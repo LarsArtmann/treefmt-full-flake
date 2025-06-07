@@ -12,9 +12,11 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/Users/larsartmann/IdeaProjects/",
-        "/Users/larsartmann/GolandProjects/",
-        "/Users/larsartmann/WebstormProjects/",
+        "~/IdeaProjects/",
+        "~/GolandProjects/",
+        "~/WebstormProjects/",
+        "~/treefmt-full-flake/",
+        "~/projects/",
         "/tmp"
       ]
     },
