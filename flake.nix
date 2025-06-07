@@ -19,6 +19,10 @@
     inputs.flake-parts.lib.mkFlake {inherit inputs;} {
       systems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
 
+      imports = [
+        inputs.treefmt-nix.flakeModule
+      ];
+
       flake = {
         # Export the treefmt modules for use in other flakes
         flakeModule = ./flake-module.nix;
@@ -60,9 +64,6 @@
       }: {
         # Example configuration for this flake itself
         # This serves as a demonstration of how to use the flake
-        imports = [
-          inputs.treefmt-nix.flakeModule
-        ];
 
         treefmt = {
           projectRootFile = "flake.nix";

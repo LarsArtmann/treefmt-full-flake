@@ -28,7 +28,7 @@ Add the flake to your inputs:
 
     # Import the treefmt-flake
     treefmt-flake = {
-      url = "github:yourusername/treefmt-flake"; # Replace with your actual repository
+      url = "github:LarsArtmann/treefmt-full-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -46,19 +46,19 @@ Import the flake module and configure which formatter groups to enable:
 
   # Configure which formatter groups to enable
   treefmtFlake = {
-    enableNix = true;
-    enableWeb = true;
-    enablePython = true;
-    enableShell = true;
-    enableYaml = true;
-    enableMarkdown = true;
-    enableJson = true;
+    nix = true;
+    web = true;
+    python = true;
+    shell = true;
+    yaml = true;
+    markdown = true;
+    json = true;
 
     # Configure project root
     projectRootFile = "flake.nix";
 
-    # Enable global excludes
-    enableGlobalExcludes = true;
+    # Enable default excludes
+    enableDefaultExcludes = true;
 
     # Don't allow missing formatters
     allowMissingFormatter = false;
@@ -68,21 +68,20 @@ Import the flake module and configure which formatter groups to enable:
 
 ### Available Formatter Groups
 
-- `enableNix`: Nix formatters (alejandra, deadnix, statix)
-- `enableWeb`: Web formatters (biome for JS/TS/CSS)
-- `enablePython`: Python formatters (black, isort, ruff)
-- `enableShell`: Shell formatters (shfmt, shellcheck)
-- `enableRust`: Rust formatters (rustfmt)
-- `enableYaml`: YAML formatters (yamlfmt)
-- `enableMarkdown`: Markdown formatters (mdformat)
-- `enableJson`: JSON formatters (jsonfmt, jq)
-- `enableMisc`: Miscellaneous formatters
+- `nix`: Nix formatters (alejandra, deadnix, statix)
+- `web`: Web formatters (biome for JS/TS/CSS)
+- `python`: Python formatters (black, isort, ruff)
+- `shell`: Shell formatters (shfmt, shellcheck)
+- `rust`: Rust formatters (rustfmt)
+- `yaml`: YAML formatters (yamlfmt)
+- `markdown`: Markdown formatters (mdformat)
+- `json`: JSON formatters (jsonfmt, jq)
+- `misc`: Miscellaneous formatters
 
 ### Configuration Options
 
 - `projectRootFile`: File that marks the project root (default: "flake.nix")
-- `enableGlobalExcludes`: Enable global excludes for common patterns (default:
-  true)
+- `enableDefaultExcludes`: Enable default excludes for common patterns (default: true)
 - `allowMissingFormatter`: Allow missing formatters (default: false)
 
 ## Using Templates
@@ -91,11 +90,11 @@ This flake provides templates to get started quickly:
 
 ```bash
 # Create a new project with the default template
-nix flake init -t github:yourusername/treefmt-flake
+nix flake init -t github:LarsArtmann/treefmt-full-flake
 
 # Or use a specific template
-nix flake init -t github:yourusername/treefmt-flake#minimal
-nix flake init -t github:yourusername/treefmt-flake#complete
+nix flake init -t github:LarsArtmann/treefmt-full-flake#minimal
+nix flake init -t github:LarsArtmann/treefmt-full-flake#complete
 ```
 
 ## Running Formatters

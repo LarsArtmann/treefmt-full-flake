@@ -9,9 +9,14 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Import the treefmt-flake
     treefmt-flake = {
-      url = "github:yourusername/treefmt-flake"; # Replace with your actual repository
+      url = "github:LarsArtmann/treefmt-full-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -21,25 +26,26 @@
       systems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
 
       imports = [
-        # Import the treefmt-flake module
+        # Import treefmt-nix and treefmt-flake modules
+        inputs.treefmt-nix.flakeModule
         inputs.treefmt-flake.flakeModule
       ];
 
       # Configure which formatter groups to enable
       treefmtFlake = {
-        enableNix = true;
-        enableWeb = true;
-        enablePython = true;
-        enableShell = true;
-        enableYaml = true;
-        enableMarkdown = true;
-        enableJson = true;
+        nix = true;
+        web = true;
+        python = true;
+        shell = true;
+        yaml = true;
+        markdown = true;
+        json = true;
 
         # Configure project root
         projectRootFile = "flake.nix";
 
-        # Enable global excludes
-        enableGlobalExcludes = true;
+        # Enable default excludes
+        enableDefaultExcludes = true;
 
         # Don't allow missing formatters
         allowMissingFormatter = false;

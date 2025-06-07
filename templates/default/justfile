@@ -13,12 +13,8 @@ format-check:
     @echo "Checking formatting..."
     @nix fmt -- --check
 
-# Run linters on all files (if you have linters configured)
-lint:
-    @echo "Running linters..."
-    @nix run .#linters
-    @echo "Linting complete!"
-
-# Run both formatters and linters
-check: format-check lint
+# Run flake checks (includes formatting validation)
+check: format-check
+    @echo "Running flake checks..."
+    @nix flake check
     @echo "All code quality checks complete!"
