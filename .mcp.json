@@ -1,0 +1,54 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ]
+    },
+    "filesystem": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/larsartmann/IdeaProjects/",
+        "/Users/larsartmann/GolandProjects/",
+        "/Users/larsartmann/WebstormProjects/",
+        "/tmp"
+      ]
+    },
+    "puppeteer": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
+    },
+    "kubernetes": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "mcp-server-kubernetes"
+      ]
+    },
+    "memory": {
+      "command": "mcp-server-memory",
+      "args": []
+    },
+    "sequential-thinking": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "everything": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-everything"
+      ]
+    }
+  }
+}
