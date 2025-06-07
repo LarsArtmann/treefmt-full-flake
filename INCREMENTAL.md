@@ -5,17 +5,20 @@ This flake now includes **incremental formatting** capabilities that provide **1
 ## Features
 
 ### 🚀 Performance Profiles
+
 - **fast**: Ultra-fast mode, skips cache (`--no-cache`)
 - **balanced**: Default mode with smart caching
 - **thorough**: Comprehensive mode with full directory walk (`--walk`)
 
 ### 🔧 Git-Based Change Detection
+
 - Format only files changed since main branch
 - Format only staged files
 - Format files changed since specific commit
 - Automatic fallback to full formatting if git detection fails
 
 ### 📦 Cache Management
+
 - Configurable cache directory (default: `~/.cache/treefmt`)
 - Project-local cache support
 - Automatic cache directory creation
@@ -31,10 +34,10 @@ treefmtFlake = {
     gitBased = true;
     cache = "./.cache/treefmt";
   };
-  
+
   # Performance profile
   performance = "balanced";  # fast | balanced | thorough
-  
+
   # Git options
   gitOptions = {
     branch = "main";
@@ -46,15 +49,17 @@ treefmtFlake = {
 ## Commands
 
 ### Basic Commands
+
 ```bash
 nix fmt                    # Format all files (incremental when enabled)
 nix fmt -- --check        # Check formatting without changes
 ```
 
 ### Incremental Commands
+
 ```bash
 nix run .#treefmt-fast     # Ultra-fast formatting (no cache)
-nix run .#treefmt-staged   # Format only staged files  
+nix run .#treefmt-staged   # Format only staged files
 nix run .#treefmt-since HEAD~5  # Format files changed since 5 commits ago
 ```
 
@@ -77,7 +82,7 @@ Formatting completed in 0.234s (3 files, balanced profile)
 
 - ⚡ **10-100x faster** on large codebases
 - 🎯 **Smart change detection** using git
-- 🔄 **Automatic fallback** for reliability  
+- 🔄 **Automatic fallback** for reliability
 - 📊 **Performance reporting** for insights
 - 🛠️ **Configurable profiles** for different use cases
 - 💾 **Persistent caching** for even better performance

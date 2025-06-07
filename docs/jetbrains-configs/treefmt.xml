@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TaskOptions>
+  <TaskOptions>
+    <option name="arguments" value="$FilePath$" />
+    <option name="checkSyntaxErrors" value="true" />
+    <option name="description" />
+    <option name="exitCodeBehavior" value="ERROR" />
+    <option name="fileExtension" value="nix" />
+    <option name="immediateSync" value="false" />
+    <option name="name" value="treefmt - Nix" />
+    <option name="output" value="$FilePath$" />
+    <option name="outputFilters">
+      <array />
+    </option>
+    <option name="outputFromStdout" value="false" />
+    <option name="program" value="$ProjectFileDir$/result/bin/treefmt" />
+    <option name="runOnExternalChanges" value="false" />
+    <option name="scopeName" value="Project Files" />
+    <option name="trackOnlyRoot" value="false" />
+    <option name="workingDir" value="$ProjectFileDir$" />
+    <envs />
+  </TaskOptions>
+  <TaskOptions>
+    <option name="arguments" value="bash -c &quot;cd $ProjectFileDir$ &amp;&amp; nix run .#treefmt-fast -- $FilePath$&quot;" />
+    <option name="checkSyntaxErrors" value="true" />
+    <option name="description" />
+    <option name="exitCodeBehavior" value="ERROR" />
+    <option name="fileExtension" value="js" />
+    <option name="immediateSync" value="false" />
+    <option name="name" value="treefmt - JavaScript (Fast)" />
+    <option name="output" value="$FilePath$" />
+    <option name="outputFilters">
+      <array />
+    </option>
+    <option name="outputFromStdout" value="false" />
+    <option name="program" value="/usr/bin/env" />
+    <option name="runOnExternalChanges" value="false" />
+    <option name="scopeName" value="Project Files" />
+    <option name="trackOnlyRoot" value="false" />
+    <option name="workingDir" value="$ProjectFileDir$" />
+    <envs>
+      <env name="PATH" value="/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin" />
+    </envs>
+  </TaskOptions>
+  <TaskOptions>
+    <option name="arguments" value="bash -c &quot;cd $ProjectFileDir$ &amp;&amp; nix run .#treefmt-fast -- $FilePath$&quot;" />
+    <option name="checkSyntaxErrors" value="true" />
+    <option name="description" />
+    <option name="exitCodeBehavior" value="ERROR" />
+    <option name="fileExtension" value="ts" />
+    <option name="immediateSync" value="false" />
+    <option name="name" value="treefmt - TypeScript (Fast)" />
+    <option name="output" value="$FilePath$" />
+    <option name="outputFilters">
+      <array />
+    </option>
+    <option name="outputFromStdout" value="false" />
+    <option name="program" value="/usr/bin/env" />
+    <option name="runOnExternalChanges" value="false" />
+    <option name="scopeName" value="Project Files" />
+    <option name="trackOnlyRoot" value="false" />
+    <option name="workingDir" value="$ProjectFileDir$" />
+    <envs>
+      <env name="PATH" value="/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin" />
+    </envs>
+  </TaskOptions>
+  <TaskOptions>
+    <option name="arguments" value="$FilePath$" />
+    <option name="checkSyntaxErrors" value="true" />
+    <option name="description" />
+    <option name="exitCodeBehavior" value="ERROR" />
+    <option name="fileExtension" value="json" />
+    <option name="immediateSync" value="false" />
+    <option name="name" value="treefmt - JSON" />
+    <option name="output" value="$FilePath$" />
+    <option name="outputFilters">
+      <array />
+    </option>
+    <option name="outputFromStdout" value="false" />
+    <option name="program" value="$ProjectFileDir$/result/bin/treefmt" />
+    <option name="runOnExternalChanges" value="false" />
+    <option name="scopeName" value="Project Files" />
+    <option name="trackOnlyRoot" value="false" />
+    <option name="workingDir" value="$ProjectFileDir$" />
+    <envs />
+  </TaskOptions>
+  <TaskOptions>
+    <option name="arguments" value="$FilePath$" />
+    <option name="checkSyntaxErrors" value="true" />
+    <option name="description" />
+    <option name="exitCodeBehavior" value="ERROR" />
+    <option name="fileExtension" value="md" />
+    <option name="immediateSync" value="false" />
+    <option name="name" value="treefmt - Markdown" />
+    <option name="output" value="$FilePath$" />
+    <option name="outputFilters">
+      <array />
+    </option>
+    <option name="outputFromStdout" value="false" />
+    <option name="program" value="$ProjectFileDir$/result/bin/treefmt" />
+    <option name="runOnExternalChanges" value="false" />
+    <option name="scopeName" value="Project Files" />
+    <option name="trackOnlyRoot" value="false" />
+    <option name="workingDir" value="$ProjectFileDir$" />
+    <envs />
+  </TaskOptions>
+</TaskOptions>

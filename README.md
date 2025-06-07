@@ -109,6 +109,66 @@ nix fmt
 nix fmt -- --check
 ```
 
+### Incremental Formatting (10-100x Faster)
+
+For large codebases, enable incremental formatting for dramatic performance improvements:
+
+```nix
+treefmtFlake = {
+  # Enable incremental formatting
+  incremental = {
+    enable = true;
+    mode = "git";
+    cache = "./.cache/treefmt";
+  };
+  performance = "balanced";
+};
+```
+
+Then use specialized commands:
+
+```bash
+# Ultra-fast formatting (no cache)
+nix run .#treefmt-fast
+
+# Format only staged files
+nix run .#treefmt-staged
+
+# Format files changed since commit
+nix run .#treefmt-since HEAD~5
+```
+
+See [INCREMENTAL.md](./INCREMENTAL.md) for full details.
+
+## Editor Integration
+
+### JetBrains IDEs (IntelliJ, WebStorm, PyCharm, etc.)
+
+Enable automatic format-on-save in JetBrains IDEs:
+
+```bash
+# Quick setup (from your project root)
+curl -sSL https://raw.githubusercontent.com/LarsArtmann/treefmt-full-flake/master/docs/jetbrains-configs/setup-jetbrains.sh | bash
+```
+
+Or manually configure:
+
+1. Install the **File Watchers** plugin
+2. Add a new watcher with:
+   - Program: `$ProjectFileDir$/result/bin/treefmt`
+   - Arguments: `$FilePath$`
+   - Trigger: On file save
+
+See [docs/jetbrains-integration.md](./docs/jetbrains-integration.md) for detailed instructions.
+
+### VS Code
+
+_(Coming soon)_
+
+### Neovim
+
+_(Coming soon)_
+
 ## Adding to Justfile
 
 For projects using [just](https://github.com/casey/just), you can add these
