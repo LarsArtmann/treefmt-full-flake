@@ -2,10 +2,7 @@
   "mcpServers": {
     "github": {
       "command": "bunx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-github"]
     },
     "filesystem": {
       "command": "bunx",
@@ -22,17 +19,11 @@
     },
     "puppeteer": {
       "command": "bunx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-puppeteer"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
     },
     "kubernetes": {
       "command": "bunx",
-      "args": [
-        "-y",
-        "mcp-server-kubernetes"
-      ]
+      "args": ["-y", "mcp-server-kubernetes"]
     },
     "memory": {
       "command": "mcp-server-memory",
@@ -40,17 +31,11 @@
     },
     "sequential-thinking": {
       "command": "bunx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
     "everything": {
       "command": "bunx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-everything"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-everything"]
     }
   }
 }

@@ -21,6 +21,7 @@
 
       imports = [
         inputs.treefmt-nix.flakeModule
+        ./flake-module.nix
       ];
 
       flake = {
@@ -74,8 +75,7 @@
           };
         };
 
-        # Make the formatter available as a package
-        formatter = config.treefmt.build.wrapper;
+        # Formatter is provided by the flake-module.nix
 
         # Create a development shell with all tools
         devShells.default = pkgs.mkShell {

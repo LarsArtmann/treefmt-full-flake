@@ -36,6 +36,61 @@
             default = false;
             description = "Allow missing formatters";
           };
+
+          # Incremental formatting options
+          incremental = lib.mkOption {
+            type = lib.types.submodule {
+              options = {
+                enable = lib.mkEnableOption "Enable incremental formatting features";
+
+                mode = lib.mkOption {
+                  type = lib.types.enum ["git" "cache" "auto"];
+                  default = "auto";
+                  description = "Incremental mode: git (use git for change detection), cache (use treefmt cache), auto (detect best method)";
+                };
+
+                cache = lib.mkOption {
+                  type = lib.types.str;
+                  default = "~/.cache/treefmt";
+                  description = "Cache directory for treefmt";
+                };
+
+                gitBased = lib.mkEnableOption "Use git for change detection";
+              };
+            };
+            default = {};
+            description = "Incremental formatting configuration";
+          };
+
+          # Performance profiles
+          performance = lib.mkOption {
+            type = lib.types.enum ["fast" "balanced" "thorough"];
+            default = "balanced";
+            description = "Performance profile: fast (skip expensive operations), balanced (default), thorough (comprehensive checking)";
+          };
+
+          # Git-specific options
+          gitOptions = lib.mkOption {
+            type = lib.types.submodule {
+              options = {
+                sinceCommit = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  description = "Format files changed since this commit";
+                };
+
+                stagedOnly = lib.mkEnableOption "Format only staged files";
+
+                branch = lib.mkOption {
+                  type = lib.types.str;
+                  default = "main";
+                  description = "Compare against this branch for change detection";
+                };
+              };
+            };
+            default = {};
+            description = "Git-based formatting options";
+          };
         };
       };
       default = {};
@@ -56,8 +111,127 @@
       ++ lib.optional cfg.markdown (import ./formatters/markdown.nix)
       ++ lib.optional cfg.json (import ./formatters/json.nix)
       ++ lib.optional cfg.misc (import ./formatters/misc.nix));
+
+    # Generate treefmt CLI arguments based on configuration
+    generateTreefmtArgs = pkgs: let
+      baseArgs = [];
+
+      # Performance profile flags
+      performanceArgs =
+        {
+          fast = ["--no-cache"];
+          balanced = [];
+          thorough = ["--walk"];
+        }.${
+          cfg.performance
+        };
+
+      # Incremental flags
+      incrementalArgs = lib.optionals cfg.incremental.enable (
+        if cfg.incremental.mode == "cache" || (cfg.incremental.mode == "auto" && !cfg.incremental.gitBased)
+        then []
+        else if cfg.incremental.mode == "git" || cfg.incremental.gitBased
+        then ["--walk"] # Use --walk for git mode to process specific files
+        else []
+      );
+
+      # Cache directory configuration
+      cacheArgs = lib.optionals (cfg.incremental.enable && cfg.incremental.cache != "~/.cache/treefmt") [
+        "--cache-dir=${cfg.incremental.cache}"
+      ];
+    in
+      baseArgs ++ performanceArgs ++ incrementalArgs ++ cacheArgs;
+
+    # Create git-aware wrapper script for incremental formatting
+    createIncrementalWrapper = pkgs: baseWrapper:
+      pkgs.writeShellScriptBin "treefmt-incremental" ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        # Default treefmt wrapper
+        TREEFMT_CMD="${baseWrapper}/bin/treefmt"
+        CACHE_DIR="${cfg.incremental.cache}"
+
+        # Ensure cache directory exists
+        mkdir -p "$CACHE_DIR"
+
+        # Function to get changed files based on git
+        get_changed_files() {
+          if [[ "${cfg.gitOptions.stagedOnly}" == "true" ]]; then
+            # Only staged files
+            git diff --cached --name-only --diff-filter=ACMR
+          elif [[ -n "${lib.optionalString (cfg.gitOptions.sinceCommit != null) cfg.gitOptions.sinceCommit}" ]]; then
+            # Files changed since specific commit
+            git diff --name-only --diff-filter=ACMR "${cfg.gitOptions.sinceCommit}"
+          else
+            # Files changed compared to main branch
+            git diff --name-only --diff-filter=ACMR "origin/${cfg.gitOptions.branch}...HEAD" 2>/dev/null || \
+            git diff --name-only --diff-filter=ACMR "${cfg.gitOptions.branch}...HEAD" 2>/dev/null || \
+            git diff --name-only --diff-filter=ACMR HEAD~1
+          fi
+        }
+
+        # Function to run treefmt with performance profiling
+        run_treefmt() {
+          local start_time=$(date +%s.%N)
+          local file_count=0
+
+          if [[ "${cfg.incremental.enable}" == "true" && ("${cfg.incremental.mode}" == "git" || "${cfg.incremental.gitBased}" == "true") ]]; then
+            # Get list of changed files
+            local changed_files
+            if ! changed_files=$(get_changed_files); then
+              echo "Warning: Could not determine changed files, falling back to full formatting"
+              "$TREEFMT_CMD" "$@"
+              return $?
+            fi
+
+            if [[ -z "$changed_files" ]]; then
+              echo "No changed files detected, skipping formatting"
+              return 0
+            fi
+
+            # Convert to array and filter existing files
+            local files_array=()
+            while IFS= read -r file; do
+              if [[ -f "$file" ]]; then
+                files_array+=("$file")
+                ((file_count++))
+              fi
+            done <<< "$changed_files"
+
+            if [[ $file_count -eq 0 ]]; then
+              echo "No files to format"
+              return 0
+            fi
+
+            echo "Formatting $file_count changed files..."
+            if [[ $file_count -le 10 ]]; then
+              printf "Files: %s\n" "''${files_array[*]}"
+            fi
+
+            # Run treefmt on specific files
+            "$TREEFMT_CMD" ${lib.concatStringsSep " " (generateTreefmtArgs pkgs)} "$@" -- "''${files_array[@]}"
+          else
+            # Standard treefmt execution
+            echo "Running full formatting..."
+            "$TREEFMT_CMD" ${lib.concatStringsSep " " (generateTreefmtArgs pkgs)} "$@"
+          fi
+
+          local end_time=$(date +%s.%N)
+          local duration=$(echo "$end_time - $start_time" | bc 2>/dev/null || echo "0")
+
+          echo "Formatting completed in ''${duration}s (''${file_count} files, ${cfg.performance} profile)"
+        }
+
+        # Main execution
+        run_treefmt "$@"
+      '';
   in {
-    perSystem = {config, ...}: {
+    perSystem = {
+      config,
+      pkgs,
+      ...
+    }: {
       treefmt = {
         inherit (cfg) projectRootFile;
 
@@ -65,16 +239,58 @@
         inherit (cfg) enableDefaultExcludes;
 
         # Allow missing formatters if requested
-        settings = {
-          allowMissingTools = cfg.allowMissingFormatter;
-        };
+        settings =
+          {
+            allowMissingTools = cfg.allowMissingFormatter;
+          }
+          // lib.optionalAttrs (cfg.incremental.enable && cfg.incremental.cache != "~/.cache/treefmt") {
+            # Configure cache directory if specified
+            cache-dir = cfg.incremental.cache;
+          };
 
         # Apply formatter configurations
         programs = lib.mkMerge formatterConfigs;
       };
 
-      # Make the formatter available as a package
-      formatter = config.treefmt.build.wrapper;
+      # Create enhanced formatter with incremental capabilities
+      formatter =
+        if cfg.incremental.enable
+        then createIncrementalWrapper pkgs config.treefmt.build.wrapper
+        else config.treefmt.build.wrapper;
+
+      # Add development packages and scripts
+      packages = lib.optionalAttrs cfg.incremental.enable {
+        treefmt-fast = pkgs.writeShellScriptBin "treefmt-fast" ''
+          ${
+            if cfg.incremental.enable
+            then "${createIncrementalWrapper pkgs config.treefmt.build.wrapper}/bin/treefmt-incremental"
+            else "${config.treefmt.build.wrapper}/bin/treefmt"
+          } --no-cache "$@"
+        '';
+
+        treefmt-staged = pkgs.writeShellScriptBin "treefmt-staged" ''
+          export TREEFMT_STAGED_ONLY=true
+          ${
+            if cfg.incremental.enable
+            then "${createIncrementalWrapper pkgs config.treefmt.build.wrapper}/bin/treefmt-incremental"
+            else "${config.treefmt.build.wrapper}/bin/treefmt"
+          } "$@"
+        '';
+
+        treefmt-since = pkgs.writeShellScriptBin "treefmt-since" ''
+          if [[ $# -eq 0 ]]; then
+            echo "Usage: treefmt-since <commit>"
+            exit 1
+          fi
+          export TREEFMT_SINCE_COMMIT="$1"
+          shift
+          ${
+            if cfg.incremental.enable
+            then "${createIncrementalWrapper pkgs config.treefmt.build.wrapper}/bin/treefmt-incremental"
+            else "${config.treefmt.build.wrapper}/bin/treefmt"
+          } "$@"
+        '';
+      };
     };
   };
 }
