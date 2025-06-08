@@ -1,0 +1,42 @@
+{
+  "name": "treefmt-analytics",
+  "version": "1.0.0",
+  "description": "Performance Analytics for treefmt - Comprehensive monitoring and insights",
+  "type": "module",
+  "scripts": {
+    "analytics": "bun run analytics-collector.ts",
+    "dashboard": "bun run terminal-dashboard.ts",
+    "dev": "bun run --watch terminal-dashboard.ts",
+    "test": "bun test",
+    "build": "bun build analytics-collector.ts --outdir=dist --target=bun",
+    "format": "./smart-treefmt-analytics.sh",
+    "analytics:summary": "bun run analytics-collector.ts summary",
+    "analytics:export": "bun run analytics-collector.ts export",
+    "analytics:dashboard": "bun run terminal-dashboard.ts"
+  },
+  "dependencies": {
+    "blessed": "^0.1.81"
+  },
+  "devDependencies": {
+    "@types/blessed": "^0.1.21",
+    "bun-types": "latest"
+  },
+  "keywords": [
+    "treefmt",
+    "analytics",
+    "performance",
+    "code-formatting",
+    "dashboard",
+    "metrics",
+    "monitoring"
+  ],
+  "author": "Lars Artmann",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LarsArtmann/treefmt-full-flake"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}
