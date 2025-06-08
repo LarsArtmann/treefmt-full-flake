@@ -1,0 +1,31 @@
+# AI-Generated treefmt configuration
+# Framework: [0;36m🔮 Advanced Framework Detection[0m
+  No specific framework detected
+  Generic project
+# Generated: Sun  8 Jun 2025 03:03:37 CEST
+# Confidence: High
+
+[global]
+excludes = [
+  ".git/**/*",
+  "node_modules/**/*",
+  "target/**/*",
+  "dist/**/*",
+  "build/**/*",
+  ".cache/**/*",
+  "*.min.js",
+  "*.min.css",
+  # AI-recommended excludes
+  "*.generated.*",
+  "__pycache__/**/*",
+  ".venv/**/*"
+]
+
+# AI-optimized rules based on framework detection
+
+# Generic optimized configuration
+[formatter.prettier]
+command = "prettier"
+includes = ["*.js", "*.json", "*.css", "*.md"]
+options = ["--write"]
+

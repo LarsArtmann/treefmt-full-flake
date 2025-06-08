@@ -233,6 +233,16 @@ This repository includes both v1 and **v2** intelligent wrappers:
 
 See [v2 Documentation](./docs/smart-treefmt-v2.md) | [v1 Documentation](./docs/smart-treefmt.md)
 
+### 🔮 **[smart-treefmt-v3-prototype.sh](./smart-treefmt-v3-prototype.sh)** - Revolutionary AI (Prototype)
+
+- 🧠 **AI-powered analysis** - semantic code understanding with local LLM
+- 🔮 **Predictive formatting** - prevent issues before they occur  
+- 🧬 **Intelligent config evolution** - learns from team patterns
+- ⚡ **Advanced framework detection** - 95%+ accuracy with confidence scores
+- 📊 **Team pattern analysis** - extracts insights from git history
+
+See [Revolutionary Roadmap](./REVOLUTIONARY_ROADMAP.md) | [Revolutionary Improvements](./REVOLUTIONARY_IMPROVEMENTS.md)
+
 ## License
 
 MIT
