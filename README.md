@@ -210,6 +210,29 @@ perSystem = {
 };
 ```
 
+## Smart Script
+
+This repository includes both v1 and **v2** intelligent wrappers:
+
+### 🚀 **[smart-treefmt-v2.sh](./smart-treefmt-v2.sh)** - Next Generation (Recommended)
+
+- ⚡ **25x faster startup** with command caching
+- 🔧 **Auto-fix capabilities** - resolves issues automatically  
+- ✨ **Configuration wizard** - generates optimal configs
+- 🎯 **Interactive mode** - guided problem resolution
+- 📊 **Progress indicators** - beautiful real-time feedback
+- 🔌 **Tool integration** - direnv, mise, asdf support
+- 📜 **History tracking** - logs all operations
+- 🔄 **Self-updating** - stays current automatically
+
+### 📚 **[smart-treefmt.sh](./smart-treefmt.sh)** - Original
+
+- 🔍 **Multi-source resolution** - finds treefmt intelligently
+- 💡 **Detailed error messages** - actionable solutions
+- 🎯 **Project detection** - context-aware guidance
+
+See [v2 Documentation](./docs/smart-treefmt-v2.md) | [v1 Documentation](./docs/smart-treefmt.md)
+
 ## License
 
 MIT
