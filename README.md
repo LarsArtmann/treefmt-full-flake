@@ -3,6 +3,8 @@
 A reusable [treefmt](https://github.com/numtide/treefmt) configuration for
 multiple projects, packaged as a Nix flake.
 
+> **⚡ [Quick Start Guide](./QUICKSTART.md) - Get up and running in 2 minutes!**
+
 ## Features
 
 - Preconfigured formatters for various languages and file types

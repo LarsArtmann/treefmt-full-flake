@@ -68,7 +68,9 @@
             echo ""
             echo "Available commands:"
             echo "  nix fmt                - Format all files"
-            echo "  nix fmt -- --check     - Check formatting without changing files"
+            echo "  nix fmt -- --fail-on-change  - Check formatting without changing files"
+            echo ""
+            echo "📖 Quick Start Guide: https://github.com/LarsArtmann/treefmt-full-flake/blob/master/QUICKSTART.md"
             echo ""
           '';
         };

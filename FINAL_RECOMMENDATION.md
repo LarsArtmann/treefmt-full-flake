@@ -6,6 +6,7 @@ After thorough investigation, we discovered:
 
 1. **Two separate git histories** created 17 minutes apart
 2. **Main branch has valuable formatter defaults** that improve code quality:
+
    - Shell: 2-space indentation, code simplification
    - Markdown: Numbered headings for better navigation
    - CSS: 100-char width (better for Tailwind)
@@ -60,24 +61,24 @@ Co-authored-by: Lars Artmann <git@lars.software>"
 
 Add to README.md:
 
-```markdown
+````markdown
 ## Smart Formatter Defaults
 
 This flake includes carefully chosen formatter options:
 
-| Formatter | Default Options | Rationale |
-|-----------|----------------|-----------|
-| Shell | 2-space indent, simplify | Consistent with modern shells |
-| Markdown | Numbered headings | Better document navigation |
-| CSS | 100-char width | Tailwind-friendly |
-| YAML | Preserve quotes | Maintains intent |
-| Python | mypy enabled | Type safety |
+| Formatter | Default Options          | Rationale                     |
+| --------- | ------------------------ | ----------------------------- |
+| Shell     | 2-space indent, simplify | Consistent with modern shells |
+| Markdown  | Numbered headings        | Better document navigation    |
+| CSS       | 100-char width           | Tailwind-friendly             |
+| YAML      | Preserve quotes          | Maintains intent              |
+| Python    | mypy enabled             | Type safety                   |
 
 To override any default:
 \```nix
-treefmt.programs.shfmt.options = ["-i" "4"];  # Use 4 spaces
+treefmt.programs.shfmt.options = ["-i" "4"]; # Use 4 spaces
 \```
-```
+````
 
 ### Step 4: Archive Main Branch (5 mins)
 

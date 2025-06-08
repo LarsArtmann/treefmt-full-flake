@@ -87,7 +87,7 @@
             echo ""
             echo "Available formatting commands:"
             echo "  nix fmt                     - Format all files (incremental when enabled)"
-            echo "  nix fmt -- --check          - Check formatting without changes"
+            echo "  nix fmt -- --fail-on-change  - Check formatting without changes"
             echo ""
             echo "Incremental formatting commands (10-100x faster):"
             echo "  nix run .#treefmt-fast     - Ultra-fast formatting (no cache)"
@@ -98,6 +98,8 @@
             echo "  fast      - Skip expensive operations, no cache"
             echo "  balanced  - Default performance with smart caching"
             echo "  thorough  - Comprehensive checking with full walk"
+            echo ""
+            echo "📖 Quick Start Guide: https://github.com/LarsArtmann/treefmt-full-flake/blob/master/QUICKSTART.md"
             echo ""
           '';
         };

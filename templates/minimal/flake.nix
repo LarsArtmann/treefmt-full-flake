@@ -52,6 +52,17 @@
             # Formatters
             config.treefmt.build.wrapper
           ];
+
+          shellHook = ''
+            echo "Welcome to the minimal treefmt environment!"
+            echo ""
+            echo "Commands:"
+            echo "  nix fmt                     - Format all files"
+            echo "  nix fmt -- --fail-on-change  - Check formatting"
+            echo ""
+            echo "📖 Quick Start: https://github.com/LarsArtmann/treefmt-full-flake/blob/master/QUICKSTART.md"
+            echo ""
+          '';
         };
       };
     };

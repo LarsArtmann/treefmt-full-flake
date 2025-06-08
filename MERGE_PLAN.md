@@ -7,6 +7,7 @@ Merge master's advanced features with main's thoughtful formatter configurations
 ## What to Keep from Each Branch
 
 ### From Master (Power Features)
+
 - ✅ Incremental formatting system (10-100x performance)
 - ✅ JetBrains IDE integration
 - ✅ Performance profiles (fast/balanced/thorough)
@@ -16,6 +17,7 @@ Merge master's advanced features with main's thoughtful formatter configurations
 - ✅ MCP configuration
 
 ### From Main (Smart Defaults)
+
 - ✅ All formatter-specific options:
   - Shell: 2-space indent, simplify code
   - Markdown: Numbered headings
@@ -29,11 +31,13 @@ Merge master's advanced features with main's thoughtful formatter configurations
 ## Implementation Steps
 
 ### Step 1: Create New Unified Branch
+
 ```bash
 git checkout -b unified origin/master
 ```
 
 ### Step 2: Cherry-Pick Formatter Configurations
+
 Apply the formatter options from main as configurable defaults:
 
 ```nix
@@ -46,12 +50,13 @@ shellOptions = lib.mkOption {
 ```
 
 ### Step 3: Add Configuration Options
+
 Make formatter options configurable while preserving main's defaults:
 
 ```nix
 treefmtFlake = {
   # Existing options...
-  
+
   # Formatter-specific options
   formatterOptions = {
     markdown = {
@@ -79,6 +84,7 @@ treefmtFlake = {
 ```
 
 ### Step 4: Update Templates
+
 Include examples of both simple usage and advanced configuration:
 
 ```nix
@@ -94,16 +100,17 @@ treefmtFlake = {
   nix = true;
   web = true;
   python = true;
-  
+
   formatterOptions.shell.indentSize = 4;
   formatterOptions.python.enableTypeChecking = true;
-  
+
   incremental.enable = true;
   performance = "fast";
 };
 ```
 
 ### Step 5: Restore Module Architecture
+
 Adopt main's cleaner import pattern in flake-module.nix:
 
 ```nix
@@ -121,6 +128,7 @@ Adopt main's cleaner import pattern in flake-module.nix:
 ```
 
 ### Step 6: Update Documentation
+
 - Add section on formatter defaults and customization
 - Explain the philosophy of smart defaults
 - Show examples of overriding defaults
@@ -136,6 +144,7 @@ Adopt main's cleaner import pattern in flake-module.nix:
 ## Migration Guide
 
 ### For Main Users
+
 ```nix
 # Old (main)
 treefmtFlake = {
@@ -152,6 +161,7 @@ treefmtFlake = {
 ```
 
 ### For Master Users
+
 ```nix
 # No changes needed - just gain new formatter defaults
 # Can disable if desired:
