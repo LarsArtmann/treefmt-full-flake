@@ -152,12 +152,14 @@
         TREEFMT_CMD="${baseWrapper}/bin/treefmt"
         CACHE_DIR="${cfg.incremental.cache}"
 
+        STAGED_ONLY="${if cfg.gitOptions.stagedOnly then "1" else ""}"
+
         # Ensure cache directory exists
         mkdir -p "$CACHE_DIR"
 
         # Function to get changed files based on git
         get_changed_files() {
-          if [[ "${cfg.gitOptions.stagedOnly}" == "true" ]]; then
+          if [[ -n "$STAGED_ONLY" ]]; then
             # Only staged files
             git diff --cached --name-only --diff-filter=ACMR
           elif [[ -n "${lib.optionalString (cfg.gitOptions.sinceCommit != null) cfg.gitOptions.sinceCommit}" ]]; then
