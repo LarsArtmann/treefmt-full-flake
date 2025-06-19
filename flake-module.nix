@@ -102,7 +102,7 @@
     cfg = config.treefmtFlake;
 
     # Import formatter modules conditionally based on enabled options
-    formatterConfigs = lib.flatten (lib.optional cfg.nix (import ./formatters/nix.nix)
+    formatterConfigs = lib.mkMerge (lib.optional cfg.nix (import ./formatters/nix.nix)
       ++ lib.optional cfg.web (import ./formatters/web.nix)
       ++ lib.optional cfg.python (import ./formatters/python.nix)
       ++ lib.optional cfg.shell (import ./formatters/shell.nix)
@@ -152,8 +152,16 @@
         TREEFMT_CMD="${baseWrapper}/bin/treefmt"
         CACHE_DIR="${cfg.incremental.cache}"
 
-        STAGED_ONLY="${if cfg.gitOptions.stagedOnly then "1" else ""}"
-        SINCE_COMMIT="${if cfg.gitOptions.sinceCommit != null then cfg.gitOptions.sinceCommit else ""}"
+        STAGED_ONLY="${
+          if cfg.gitOptions.stagedOnly
+          then "1"
+          else ""
+        }"
+        SINCE_COMMIT="${
+          if cfg.gitOptions.sinceCommit != null
+          then cfg.gitOptions.sinceCommit
+          else ""
+        }"
 
         # Ensure cache directory exists
         mkdir -p "$CACHE_DIR"
@@ -167,7 +175,7 @@
           elif [[ -n "$SINCE_COMMIT" ]]; then
             # Files changed since specific commit
             git diff --name-only --diff-filter=ACMR "$SINCE_COMMIT"
-          ''}
+        ''}
           else
             # Files changed compared to main branch
             git diff --name-only --diff-filter=ACMR "origin/${cfg.gitOptions.branch}...HEAD" 2>/dev/null || \
@@ -181,9 +189,17 @@
           local start_time=$(date +%s.%N)
           local file_count=0
 
-          INCREMENTAL_ENABLE="${if cfg.incremental.enable then "1" else ""}"
+          INCREMENTAL_ENABLE="${
+          if cfg.incremental.enable
+          then "1"
+          else ""
+        }"
           INCREMENTAL_MODE="${cfg.incremental.mode}"
-          GIT_BASED="${if cfg.incremental.gitBased then "1" else ""}"
+          GIT_BASED="${
+          if cfg.incremental.gitBased
+          then "1"
+          else ""
+        }"
 
           if [[ -n "$INCREMENTAL_ENABLE" && ( "$INCREMENTAL_MODE" == "git" || -n "$GIT_BASED" ) ]]; then
             # Get list of changed files
@@ -258,7 +274,7 @@
           };
 
         # Apply formatter configurations
-        programs = lib.mkMerge formatterConfigs;
+        programs = formatterConfigs;
       };
 
       # Create enhanced formatter with incremental capabilities
