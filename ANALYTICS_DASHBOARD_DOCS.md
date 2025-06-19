@@ -104,11 +104,12 @@ class AnalyticsCollector {
   exportData(projectId: string, format: 'json' | 'csv'): string
 }
 
-// Terminal Dashboard - Beautiful terminal UI
+// Terminal Dashboard - Beautiful terminal UI (using terminal-kit)
 class TerminalDashboard {
   start(): Promise<void>
   updateDisplay(): Promise<void>
-  renderCharts(data: ChartData): string
+  drawTable(x: number, y: number, data: string[][]): void
+  drawPerformanceChart(x: number, y: number, width: number, height: number): void
 }
 
 // Performance Monitor - Real-time tracking
@@ -519,7 +520,7 @@ treefmt .                              # Before
 
 # View results
 bun run analytics summary              # Performance summary
-bun run dashboard                      # Interactive dashboard
+bun run dashboard                      # Interactive dashboard (terminal-kit)
 ```
 
 ### Advanced Workflow

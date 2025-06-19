@@ -5,20 +5,21 @@
   "type": "module",
   "scripts": {
     "analytics": "bun run analytics-collector.ts",
-    "dashboard": "bun run terminal-dashboard.ts",
-    "dev": "bun run --watch terminal-dashboard.ts",
+    "dashboard": "bun run terminal-dashboard-kit.ts",
+    "dashboard:blessed": "bun run terminal-dashboard.ts",
+    "dev": "bun run --watch terminal-dashboard-kit.ts",
     "test": "bun test",
     "build": "bun build analytics-collector.ts --outdir=dist --target=bun",
     "format": "./smart-treefmt-analytics.sh",
     "analytics:summary": "bun run analytics-collector.ts summary",
     "analytics:export": "bun run analytics-collector.ts export",
-    "analytics:dashboard": "bun run terminal-dashboard.ts"
+    "analytics:dashboard": "bun run terminal-dashboard-kit.ts"
   },
   "dependencies": {
-    "blessed": "^0.1.81"
+    "terminal-kit": "^3.0.0"
   },
   "devDependencies": {
-    "@types/blessed": "^0.1.21",
+    "@types/terminal-kit": "^2.5.0",
     "bun-types": "latest"
   },
   "keywords": [

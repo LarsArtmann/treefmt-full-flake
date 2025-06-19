@@ -348,11 +348,11 @@ show_quick_summary() {
 
 # Function to launch analytics dashboard
 launch_dashboard() {
-  if command -v bun >/dev/null 2>&1 && [[ -f "terminal-dashboard.ts" ]]; then
+  if command -v bun >/dev/null 2>&1 && [[ -f "terminal-dashboard-kit.ts" ]]; then
     print_analytics "$CHART" "$CYAN" "Launching analytics dashboard..."
-    bun run terminal-dashboard.ts "$PROJECT_ID" 7
+    bun run terminal-dashboard-kit.ts "$PROJECT_ID" 7
   else
-    print_analytics "$CHART" "$YELLOW" "Dashboard not available (requires bun and terminal-dashboard.ts)"
+    print_analytics "$CHART" "$YELLOW" "Dashboard not available (requires bun and terminal-dashboard-kit.ts)"
   fi
 }
 
