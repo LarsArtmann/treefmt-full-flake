@@ -18,6 +18,8 @@
 ```bash
 # Create new project with treefmt already configured
 nix flake init -t github:LarsArtmann/treefmt-full-flake
+or
+nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake (works for private repos)
 
 # Test it works (formats this file!)
 nix fmt
