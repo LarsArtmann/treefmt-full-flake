@@ -16,7 +16,7 @@
 
     # Import the treefmt-flake
     treefmt-flake = {
-      url = "github:LarsArtmann/treefmt-full-flake";
+      url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git"; # using the ssh url to support private repo auth
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
