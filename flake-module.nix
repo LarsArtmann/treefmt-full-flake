@@ -153,6 +153,7 @@
         CACHE_DIR="${cfg.incremental.cache}"
 
         STAGED_ONLY="${if cfg.gitOptions.stagedOnly then "1" else ""}"
+        SINCE_COMMIT="${if cfg.gitOptions.sinceCommit != null then cfg.gitOptions.sinceCommit else ""}"
 
         # Ensure cache directory exists
         mkdir -p "$CACHE_DIR"
@@ -162,9 +163,11 @@
           if [[ -n "$STAGED_ONLY" ]]; then
             # Only staged files
             git diff --cached --name-only --diff-filter=ACMR
-          elif [[ -n "${lib.optionalString (cfg.gitOptions.sinceCommit != null) cfg.gitOptions.sinceCommit}" ]]; then
+          ${lib.optionalString (cfg.gitOptions.sinceCommit != null) ''
+          elif [[ -n "$SINCE_COMMIT" ]]; then
             # Files changed since specific commit
-            git diff --name-only --diff-filter=ACMR "${cfg.gitOptions.sinceCommit}"
+            git diff --name-only --diff-filter=ACMR "$SINCE_COMMIT"
+          ''}
           else
             # Files changed compared to main branch
             git diff --name-only --diff-filter=ACMR "origin/${cfg.gitOptions.branch}...HEAD" 2>/dev/null || \
@@ -178,7 +181,11 @@
           local start_time=$(date +%s.%N)
           local file_count=0
 
-          if [[ "${cfg.incremental.enable}" == "true" && ("${cfg.incremental.mode}" == "git" || "${cfg.incremental.gitBased}" == "true") ]]; then
+          INCREMENTAL_ENABLE="${if cfg.incremental.enable then "1" else ""}"
+          INCREMENTAL_MODE="${cfg.incremental.mode}"
+          GIT_BASED="${if cfg.incremental.gitBased then "1" else ""}"
+
+          if [[ -n "$INCREMENTAL_ENABLE" && ( "$INCREMENTAL_MODE" == "git" || -n "$GIT_BASED" ) ]]; then
             # Get list of changed files
             local changed_files
             if ! changed_files=$(get_changed_files); then
