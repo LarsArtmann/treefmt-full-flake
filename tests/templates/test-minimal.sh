@@ -7,6 +7,10 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/timeout.sh"
+
 # Test configuration
 TEST_NAME="minimal template"
 TEST_DIR=$(mktemp -d)
@@ -102,7 +106,8 @@ echo -e "${GREEN}✓ flake.nix exists${NC}"
 
 # Step 4: Check flake metadata (allow lock file creation for fresh flake)
 echo -e "\n${YELLOW}Step 4: Checking flake metadata...${NC}"
-if ! run_with_timeout 30 "nix flake metadata"; then
+# Create flake lock without updating registries (as per flake-lock-strategy.md)
+if ! run_with_timeout 30 "nix flake metadata --no-registries"; then
   echo -e "${RED}Failed to check flake metadata${NC}"
   exit 1
 fi
@@ -183,14 +188,15 @@ if ! run_with_timeout 30 "nix fmt -- --version"; then
 fi
 
 # Run formatter twice to ensure stability
-if ! run_with_timeout 60 "nix fmt"; then
+# Use --no-update-lock-file to prevent unintended updates
+if ! run_with_timeout 60 "nix fmt --no-update-lock-file"; then
   echo -e "${RED}Formatter failed${NC}"
   exit 1
 fi
 echo -e "${GREEN}✓ Formatter ran successfully (pass 1)${NC}"
 
 # Run formatter again to ensure idempotency
-if ! run_with_timeout 60 "nix fmt"; then
+if ! run_with_timeout 60 "nix fmt --no-update-lock-file"; then
   echo -e "${RED}Formatter failed on second pass${NC}"
   exit 1
 fi
@@ -237,7 +243,7 @@ echo -e "${GREEN}✓ YAML file formatted${NC}"
 
 # Step 9: Test format check (should pass now)
 echo -e "\n${YELLOW}Step 9: Testing format check...${NC}"
-if ! run_with_timeout 60 "nix fmt -- --fail-on-change"; then
+if ! run_with_timeout 60 "nix fmt --no-update-lock-file -- --fail-on-change"; then
   echo -e "${RED}Format check failed after formatting${NC}"
   exit 1
 fi
