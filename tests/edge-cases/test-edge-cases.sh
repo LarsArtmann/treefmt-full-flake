@@ -11,6 +11,10 @@ NC='\033[0m' # No Color
 TEST_NAME="edge cases"
 TEST_DIR=$(mktemp -d)
 REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+# Source the universal timeout wrapper
+source "$SCRIPT_DIR/../lib/timeout.sh"
 
 echo -e "${YELLOW}Testing ${TEST_NAME}...${NC}"
 echo "Test directory: $TEST_DIR"
@@ -21,48 +25,6 @@ cleanup() {
   rm -rf "$TEST_DIR"
 }
 trap cleanup EXIT
-
-# Function to run test with timeout
-run_with_timeout() {
-  local timeout=$1
-  shift
-  local cmd="$@"
-
-  echo "Running: $cmd"
-  if command -v timeout >/dev/null 2>&1; then
-    if ! timeout "$timeout" bash -c "$cmd"; then
-      local exit_code=$?
-      if [ $exit_code -eq 124 ]; then
-        echo -e "${RED}Command timed out after ${timeout}s: $cmd${NC}"
-      else
-        echo -e "${RED}Command failed with exit code $exit_code: $cmd${NC}"
-      fi
-      return $exit_code
-    fi
-  else
-    # macOS doesn't have timeout, use alternative
-    (
-      eval "$cmd" &
-      local pid=$!
-      local count=0
-      while kill -0 $pid 2>/dev/null && [ $count -lt $timeout ]; do
-        sleep 1
-        ((count++))
-      done
-      if kill -0 $pid 2>/dev/null; then
-        echo -e "${RED}Command timed out after ${timeout}s: $cmd${NC}"
-        kill -9 $pid
-        return 124
-      fi
-      wait $pid
-      local exit_code=$?
-      if [ $exit_code -ne 0 ]; then
-        echo -e "${RED}Command failed with exit code $exit_code: $cmd${NC}"
-        return $exit_code
-      fi
-    )
-  fi
-}
 
 # Setup test directory
 cd "$TEST_DIR"
@@ -158,7 +120,8 @@ git commit -m "Add edge case test files" -q
 
 # Run formatter
 echo -e "\n${YELLOW}Running formatter on edge cases...${NC}"
-if ! run_with_timeout 120 "nix fmt 2>&1"; then
+# Use --no-update-lock-file to prevent unintended updates
+if ! run_with_timeout 120 "nix fmt --no-update-lock-file 2>&1"; then
   echo -e "${RED}Formatter failed on edge cases${NC}"
   exit 1
 fi
@@ -222,7 +185,7 @@ echo -e "\n${YELLOW}Testing formatter idempotency...${NC}"
 git add -A
 git commit -m "Format edge cases" -q || true
 
-if ! run_with_timeout 60 "nix fmt -- --fail-on-change"; then
+if ! run_with_timeout 60 "nix fmt --no-update-lock-file -- --fail-on-change"; then
   echo -e "${RED}Formatter is not idempotent on edge cases${NC}"
   exit 1
 fi
