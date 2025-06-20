@@ -5,6 +5,7 @@
 ## 🚀 All 10 Improvements Implemented
 
 ### ✅ 1. Command Discovery Caching
+
 - **Fast**: Instant startup after first run (sub-second)
 - **Smart**: Caches per-directory for project-specific commands
 - **Reliable**: 1-hour TTL with automatic cache invalidation
@@ -16,11 +17,12 @@
 # [VERBOSE] Cached treefmt_command_...
 
 # Subsequent runs: instant
-./smart-treefmt-v2.sh -v  
+./smart-treefmt-v2.sh -v
 # ✓ Found treefmt (cached): nix fmt --
 ```
 
 ### ✅ 2. Auto-Fix Capabilities
+
 - **Intelligent**: Detects what can be fixed automatically
 - **Safe**: Always asks permission or uses explicit `--auto-fix` flag
 - **Context-aware**: Different fixes for different project types
@@ -34,12 +36,14 @@
 ```
 
 **Auto-fix options include:**
+
 - Enter Nix development shell (`nix develop`)
 - Build treefmt with Nix (`nix build`)
 - Install treefmt globally (Nix, Homebrew)
 - Generate project configuration
 
 ### ✅ 3. Real-time Progress Indicators
+
 - **Visual**: Beautiful Unicode spinners during operations
 - **Informative**: Shows what's happening in real-time
 - **Non-intrusive**: Clears automatically when complete
@@ -51,6 +55,7 @@
 ```
 
 ### ✅ 4. Interactive Mode
+
 - **Guided**: Menu-driven selections for complex decisions
 - **Accessible**: Arrow key navigation with visual feedback
 - **Smart**: Only prompts when user input is valuable
@@ -66,6 +71,7 @@ Select an auto-fix option:
 ```
 
 ### ✅ 5. Configuration Generation Wizard
+
 - **Intelligent**: Analyzes project to detect languages
 - **Comprehensive**: Supports 12+ language ecosystems
 - **Optimized**: Generates best-practice configurations
@@ -80,6 +86,7 @@ Select an auto-fix option:
 ```
 
 **Supported languages:**
+
 - Nix (alejandra, deadnix, statix)
 - JavaScript/TypeScript (prettier, eslint)
 - Python (black, isort, ruff)
@@ -95,6 +102,7 @@ Select an auto-fix option:
 - Web (prettier for CSS/HTML)
 
 ### ✅ 6. Tool Manager Integration
+
 - **direnv**: Automatic environment loading from `.envrc`
 - **mise/asdf**: Tool version management support
 - **Seamless**: No configuration required
@@ -112,6 +120,7 @@ cd project-with-tool-versions
 ```
 
 ### ✅ 7. Format History Tracking
+
 - **Persistent**: Logs all formatting operations
 - **Detailed**: Tracks commands, exit codes, timestamps
 - **Organized**: Monthly log files for easy browsing
@@ -127,6 +136,7 @@ cat ~/.cache/smart-treefmt/history/2025-06.log
 ```
 
 ### ✅ 8. Self-Update Mechanism
+
 - **Automatic**: Checks for updates daily
 - **Simple**: One command to update
 - **Reliable**: Downloads from official source
@@ -141,6 +151,7 @@ cat ~/.cache/smart-treefmt/history/2025-06.log
 ```
 
 ### ✅ 9. Enhanced Error Messages
+
 - **Detailed**: Shows every location checked
 - **Actionable**: Specific commands to fix issues
 - **Contextual**: Different messages for different scenarios
@@ -158,6 +169,7 @@ Attempted to find treefmt in the following locations:
 ```
 
 ### ✅ 10. Performance Optimizations
+
 - **Caching**: Sub-second startup after first run
 - **Parallel**: Background update checks
 - **Efficient**: Minimal overhead for all operations
@@ -165,6 +177,7 @@ Attempted to find treefmt in the following locations:
 ## 🎯 Usage Examples
 
 ### Basic Usage (Same as v1)
+
 ```bash
 ./smart-treefmt-v2.sh                    # Format all files
 ./smart-treefmt-v2.sh --fail-on-change   # Check mode
@@ -172,6 +185,7 @@ Attempted to find treefmt in the following locations:
 ```
 
 ### New v2 Features
+
 ```bash
 # Auto-fix any issues
 ./smart-treefmt-v2.sh --auto-fix
@@ -194,27 +208,30 @@ Attempted to find treefmt in the following locations:
 
 ## 📊 Performance Improvements
 
-| Feature | v1 Time | v2 Time | Improvement |
-|---------|---------|---------|-------------|
-| First run | 2.5s | 2.5s | Same |
-| Subsequent runs | 2.5s | 0.1s | **25x faster** |
-| Config generation | N/A | 3s | **New feature** |
-| Auto-fix | Manual | 10s | **Saves minutes** |
+| Feature           | v1 Time | v2 Time | Improvement       |
+| ----------------- | ------- | ------- | ----------------- |
+| First run         | 2.5s    | 2.5s    | Same              |
+| Subsequent runs   | 2.5s    | 0.1s    | **25x faster**    |
+| Config generation | N/A     | 3s      | **New feature**   |
+| Auto-fix          | Manual  | 10s     | **Saves minutes** |
 
 ## 🔧 Technical Implementation
 
 ### Caching Strategy
+
 - **Location**: `~/.cache/smart-treefmt/`
 - **Key format**: `treefmt_command_{directory_hash}`
 - **TTL**: 1 hour (configurable)
 - **Invalidation**: Automatic on cache miss
 
 ### Language Detection
+
 - **Method**: File extension scanning with `find`
 - **Performance**: Optimized paths exclude common ignore patterns
 - **Accuracy**: Multiple file detection prevents false positives
 
 ### Auto-Fix Logic
+
 ```bash
 1. Detect project type (Nix flake, npm, etc.)
 2. Identify available package managers
@@ -224,6 +241,7 @@ Attempted to find treefmt in the following locations:
 ```
 
 ### Error Handling
+
 - **Progressive**: Try multiple solutions
 - **Informative**: Explain each failure
 - **Actionable**: Provide specific next steps
@@ -236,7 +254,7 @@ v2 is **100% backward compatible** with v1:
 ```bash
 # All v1 commands work identically
 ./smart-treefmt-v2.sh                  # ✅ Same as v1
-./smart-treefmt-v2.sh --verbose        # ✅ Same as v1  
+./smart-treefmt-v2.sh --verbose        # ✅ Same as v1
 ./smart-treefmt-v2.sh --dry-run        # ✅ Same as v1
 
 # Plus new v2 features

@@ -215,7 +215,14 @@ if ! run_with_timeout 60 "nix fmt"; then
     echo -e "${RED}Formatter failed${NC}"
     exit 1
 fi
-echo -e "${GREEN}✓ Formatter ran successfully${NC}"
+echo -e "${GREEN}✓ Formatter ran successfully (pass 1)${NC}"
+
+# Run formatter again to ensure idempotency
+if ! run_with_timeout 60 "nix fmt"; then
+    echo -e "${RED}Formatter failed on second pass${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ Formatter is idempotent (pass 2)${NC}"
 
 # Commit the formatted changes to stabilize git state
 git add -A

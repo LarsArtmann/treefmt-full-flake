@@ -11,7 +11,7 @@ interface DashboardConfig {
   updateInterval: number; // ms
   projectId: string;
   timeRange: number; // days
-  theme: 'dark' | 'light';
+  theme: "dark" | "light";
 }
 
 interface ChartData {
@@ -25,7 +25,7 @@ export class TerminalDashboard {
   private screen: blessed.Widgets.Screen;
   private collector: AnalyticsCollector;
   private config: DashboardConfig;
-  private currentView: 'overview' | 'detailed' | 'trends' | 'team' = 'overview';
+  private currentView: "overview" | "detailed" | "trends" | "team" = "overview";
   private updateTimer: NodeJS.Timeout | null = null;
 
   // UI Components
@@ -35,22 +35,25 @@ export class TerminalDashboard {
   private recommendationsBox: blessed.Widgets.BoxElement;
   private statusBar: blessed.Widgets.BoxElement;
 
-  constructor(collector: AnalyticsCollector, config: Partial<DashboardConfig> = {}) {
+  constructor(
+    collector: AnalyticsCollector,
+    config: Partial<DashboardConfig> = {},
+  ) {
     this.collector = collector;
     this.config = {
       updateInterval: 5000,
-      projectId: 'default',
+      projectId: "default",
       timeRange: 7,
-      theme: 'dark',
-      ...config
+      theme: "dark",
+      ...config,
     };
 
     this.screen = blessed.screen({
       smartCSR: true,
-      title: 'Treefmt Performance Analytics',
+      title: "Treefmt Performance Analytics",
       dockBorders: true,
       fullUnicode: true,
-      autoPadding: true
+      autoPadding: true,
     });
 
     this.setupUI();
@@ -62,96 +65,96 @@ export class TerminalDashboard {
     this.headerBox = blessed.box({
       top: 0,
       left: 0,
-      width: '100%',
+      width: "100%",
       height: 3,
       content: this.getHeaderContent(),
       tags: true,
       border: {
-        type: 'line'
+        type: "line",
       },
       style: {
-        fg: 'white',
-        bg: 'blue',
+        fg: "white",
+        bg: "blue",
         border: {
-          fg: 'cyan'
-        }
-      }
+          fg: "cyan",
+        },
+      },
     });
 
     // Overview Panel
     this.overviewBox = blessed.box({
       top: 3,
       left: 0,
-      width: '50%',
-      height: '40%',
-      content: 'Loading performance overview...',
+      width: "50%",
+      height: "40%",
+      content: "Loading performance overview...",
       tags: true,
       border: {
-        type: 'line'
+        type: "line",
       },
-      label: ' Performance Overview ',
+      label: " Performance Overview ",
       style: {
-        fg: 'white',
+        fg: "white",
         border: {
-          fg: 'green'
-        }
-      }
+          fg: "green",
+        },
+      },
     });
 
     // Chart Panel
     this.chartBox = blessed.box({
       top: 3,
-      left: '50%',
-      width: '50%',
-      height: '40%',
-      content: 'Loading performance trends...',
+      left: "50%",
+      width: "50%",
+      height: "40%",
+      content: "Loading performance trends...",
       tags: true,
       border: {
-        type: 'line'
+        type: "line",
       },
-      label: ' Performance Trends ',
+      label: " Performance Trends ",
       style: {
-        fg: 'white',
+        fg: "white",
         border: {
-          fg: 'yellow'
-        }
-      }
+          fg: "yellow",
+        },
+      },
     });
 
     // Recommendations Panel
     this.recommendationsBox = blessed.box({
-      top: '43%',
+      top: "43%",
       left: 0,
-      width: '100%',
-      height: '50%',
-      content: 'Loading recommendations...',
+      width: "100%",
+      height: "50%",
+      content: "Loading recommendations...",
       tags: true,
       border: {
-        type: 'line'
+        type: "line",
       },
-      label: ' Insights & Recommendations ',
+      label: " Insights & Recommendations ",
       scrollable: true,
       alwaysScroll: true,
       style: {
-        fg: 'white',
+        fg: "white",
         border: {
-          fg: 'magenta'
-        }
-      }
+          fg: "magenta",
+        },
+      },
     });
 
     // Status Bar
     this.statusBar = blessed.box({
       bottom: 0,
       left: 0,
-      width: '100%',
+      width: "100%",
       height: 3,
       content: this.getStatusBarContent(),
       tags: true,
       style: {
-        fg: 'white',
-        bg: 'blue'
-      }
+        fg: "white",
+        bg: "blue",
+      },
     });
 
     // Add all components to screen
@@ -164,44 +167,44 @@ export class TerminalDashboard {
 
   private setupKeyBindings(): void {
     // Quit
-    this.screen.key(['escape', 'q', 'C-c'], () => {
+    this.screen.key(["escape", "q", "C-c"], () => {
       this.stop();
       process.exit(0);
     });
 
     // View switching
-    this.screen.key(['1', 'o'], () => {
-      this.currentView = 'overview';
+    this.screen.key(["1", "o"], () => {
+      this.currentView = "overview";
       this.updateDisplay();
     });
 
-    this.screen.key(['2', 'd'], () => {
-      this.currentView = 'detailed';
+    this.screen.key(["2", "d"], () => {
+      this.currentView = "detailed";
       this.updateDisplay();
     });
 
-    this.screen.key(['3', 't'], () => {
-      this.currentView = 'trends';
+    this.screen.key(["3", "t"], () => {
+      this.currentView = "trends";
       this.updateDisplay();
     });
 
-    this.screen.key(['4', 'm'], () => {
-      this.currentView = 'team';
+    this.screen.key(["4", "m"], () => {
+      this.currentView = "team";
       this.updateDisplay();
     });
 
     // Refresh
-    this.screen.key(['f5', 'r'], () => {
+    this.screen.key(["f5", "r"], () => {
       this.updateDisplay();
     });
 
     // Time range adjustment
-    this.screen.key(['-'], () => {
+    this.screen.key(["-"], () => {
       this.config.timeRange = Math.max(1, this.config.timeRange - 1);
       this.updateDisplay();
     });
 
-    this.screen.key(['+', '='], () => {
+    this.screen.key(["+", "="], () => {
       this.config.timeRange = Math.min(365, this.config.timeRange + 1);
       this.updateDisplay();
     });
@@ -214,15 +217,15 @@ export class TerminalDashboard {
 
   private getStatusBarContent(): string {
     const shortcuts = [
-      '[1/O]verview',
-      '[2/D]etailed',
-      '[3/T]rends', 
-      '[4/T]eam',
-      '[R]efresh',
-      '[+/-] Time Range',
-      '[Q]uit'
+      "[1/O]verview",
+      "[2/D]etailed",
+      "[3/T]rends",
+      "[4/T]eam",
+      "[R]efresh",
+      "[+/-] Time Range",
+      "[Q]uit",
     ];
-    return `{center}${shortcuts.join(' | ')}{/center}`;
+    return `{center}${shortcuts.join(" | ")}{/center}`;
   }
 
   async start(): Promise<void> {
@@ -244,59 +247,65 @@ export class TerminalDashboard {
 
   private async updateDisplay(): Promise<void> {
     try {
-      const metrics = this.collector.getAggregatedMetrics(this.config.projectId, this.config.timeRange);
-      
+      const metrics = this.collector.getAggregatedMetrics(
+        this.config.projectId,
+        this.config.timeRange,
+      );
+
       // Update header
       this.headerBox.setContent(this.getHeaderContent());
-      
+
       // Update main content based on current view
       switch (this.currentView) {
-        case 'overview':
+        case "overview":
           await this.updateOverviewDisplay(metrics);
           break;
-        case 'detailed':
+        case "detailed":
           await this.updateDetailedDisplay(metrics);
           break;
-        case 'trends':
+        case "trends":
           await this.updateTrendsDisplay(metrics);
           break;
-        case 'team':
+        case "team":
           await this.updateTeamDisplay(metrics);
           break;
       }
 
       // Update status bar
       this.statusBar.setContent(this.getStatusBarContent());
-      
+
       this.screen.render();
     } catch (error) {
       this.showError(`Error updating display: ${error.message}`);
     }
   }
 
-  private async updateOverviewDisplay(metrics: AggregatedMetrics): Promise<void> {
+  private async updateOverviewDisplay(
+    metrics: AggregatedMetrics,
+  ): Promise<void> {
     // Performance Overview
     const overviewContent = this.generateOverviewContent(metrics);
     this.overviewBox.setContent(overviewContent);
-    this.overviewBox.setLabel(' Performance Overview ');
+    this.overviewBox.setLabel(" Performance Overview ");
 
     // Performance Chart
     const chartContent = this.generatePerformanceChart(metrics);
     this.chartBox.setContent(chartContent);
-    this.chartBox.setLabel(' Performance Trends ');
+    this.chartBox.setLabel(" Performance Trends ");
 
     // Recommendations
     const recommendationsContent = this.generateRecommendations(metrics);
     this.recommendationsBox.setContent(recommendationsContent);
-    this.recommendationsBox.setLabel(' Insights & Recommendations ');
+    this.recommendationsBox.setLabel(" Insights & Recommendations ");
   }
 
   private generateOverviewContent(metrics: AggregatedMetrics): string {
-    const formatTime = (ms: number) => ms < 1000 ? `${ms.toFixed(0)}ms` : `${(ms/1000).toFixed(1)}s`;
+    const formatTime = (ms: number) =>
+      ms < 1000 ? `${ms.toFixed(0)}ms` : `${(ms / 1000).toFixed(1)}s`;
     const formatPercent = (val: number) => `${(val * 100).toFixed(1)}%`;
     const formatChange = (val: number) => {
-      const sign = val > 0 ? '↑' : val < 0 ? '↓' : '→';
-      const color = val > 0 ? 'red' : val < 0 ? 'green' : 'yellow';
+      const sign = val > 0 ? "↑" : val < 0 ? "↓" : "→";
+      const color = val > 0 ? "red" : val < 0 ? "green" : "yellow";
       return `{${color}-fg}${sign} ${Math.abs(val).toFixed(1)}%{/}`;
     };
 
@@ -325,46 +334,57 @@ ${this.generateTopIssues(metrics)}
   private generatePerformanceChart(metrics: AggregatedMetrics): string {
     // Generate ASCII chart for performance trends
     const chartData = this.generateChartData(metrics);
-    
+
     return `
 {center}📈 Performance Over Time{/center}
 
 Format Time (ms)
 ${this.renderSparkline(chartData.values, 20)}
 
-${this.renderBarChart(metrics.topFormatters.map(f => ({
-  label: f.name,
-  value: f.avgTime
-})))}
+${this.renderBarChart(
+  metrics.topFormatters.map((f) => ({
+    label: f.name,
+    value: f.avgTime,
+  })),
+)}
 
 {center}Legend{/center}
-${metrics.topFormatters.map((f, i) => {
-  const status = f.avgTime < 500 ? '{green-fg}✅ Excellent{/}' : 
-                f.avgTime < 1000 ? '{yellow-fg}⚠️  Good{/}' : 
-                '{red-fg}❌ Needs Optimization{/}';
-  return `• {cyan-fg}${f.name}:{/} ${f.avgTime.toFixed(0)}ms ${status}`;
-}).join('\n')}
+${metrics.topFormatters
+  .map((f, i) => {
+    const status =
+      f.avgTime < 500
+        ? "{green-fg}✅ Excellent{/}"
+        : f.avgTime < 1000
+          ? "{yellow-fg}⚠️  Good{/}"
+          : "{red-fg}❌ Needs Optimization{/}";
+    return `• {cyan-fg}${f.name}:{/} ${f.avgTime.toFixed(0)}ms ${status}`;
+  })
+  .join("\n")}
 `;
   }
 
   private generateRecommendations(metrics: AggregatedMetrics): string {
     const recommendations = this.generateSmartRecommendations(metrics);
-    
+
     return `
 {center}💡 Performance Recommendations{/center}
 
-${recommendations.map((rec, i) => 
-  `${i + 1}. {${rec.priority === 'high' ? 'red' : rec.priority === 'medium' ? 'yellow' : 'green'}-fg}${rec.title}{/}
+${recommendations
+  .map(
+    (rec, i) =>
+      `${i + 1}. {${rec.priority === "high" ? "red" : rec.priority === "medium" ? "yellow" : "green"}-fg}${rec.title}{/}
    ${rec.description}
    {cyan-fg}Impact:{/} ${rec.impact}
    {cyan-fg}Effort:{/} ${rec.effort}
-`).join('\n')}
+`,
+  )
+  .join("\n")}
 
 {center}🎯 Quick Wins{/center}
 
-${this.generateQuickWins(metrics).map(win => 
-  `• {green-fg}${win.action}{/} → {cyan-fg}${win.benefit}{/}`
-).join('\n')}
+${this.generateQuickWins(metrics)
+  .map((win) => `• {green-fg}${win.action}{/} → {cyan-fg}${win.benefit}{/}`)
+  .join("\n")}
 
 {center}📊 Performance Insights{/center}
 
@@ -385,46 +405,52 @@ ${this.generateInsights(metrics)}
       labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
       values,
       maxValue: Math.max(...values),
-      minValue: Math.min(...values)
+      minValue: Math.min(...values),
     };
   }
 
   private renderSparkline(data: number[], height: number = 10): string {
-    const sparkChars = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+    const sparkChars = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
     const max = Math.max(...data);
     const min = Math.min(...data);
     const range = max - min;
 
     if (range === 0) return sparkChars[0].repeat(data.length);
 
-    const sparkline = data.map(value => {
-      const normalized = (value - min) / range;
-      const index = Math.floor(normalized * (sparkChars.length - 1));
-      return sparkChars[index];
-    }).join('');
+    const sparkline = data
+      .map((value) => {
+        const normalized = (value - min) / range;
+        const index = Math.floor(normalized * (sparkChars.length - 1));
+        return sparkChars[index];
+      })
+      .join("");
 
     // Add axis labels
     const maxLabel = `${max.toFixed(0)}ms`;
     const minLabel = `${min.toFixed(0)}ms`;
-    
+
     return `${maxLabel} ┤${sparkline}
-${' '.repeat(maxLabel.length)} │
-${minLabel} └${'─'.repeat(data.length)}`;
+${" ".repeat(maxLabel.length)} │
+${minLabel} └${"─".repeat(data.length)}`;
   }
 
-  private renderBarChart(data: Array<{ label: string; value: number }>): string {
-    const maxValue = Math.max(...data.map(d => d.value));
-    const maxLabelLength = Math.max(...data.map(d => d.label.length));
+  private renderBarChart(
+    data: Array<{ label: string; value: number }>,
+  ): string {
+    const maxValue = Math.max(...data.map((d) => d.value));
+    const maxLabelLength = Math.max(...data.map((d) => d.label.length));
     const barWidth = 30;
 
-    return data.map(({ label, value }) => {
-      const normalizedValue = value / maxValue;
-      const barLength = Math.floor(normalizedValue * barWidth);
-      const bar = '█'.repeat(barLength) + '░'.repeat(barWidth - barLength);
-      const paddedLabel = label.padEnd(maxLabelLength);
-      
-      return `${paddedLabel} ${bar} ${value.toFixed(0)}ms`;
-    }).join('\n');
+    return data
+      .map(({ label, value }) => {
+        const normalizedValue = value / maxValue;
+        const barLength = Math.floor(normalizedValue * barWidth);
+        const bar = "█".repeat(barLength) + "░".repeat(barWidth - barLength);
+        const paddedLabel = label.padEnd(maxLabelLength);
+
+        return `${paddedLabel} ${bar} ${value.toFixed(0)}ms`;
+      })
+      .join("\n");
   }
 
   private generateSmartRecommendations(metrics: AggregatedMetrics): Array<{
@@ -432,62 +458,74 @@ ${minLabel} └${'─'.repeat(data.length)}`;
     description: string;
     impact: string;
     effort: string;
-    priority: 'high' | 'medium' | 'low';
+    priority: "high" | "medium" | "low";
   }> {
     const recommendations = [];
 
     // High-impact recommendations based on metrics
     if (metrics.avgFormatTime > 2000) {
       recommendations.push({
-        title: 'Enable Parallel Processing',
-        description: 'Format files in parallel to reduce overall time by 40-60%',
-        impact: 'High (40-60% speed improvement)',
-        effort: 'Low (configuration change)',
-        priority: 'high' as const
+        title: "Enable Parallel Processing",
+        description:
+          "Format files in parallel to reduce overall time by 40-60%",
+        impact: "High (40-60% speed improvement)",
+        effort: "Low (configuration change)",
+        priority: "high" as const,
       });
     }
 
     if (metrics.errorRate > 0.05) {
       recommendations.push({
-        title: 'Improve Error Handling',
-        description: 'High error rate detected. Review formatter configurations',
-        impact: 'High (reduce failed operations)',
-        effort: 'Medium (config review and fixes)',
-        priority: 'high' as const
+        title: "Improve Error Handling",
+        description:
+          "High error rate detected. Review formatter configurations",
+        impact: "High (reduce failed operations)",
+        effort: "Medium (config review and fixes)",
+        priority: "high" as const,
       });
     }
 
-    const slowFormatters = metrics.topFormatters.filter(f => f.avgTime > 1000);
+    const slowFormatters = metrics.topFormatters.filter(
+      (f) => f.avgTime > 1000,
+    );
     if (slowFormatters.length > 0) {
       recommendations.push({
-        title: `Optimize Slow Formatters: ${slowFormatters.map(f => f.name).join(', ')}`,
-        description: 'These formatters are taking longer than 1s on average',
-        impact: 'Medium (reduce bottlenecks)',
-        effort: 'Medium (formatter optimization)',
-        priority: 'medium' as const
+        title: `Optimize Slow Formatters: ${slowFormatters.map((f) => f.name).join(", ")}`,
+        description: "These formatters are taking longer than 1s on average",
+        impact: "Medium (reduce bottlenecks)",
+        effort: "Medium (formatter optimization)",
+        priority: "medium" as const,
       });
     }
 
     if (metrics.totalFiles > 1000 && metrics.avgFormatTime > 1000) {
       recommendations.push({
-        title: 'Implement Incremental Formatting',
-        description: 'Only format changed files to dramatically improve speed',
-        impact: 'Very High (10-100x speed improvement)',
-        effort: 'Medium (implementation)',
-        priority: 'high' as const
+        title: "Implement Incremental Formatting",
+        description: "Only format changed files to dramatically improve speed",
+        impact: "Very High (10-100x speed improvement)",
+        effort: "Medium (implementation)",
+        priority: "high" as const,
       });
     }
 
     return recommendations;
   }
 
-  private generateQuickWins(metrics: AggregatedMetrics): Array<{ action: string; benefit: string }> {
+  private generateQuickWins(
+    metrics: AggregatedMetrics,
+  ): Array<{ action: string; benefit: string }> {
     return [
-      { action: 'Enable file caching', benefit: '+25% speed' },
-      { action: 'Exclude node_modules', benefit: '+15% speed' },
-      { action: 'Update to latest formatters', benefit: '+10% speed, fewer bugs' },
-      { action: 'Use .treefmtignore file', benefit: 'Skip unnecessary files' },
-      { action: 'Run formatting in git hooks', benefit: 'Prevent style issues' }
+      { action: "Enable file caching", benefit: "+25% speed" },
+      { action: "Exclude node_modules", benefit: "+15% speed" },
+      {
+        action: "Update to latest formatters",
+        benefit: "+10% speed, fewer bugs",
+      },
+      { action: "Use .treefmtignore file", benefit: "Skip unnecessary files" },
+      {
+        action: "Run formatting in git hooks",
+        benefit: "Prevent style issues",
+      },
     ];
   }
 
@@ -496,50 +534,66 @@ ${minLabel} └${'─'.repeat(data.length)}`;
 
     // Performance insights
     if (metrics.trends.performanceChange < -10) {
-      insights.push(`🚀 Performance improved by ${Math.abs(metrics.trends.performanceChange).toFixed(1)}% this period`);
+      insights.push(
+        `🚀 Performance improved by ${Math.abs(metrics.trends.performanceChange).toFixed(1)}% this period`,
+      );
     } else if (metrics.trends.performanceChange > 10) {
-      insights.push(`⚠️  Performance degraded by ${metrics.trends.performanceChange.toFixed(1)}% - investigate recent changes`);
+      insights.push(
+        `⚠️  Performance degraded by ${metrics.trends.performanceChange.toFixed(1)}% - investigate recent changes`,
+      );
     }
 
     // Usage insights
     if (metrics.totalFiles > 500) {
-      insights.push(`📊 Large codebase detected (${metrics.totalFiles} files) - consider incremental formatting`);
+      insights.push(
+        `📊 Large codebase detected (${metrics.totalFiles} files) - consider incremental formatting`,
+      );
     }
 
     // Quality insights
     if (metrics.successRate > 0.99) {
-      insights.push(`✅ Excellent formatting success rate (${(metrics.successRate * 100).toFixed(1)}%)`);
+      insights.push(
+        `✅ Excellent formatting success rate (${(metrics.successRate * 100).toFixed(1)}%)`,
+      );
     }
 
     // Formatter insights
     const topFormatter = metrics.topFormatters[0];
     if (topFormatter) {
-      insights.push(`🔧 Most used formatter: ${topFormatter.name} (${topFormatter.usage} files)`);
+      insights.push(
+        `🔧 Most used formatter: ${topFormatter.name} (${topFormatter.usage} files)`,
+      );
     }
 
-    return insights.join('\n• ');
+    return insights.join("\n• ");
   }
 
   private generateTopIssues(metrics: AggregatedMetrics): string {
     const issues = [];
 
     // Generate issues based on metrics
-    metrics.slowestFiles.slice(0, 3).forEach(file => {
-      const status = file.time > 2000 ? '{red-fg}[Critical]{/}' : '{yellow-fg}[Warning]{/}';
+    metrics.slowestFiles.slice(0, 3).forEach((file) => {
+      const status =
+        file.time > 2000 ? "{red-fg}[Critical]{/}" : "{yellow-fg}[Warning]{/}";
       issues.push(`├─ ${status} ${file.path} (${file.time.toFixed(0)}ms)`);
     });
 
     if (issues.length === 0) {
-      issues.push('├─ {green-fg}✅ No performance issues detected{/}');
+      issues.push("├─ {green-fg}✅ No performance issues detected{/}");
     }
 
-    return issues.join('\n') + '\n└─ {cyan-fg}💡 Run detailed analysis for more insights{/}';
+    return (
+      issues.join("\n") +
+      "\n└─ {cyan-fg}💡 Run detailed analysis for more insights{/}"
+    );
   }
 
-  private async updateDetailedDisplay(metrics: AggregatedMetrics): Promise<void> {
-    this.overviewBox.setLabel(' Formatter Breakdown ');
-    this.chartBox.setLabel(' File Type Performance ');
-    this.recommendationsBox.setLabel(' Detailed Analysis ');
+  private async updateDetailedDisplay(
+    metrics: AggregatedMetrics,
+  ): Promise<void> {
+    this.overviewBox.setLabel(" Formatter Breakdown ");
+    this.chartBox.setLabel(" File Type Performance ");
+    this.recommendationsBox.setLabel(" Detailed Analysis ");
 
     // Detailed formatter breakdown
     const formatterContent = `
@@ -548,11 +602,18 @@ ${minLabel} └${'─'.repeat(data.length)}`;
 ┌─────────────┬────────────┬───────────┬─────────────────────┐
 │ Formatter   │ Avg Time   │ Files     │ Performance Trend   │
 ├─────────────┼────────────┼───────────┼─────────────────────┤
-${metrics.topFormatters.map(f => {
-  const trend = '████████████░░░░'; // Simplified trend visualization
-  const status = f.avgTime < 500 ? '{green-fg}' : f.avgTime < 1000 ? '{yellow-fg}' : '{red-fg}';
-  return `│ ${f.name.padEnd(11)} │ ${status}${f.avgTime.toFixed(0)}ms{/} ${this.getTrendIndicator(0)} │ ${f.usage.toString().padEnd(9)} │ ${trend} │`;
-}).join('\n')}
+${metrics.topFormatters
+  .map((f) => {
+    const trend = "████████████░░░░"; // Simplified trend visualization
+    const status =
+      f.avgTime < 500
+        ? "{green-fg}"
+        : f.avgTime < 1000
+          ? "{yellow-fg}"
+          : "{red-fg}";
+    return `│ ${f.name.padEnd(11)} │ ${status}${f.avgTime.toFixed(0)}ms{/} ${this.getTrendIndicator(0)} │ ${f.usage.toString().padEnd(9)} │ ${trend} │`;
+  })
+  .join("\n")}
 └─────────────┴────────────┴───────────┴─────────────────────┘
 `;
 
@@ -566,9 +627,13 @@ ${this.renderFileTypeChart(metrics)}
 
 {center}🔍 Slowest Files (This Week){/center}
 
-${metrics.slowestFiles.slice(0, 5).map((file, i) => 
-  `${i + 1}. ${file.path.slice(-40)} - ${file.time.toFixed(0)}ms`
-).join('\n')}
+${metrics.slowestFiles
+  .slice(0, 5)
+  .map(
+    (file, i) =>
+      `${i + 1}. ${file.path.slice(-40)} - ${file.time.toFixed(0)}ms`,
+  )
+  .join("\n")}
 `;
 
     this.chartBox.setContent(fileTypeContent);
@@ -601,58 +666,68 @@ ${this.generateOptimizationOpportunities(metrics)}
 
   private async updateTrendsDisplay(metrics: AggregatedMetrics): Promise<void> {
     // Implementation for trends view
-    this.overviewBox.setLabel(' Performance Trends ');
-    this.overviewBox.setContent('Trends view - Coming soon!');
+    this.overviewBox.setLabel(" Performance Trends ");
+    this.overviewBox.setContent("Trends view - Coming soon!");
   }
 
   private async updateTeamDisplay(metrics: AggregatedMetrics): Promise<void> {
     // Implementation for team view
-    this.overviewBox.setLabel(' Team Performance ');
-    this.overviewBox.setContent('Team view - Coming soon!');
+    this.overviewBox.setLabel(" Team Performance ");
+    this.overviewBox.setContent("Team view - Coming soon!");
   }
 
   private renderFileTypeChart(metrics: AggregatedMetrics): string {
     // Generate file type performance chart
     const fileTypes = [
-      { type: 'TypeScript', time: 847, status: 'Needs optimization' },
-      { type: 'JavaScript', time: 623, status: 'Good' },
-      { type: 'Python', time: 234, status: 'Excellent' },
-      { type: 'Rust', time: 189, status: 'Excellent' },
-      { type: 'Nix', time: 134, status: 'Excellent' }
+      { type: "TypeScript", time: 847, status: "Needs optimization" },
+      { type: "JavaScript", time: 623, status: "Good" },
+      { type: "Python", time: 234, status: "Excellent" },
+      { type: "Rust", time: 189, status: "Excellent" },
+      { type: "Nix", time: 134, status: "Excellent" },
     ];
 
-    return fileTypes.map(ft => {
-      const barLength = Math.floor((ft.time / 1000) * 16);
-      const bar = '█'.repeat(barLength) + '░'.repeat(16 - barLength);
-      const statusColor = ft.status === 'Excellent' ? 'green' : 
-                         ft.status === 'Good' ? 'yellow' : 'red';
-      
-      return `${ft.type.padEnd(12)} ${bar} ${ft.time}ms  {${statusColor}-fg}(${ft.status}){/}`;
-    }).join('\n');
+    return fileTypes
+      .map((ft) => {
+        const barLength = Math.floor((ft.time / 1000) * 16);
+        const bar = "█".repeat(barLength) + "░".repeat(16 - barLength);
+        const statusColor =
+          ft.status === "Excellent"
+            ? "green"
+            : ft.status === "Good"
+              ? "yellow"
+              : "red";
+
+        return `${ft.type.padEnd(12)} ${bar} ${ft.time}ms  {${statusColor}-fg}(${ft.status}){/}`;
+      })
+      .join("\n");
   }
 
   private getTrendIndicator(change: number): string {
-    if (change > 5) return '{red-fg}↑{/}';
-    if (change < -5) return '{green-fg}↓{/}';
-    return '{yellow-fg}→{/}';
+    if (change > 5) return "{red-fg}↑{/}";
+    if (change < -5) return "{green-fg}↓{/}";
+    return "{yellow-fg}→{/}";
   }
 
-  private generateOptimizationOpportunities(metrics: AggregatedMetrics): string {
+  private generateOptimizationOpportunities(
+    metrics: AggregatedMetrics,
+  ): string {
     const opportunities = [];
 
     if (metrics.avgFormatTime > 1000) {
-      opportunities.push('• Consider parallel processing for large files');
+      opportunities.push("• Consider parallel processing for large files");
     }
 
     if (metrics.errorRate > 0.02) {
-      opportunities.push('• Review formatter configurations to reduce errors');
+      opportunities.push("• Review formatter configurations to reduce errors");
     }
 
-    opportunities.push('• Enable incremental formatting for large codebases');
-    opportunities.push('• Use file size limits to skip very large files');
-    opportunities.push('• Implement smart caching for frequently formatted files');
+    opportunities.push("• Enable incremental formatting for large codebases");
+    opportunities.push("• Use file size limits to skip very large files");
+    opportunities.push(
+      "• Implement smart caching for frequently formatted files",
+    );
 
-    return opportunities.join('\n');
+    return opportunities.join("\n");
   }
 
   private showError(message: string): void {
@@ -665,14 +740,14 @@ ${this.generateOptimizationOpportunities(metrics)}
 export async function runDashboard(): Promise<void> {
   const collector = new AnalyticsCollector();
   const dashboard = new TerminalDashboard(collector, {
-    projectId: process.argv[2] || 'default',
-    timeRange: parseInt(process.argv[3]) || 7
+    projectId: process.argv[2] || "default",
+    timeRange: parseInt(process.argv[3]) || 7,
   });
 
   await dashboard.start();
 
   // Handle graceful shutdown
-  process.on('SIGINT', () => {
+  process.on("SIGINT", () => {
     dashboard.stop();
     collector.close();
     process.exit(0);

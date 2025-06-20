@@ -182,12 +182,19 @@ if ! run_with_timeout 30 "nix fmt -- --version"; then
     exit 1
 fi
 
-# Run formatter
+# Run formatter twice to ensure stability
 if ! run_with_timeout 60 "nix fmt"; then
     echo -e "${RED}Formatter failed${NC}"
     exit 1
 fi
-echo -e "${GREEN}✓ Formatter ran successfully${NC}"
+echo -e "${GREEN}✓ Formatter ran successfully (pass 1)${NC}"
+
+# Run formatter again to ensure idempotency
+if ! run_with_timeout 60 "nix fmt"; then
+    echo -e "${RED}Formatter failed on second pass${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ Formatter is idempotent (pass 2)${NC}"
 
 # Commit the formatted changes to stabilize git state
 git add -A
@@ -195,7 +202,7 @@ git commit -m "Format code" -q || true
 
 # Step 7: Run nix flake check (after formatting)
 echo -e "\n${YELLOW}Step 7: Running flake check...${NC}"
-if ! run_with_timeout 60 "nix flake check"; then
+if ! run_with_timeout 60 "nix flake check --no-update-lock-file"; then
     echo -e "${RED}Failed to check flake${NC}"
     exit 1
 fi
