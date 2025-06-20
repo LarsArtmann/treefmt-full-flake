@@ -1,0 +1,32 @@
+# Test execution artifacts
+.test-results/
+*.log
+*.result
+*.tmp
+
+# Performance test outputs
+performance-results.json
+performance-*.json
+
+# Temporary test directories
+tmp.*
+temp.*
+
+# Cache files
+.cache/
+cache/
+
+# Generated scripts
+run_single_test.sh
+jobs.txt
+
+# Editor artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS artifacts
+.DS_Store
+Thumbs.db
