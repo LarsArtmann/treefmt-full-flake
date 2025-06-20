@@ -14,8 +14,8 @@
           # Nix formatter choice
           nixFormatter = lib.mkOption {
             type = lib.types.enum ["alejandra" "nixfmt-rfc-style"];
-            default = "alejandra";
-            description = "Which Nix formatter to use. Note: alejandra has known non-determinism issues.";
+            default = "nixfmt-rfc-style";
+            description = "Which Nix formatter to use. nixfmt-rfc-style is deterministic and recommended.";
           };
           python = lib.mkEnableOption "Enable Python formatters (black, isort, ruff)";
           shell = lib.mkEnableOption "Enable Shell formatters (shfmt, shellcheck)";
