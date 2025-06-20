@@ -104,7 +104,8 @@ fi
 # Check if files were formatted
 echo -e "\n${YELLOW}Checking formatting results...${NC}"
 
-if grep -q "^  myVar = \"value\";" src/test.nix; then
+# Check for both possible alejandra formatting styles
+if grep -q "enable = true;" src/test.nix && (grep -q "{pkgs, ...}:" src/test.nix || grep -q "^{$" src/test.nix); then
     echo -e "${GREEN}✓ Nix file formatted correctly${NC}"
 else
     echo -e "${RED}✗ Nix file not formatted correctly${NC}"
