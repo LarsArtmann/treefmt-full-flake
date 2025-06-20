@@ -40,7 +40,6 @@
         rust = true;
         yaml = true;
         markdown = true;
-        json = true;
         misc = true;
 
         # Configure project root

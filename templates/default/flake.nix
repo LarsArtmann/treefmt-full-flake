@@ -39,7 +39,6 @@
         shell = true;
         yaml = true;
         markdown = true;
-        json = true;
 
         # Configure project root
         projectRootFile = "flake.nix";

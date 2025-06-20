@@ -30,7 +30,15 @@ run_with_timeout() {
     
     echo "Running: $cmd"
     if command -v timeout >/dev/null 2>&1; then
-        timeout "$timeout" bash -c "$cmd"
+        if ! timeout "$timeout" bash -c "$cmd"; then
+            local exit_code=$?
+            if [ $exit_code -eq 124 ]; then
+                echo -e "${RED}Command timed out after ${timeout}s: $cmd${NC}"
+            else
+                echo -e "${RED}Command failed with exit code $exit_code: $cmd${NC}"
+            fi
+            return $exit_code
+        fi
     else
         # macOS doesn't have timeout, use alternative
         ( 
@@ -42,9 +50,15 @@ run_with_timeout() {
                 ((count++))
             done
             if kill -0 $pid 2>/dev/null; then
-                echo -e "${RED}Command timed out after ${timeout}s${NC}"
+                echo -e "${RED}Command timed out after ${timeout}s: $cmd${NC}"
                 kill -9 $pid
                 return 124
+            fi
+            wait $pid
+            local exit_code=$?
+            if [ $exit_code -ne 0 ]; then
+                echo -e "${RED}Command failed with exit code $exit_code: $cmd${NC}"
+                return $exit_code
             fi
         )
     fi
@@ -343,14 +357,18 @@ if ! grep -q "^name: " config.yaml; then
 fi
 echo -e "${GREEN}✓ YAML file formatted${NC}"
 
-if ! grep -q "^## Features$" README.md; then
+if ! grep -q "^## Features" README.md; then
     echo -e "${RED}Markdown file was not formatted properly${NC}"
+    echo "Expected to find '## Features' but got:"
+    grep "Features" README.md || echo "No 'Features' line found"
     exit 1
 fi
 echo -e "${GREEN}✓ Markdown file formatted${NC}"
 
 if grep -q '"name":"test-app"' package.json; then
     echo -e "${RED}JSON file was not formatted properly${NC}"
+    echo "Expected formatted JSON but got:"
+    head -5 package.json
     exit 1
 fi
 echo -e "${GREEN}✓ JSON file formatted${NC}"
