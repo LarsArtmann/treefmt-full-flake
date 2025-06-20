@@ -1,0 +1,53 @@
+{
+  "timestamp": "2025-06-20T15:44:27Z",
+  "iterations": 1,
+  "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "nix_version": "2.28.3"
+  },
+  "tests": {
+    "template-init-minimal": {
+      "avg": 0.143,
+      "min": 0.14309,
+      "max": 0.14309,
+      "times": [0.14309]
+    },
+    "template-init-default": {
+      "avg": 0.09,
+      "min": 0.090404,
+      "max": 0.090404,
+      "times": [0.090404]
+    },
+    "template-init-complete": {
+      "avg": 0.089,
+      "min": 0.089905,
+      "max": 0.089905,
+      "times": [0.089905]
+    },
+    "format-small": {
+      "avg": 8.141,
+      "min": 8.141022,
+      "max": 8.141022,
+      "times": [8.141022]
+    },
+    "format-medium": {
+      "avg": 10.989,
+      "min": 10.98927,
+      "max": 10.98927,
+      "times": [10.98927]
+    },
+    "format-large": {
+      "avg": 34.02,
+      "min": 34.020168,
+      "max": 34.020168,
+      "times": [34.020168]
+    },
+    "format-check": {
+      "avg": 0,
+      "min": 0,
+      "max": 0,
+      "times": [0]
+    }
+  }
+}

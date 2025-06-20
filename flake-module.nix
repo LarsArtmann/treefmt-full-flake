@@ -10,6 +10,13 @@
           # Enable specific formatter groups
           nix = lib.mkEnableOption "Enable Nix formatters (alejandra, deadnix, statix)";
           web = lib.mkEnableOption "Enable Web formatters (biome for JS/TS/CSS)";
+
+          # Nix formatter choice
+          nixFormatter = lib.mkOption {
+            type = lib.types.enum ["alejandra" "nixfmt-rfc-style"];
+            default = "alejandra";
+            description = "Which Nix formatter to use. Note: alejandra has known non-determinism issues.";
+          };
           python = lib.mkEnableOption "Enable Python formatters (black, isort, ruff)";
           shell = lib.mkEnableOption "Enable Shell formatters (shfmt, shellcheck)";
           rust = lib.mkEnableOption "Enable Rust formatters (rustfmt)";
@@ -102,7 +109,11 @@
     cfg = config.treefmtFlake;
 
     # Import formatter modules conditionally based on enabled options
-    formatterConfigs = lib.mkMerge (lib.optional cfg.nix (import ./formatters/nix.nix)
+    formatterConfigs = lib.mkMerge (lib.optional cfg.nix (
+        if cfg.nixFormatter == "nixfmt-rfc-style"
+        then import ./formatters/nix-nixfmt.nix
+        else import ./formatters/nix.nix
+      )
       ++ lib.optional cfg.web (import ./formatters/web.nix)
       ++ lib.optional cfg.python (import ./formatters/python.nix)
       ++ lib.optional cfg.shell (import ./formatters/shell.nix)

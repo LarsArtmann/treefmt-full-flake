@@ -73,7 +73,7 @@ Import the flake module and configure which formatter groups to enable:
 
 ### Available Formatter Groups
 
-- `nix`: Nix formatters (alejandra, deadnix, statix)
+- `nix`: Nix formatters (alejandra/nixfmt-rfc-style, deadnix, statix)
 - `web`: Web formatters (biome for JS/TS/CSS)
 - `python`: Python formatters (black, isort, ruff)
 - `shell`: Shell formatters (shfmt, shellcheck)
@@ -88,6 +88,7 @@ Import the flake module and configure which formatter groups to enable:
 - `projectRootFile`: File that marks the project root (default: "flake.nix")
 - `enableDefaultExcludes`: Enable default excludes for common patterns (default: true)
 - `allowMissingFormatter`: Allow missing formatters (default: false)
+- `nixFormatter`: Choose between "alejandra" (default) or "nixfmt-rfc-style" (deterministic)
 
 ## Using Templates
 
@@ -266,9 +267,10 @@ See [Revolutionary Roadmap](./REVOLUTIONARY_ROADMAP.md) | [Revolutionary Improve
 
 **Solution**:
 
-- Run `nix fmt` twice to ensure stable formatting
-- This is a known issue with Alejandra (see [issue #23](https://github.com/LarsArtmann/treefmt-full-flake/issues/23))
-- Consider using `nixfmt` as an alternative
+- **Recommended**: Switch to `nixfmt-rfc-style` by setting `nixFormatter = "nixfmt-rfc-style"` in your configuration
+- Alternative: Run `nix fmt` twice to ensure stable formatting with Alejandra
+- This is a known issue with Alejandra (see [GitHub Issue #250](https://github.com/kamadorueda/alejandra/issues/250))
+- See [Alejandra Determinism Documentation](./docs/alejandra-determinism-issue.md) for detailed migration guide
 
 #### 3. Nix Flake Cache Issues
 
