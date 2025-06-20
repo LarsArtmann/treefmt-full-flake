@@ -123,18 +123,15 @@ else
   echo -e "${BLUE}Using xargs (install GNU parallel for better output)${NC}\n"
 
   # Use xargs for parallel execution
-  # Export arrays for subshell access
-  export TEST_NAMES_STR="${TEST_NAMES[*]}"
-  export TEST_SCRIPTS_STR="${TEST_SCRIPTS[*]}"
-
-  # Create temporary script for xargs
+  # Create temporary script for xargs that reads from the same jobs file
   cat >"$RESULTS_DIR/run_single_test.sh" <<'SCRIPT_EOF'
 #!/usr/bin/env bash
 source "$(dirname "$0")/../lib/timing.sh"
 source "$(dirname "$0")/../lib/timeout.sh"
-idx=$1
-IFS=' ' read -ra TEST_NAMES <<<"$TEST_NAMES_STR"
-IFS=' ' read -ra TEST_SCRIPTS <<<"$TEST_SCRIPTS_STR"
+line_num=$1
+test_line=$(sed -n "${line_num}p" "$(dirname "$0")/jobs.txt")
+test_name=$(echo "$test_line" | cut -d' ' -f1)
+test_script=$(echo "$test_line" | cut -d' ' -f2)
 
 # Re-define color variables
 RED='\033[0;31m'
@@ -173,13 +170,13 @@ run_test() {
   fi
 }
 
-run_test "${TEST_NAMES[$idx]}" "${TEST_SCRIPTS[$idx]}"
+run_test "$test_name" "$test_script"
 SCRIPT_EOF
 
   chmod +x "$RESULTS_DIR/run_single_test.sh"
 
   # Run tests in parallel
-  printf "%s\n" "${!TEST_NAMES[@]}" | xargs -P "$MAX_JOBS" -I {} "$RESULTS_DIR/run_single_test.sh" {}
+  seq 1 ${#TEST_NAMES[@]} | xargs -P "$MAX_JOBS" -I {} "$RESULTS_DIR/run_single_test.sh" {}
 fi
 
 # Wait for all jobs to complete
