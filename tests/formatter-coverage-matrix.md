@@ -4,36 +4,36 @@ This document shows which file types are handled by which formatters to identify
 
 ## Coverage by File Extension
 
-| Extension | Formatter | Module | Priority | Notes |
-|-----------|-----------|--------|----------|-------|
-| .nix | alejandra | nix.nix | 1 | Primary Nix formatter |
-| .nix | deadnix | nix.nix | 2 | Dead code detection |
-| .nix | statix | nix.nix | 3 | Linting |
-| .js | biome | web.nix | 1 | JavaScript formatting |
-| .jsx | biome | web.nix | 1 | React JSX |
-| .ts | biome | web.nix | 1 | TypeScript |
-| .tsx | biome | web.nix | 1 | React TSX |
-| .css | biome | web.nix | 1 | Stylesheets |
-| .scss | biome | web.nix | 1 | Sass |
-| .sass | biome | web.nix | 1 | Sass (indented) |
-| .less | biome | web.nix | 1 | Less |
-| .json | biome | web.nix | 1 | JSON files |
-| .jsonc | biome | web.nix | 1 | JSON with comments |
-| .py | black | python.nix | 1 | Python formatting |
-| .py | isort | python.nix | 2 | Import sorting |
-| .py | ruff-format | python.nix | 3 | Fast Python formatter |
-| .sh | shfmt | shell.nix | 1 | Shell formatting |
-| .bash | shfmt | shell.nix | 1 | Bash scripts |
-| .sh | shellcheck | shell.nix | 2 | Shell linting |
-| .bash | shellcheck | shell.nix | 2 | Bash linting |
-| .rs | rustfmt | rust.nix | 1 | Rust formatting |
-| .yaml | yamlfmt | yaml.nix | 1 | YAML formatting |
-| .yml | yamlfmt | yaml.nix | 1 | YAML formatting |
-| .md | mdformat | markdown.nix | 1 | Markdown formatting |
-| .proto | buf | misc.nix | 1 | Protocol buffers |
-| .toml | taplo | misc.nix | 2 | TOML formatting |
-| .yml | actionlint | misc.nix | 3 | GitHub Actions linting |
-| justfile | just | misc.nix | 4 | Justfile formatting |
+| Extension | Formatter   | Module       | Priority | Notes                  |
+| --------- | ----------- | ------------ | -------- | ---------------------- |
+| .nix      | alejandra   | nix.nix      | 1        | Primary Nix formatter  |
+| .nix      | deadnix     | nix.nix      | 2        | Dead code detection    |
+| .nix      | statix      | nix.nix      | 3        | Linting                |
+| .js       | biome       | web.nix      | 1        | JavaScript formatting  |
+| .jsx      | biome       | web.nix      | 1        | React JSX              |
+| .ts       | biome       | web.nix      | 1        | TypeScript             |
+| .tsx      | biome       | web.nix      | 1        | React TSX              |
+| .css      | biome       | web.nix      | 1        | Stylesheets            |
+| .scss     | biome       | web.nix      | 1        | Sass                   |
+| .sass     | biome       | web.nix      | 1        | Sass (indented)        |
+| .less     | biome       | web.nix      | 1        | Less                   |
+| .json     | biome       | web.nix      | 1        | JSON files             |
+| .jsonc    | biome       | web.nix      | 1        | JSON with comments     |
+| .py       | black       | python.nix   | 1        | Python formatting      |
+| .py       | isort       | python.nix   | 2        | Import sorting         |
+| .py       | ruff-format | python.nix   | 3        | Fast Python formatter  |
+| .sh       | shfmt       | shell.nix    | 1        | Shell formatting       |
+| .bash     | shfmt       | shell.nix    | 1        | Bash scripts           |
+| .sh       | shellcheck  | shell.nix    | 2        | Shell linting          |
+| .bash     | shellcheck  | shell.nix    | 2        | Bash linting           |
+| .rs       | rustfmt     | rust.nix     | 1        | Rust formatting        |
+| .yaml     | yamlfmt     | yaml.nix     | 1        | YAML formatting        |
+| .yml      | yamlfmt     | yaml.nix     | 1        | YAML formatting        |
+| .md       | mdformat    | markdown.nix | 1        | Markdown formatting    |
+| .proto    | buf         | misc.nix     | 1        | Protocol buffers       |
+| .toml     | taplo       | misc.nix     | 2        | TOML formatting        |
+| .yml      | actionlint  | misc.nix     | 3        | GitHub Actions linting |
+| justfile  | just        | misc.nix     | 4        | Justfile formatting    |
 
 ## Potential Issues Identified
 
@@ -43,8 +43,9 @@ This document shows which file types are handled by which formatters to identify
 ## File Types Without Coverage
 
 The following common file types don't have formatters configured:
+
 - .html (HTML files)
-- .xml (XML files) 
+- .xml (XML files)
 - .svg (SVG files)
 - .sql (SQL files)
 - .go (Go files)

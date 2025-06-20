@@ -4,7 +4,7 @@ set -euo pipefail
 echo "Testing alejandra formatting behavior..."
 
 # Create test file 1 - short args
-cat > test1.nix << 'EOF'
+cat >test1.nix <<'EOF'
 {pkgs,lib,...}:
 {
   enable = true;
@@ -12,7 +12,7 @@ cat > test1.nix << 'EOF'
 EOF
 
 # Create test file 2 - longer args
-cat > test2.nix << 'EOF'
+cat >test2.nix <<'EOF'
 {pkgs,lib,config,options,...}:
 {
   enable = true;

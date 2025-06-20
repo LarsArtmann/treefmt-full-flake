@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   test-templates:
@@ -17,7 +17,7 @@ jobs:
         template: [minimal, default, complete]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: cachix/install-nix-action@v27
         with:
@@ -25,14 +25,14 @@ jobs:
           extra_nix_config: |
             accept-flake-config = true
             experimental-features = nix-command flakes
-      
+
       - name: Setup Cachix
         uses: cachix/cachix-action@v15
         with:
           name: treefmt-full-flake
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
           skipPush: ${{ github.event_name == 'pull_request' }}
-      
+
       - name: Run template test
         run: |
           chmod +x ./tests/templates/test-${{ matrix.template }}.sh
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: cachix/install-nix-action@v27
         with:
@@ -53,14 +53,14 @@ jobs:
           extra_nix_config: |
             accept-flake-config = true
             experimental-features = nix-command flakes
-      
+
       - name: Setup Cachix
         uses: cachix/cachix-action@v15
         with:
           name: treefmt-full-flake
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
           skipPush: ${{ github.event_name == 'pull_request' }}
-      
+
       - name: Check flake
         run: nix flake check
 
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: cachix/install-nix-action@v27
         with:
@@ -77,14 +77,14 @@ jobs:
           extra_nix_config: |
             accept-flake-config = true
             experimental-features = nix-command flakes
-      
+
       - name: Setup Cachix
         uses: cachix/cachix-action@v15
         with:
           name: treefmt-full-flake
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
           skipPush: ${{ github.event_name == 'pull_request' }}
-      
+
       - name: Run formatter isolation tests
         run: |
           chmod +x ./tests/formatters/test-formatter-isolation.sh
@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: cachix/install-nix-action@v27
         with:
@@ -103,14 +103,14 @@ jobs:
           extra_nix_config: |
             accept-flake-config = true
             experimental-features = nix-command flakes
-      
+
       - name: Setup Cachix
         uses: cachix/cachix-action@v15
         with:
           name: treefmt-full-flake
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
           skipPush: ${{ github.event_name == 'pull_request' }}
-      
+
       - name: Run all tests
         run: |
           chmod +x ./tests/run-all-tests.sh

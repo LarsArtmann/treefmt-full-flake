@@ -19,12 +19,12 @@ mkdir -p "$REPO_ROOT/.git/hooks"
 
 # Install pre-commit hook
 if [ -f "$REPO_ROOT/.githooks/pre-commit" ]; then
-    cp "$REPO_ROOT/.githooks/pre-commit" "$REPO_ROOT/.git/hooks/pre-commit"
-    chmod +x "$REPO_ROOT/.git/hooks/pre-commit"
-    echo -e "${GREEN}✓ Installed pre-commit hook${NC}"
+  cp "$REPO_ROOT/.githooks/pre-commit" "$REPO_ROOT/.git/hooks/pre-commit"
+  chmod +x "$REPO_ROOT/.git/hooks/pre-commit"
+  echo -e "${GREEN}✓ Installed pre-commit hook${NC}"
 else
-    echo -e "${RED}Error: pre-commit hook not found in .githooks/${NC}"
-    exit 1
+  echo -e "${RED}Error: pre-commit hook not found in .githooks/${NC}"
+  exit 1
 fi
 
 # Alternative: Use git config to set hooks path (Git 2.9+)

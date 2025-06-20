@@ -71,6 +71,7 @@ Visit `https://app.cachix.org/cache/treefmt-full-flake` to see:
 ### CI not using cache
 
 Check that:
+
 1. `CACHIX_AUTH_TOKEN` secret is set correctly
 2. The cache name matches in workflows (`treefmt-full-flake`)
 3. The Cachix action version is up to date
@@ -78,6 +79,7 @@ Check that:
 ### Local builds not using cache
 
 Ensure you've run:
+
 ```bash
 cachix use treefmt-full-flake
 ```
