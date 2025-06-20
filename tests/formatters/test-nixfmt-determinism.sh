@@ -10,7 +10,11 @@ NC='\033[0m' # No Color
 
 # Test configuration
 REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 TEST_DIR=$(mktemp -d)
+
+# Source the universal timeout wrapper
+source "$SCRIPT_DIR/../lib/timeout.sh"
 
 echo -e "${BLUE}Testing nixfmt-rfc-style determinism...${NC}"
 echo "Repository root: $REPO_ROOT"
@@ -22,35 +26,6 @@ cleanup() {
   rm -rf "$TEST_DIR"
 }
 trap cleanup EXIT
-
-# Function to run test with timeout
-run_with_timeout() {
-  local timeout=$1
-  shift
-  local cmd="$@"
-
-  if command -v timeout >/dev/null 2>&1; then
-    if ! timeout "$timeout" bash -c "$cmd"; then
-      return 1
-    fi
-  else
-    # macOS doesn't have timeout, use alternative
-    (
-      eval "$cmd" &
-      local pid=$!
-      local count=0
-      while kill -0 $pid 2>/dev/null && [ $count -lt $timeout ]; do
-        sleep 1
-        ((count++))
-      done
-      if kill -0 $pid 2>/dev/null; then
-        kill -9 $pid
-        return 1
-      fi
-      wait $pid
-    )
-  fi
-}
 
 # Test nixfmt-rfc-style determinism
 test_nixfmt_determinism() {
@@ -149,7 +124,7 @@ EOF
 
   # First run
   echo -n "First run: "
-  if run_with_timeout 30 "nix fmt 2>&1"; then
+  if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
     echo -e "${GREEN}✓${NC}"
     cp test.nix test.nix.run1
   else
@@ -159,7 +134,7 @@ EOF
 
   # Second run
   echo -n "Second run: "
-  if run_with_timeout 30 "nix fmt 2>&1"; then
+  if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
     echo -e "${GREEN}✓${NC}"
     cp test.nix test.nix.run2
   else
@@ -169,7 +144,7 @@ EOF
 
   # Third run
   echo -n "Third run: "
-  if run_with_timeout 30 "nix fmt 2>&1"; then
+  if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
     echo -e "${GREEN}✓${NC}"
     cp test.nix test.nix.run3
   else
@@ -259,7 +234,7 @@ EOF
   git add .
 
   echo "Running alejandra formatter..."
-  if run_with_timeout 30 "nix fmt 2>&1"; then
+  if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
     cp test.nix ../alejandra-output.nix
     echo -e "${GREEN}✓ Alejandra completed${NC}"
   else

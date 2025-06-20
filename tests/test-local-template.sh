@@ -11,6 +11,10 @@ NC='\033[0m' # No Color
 TEST_NAME="local template test"
 TEST_DIR=$(mktemp -d)
 REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+# Source the universal timeout wrapper
+source "$SCRIPT_DIR/lib/timeout.sh"
 
 echo -e "${YELLOW}Testing template with local path...${NC}"
 echo "Test directory: $TEST_DIR"
@@ -94,7 +98,18 @@ git commit -m "Initial commit" -q
 
 # Test formatting
 echo -e "\n${YELLOW}Running formatter...${NC}"
-if nix fmt; then
+# Create flake metadata first to ensure lock file exists
+if ! run_with_timeout 30 "nix flake metadata --no-registries 2>&1 | grep -v 'Git tree.*dirty' || true"; then
+  echo -e "${RED}✗ Failed to create flake metadata${NC}"
+  exit 1
+fi
+# Add lock file to git if created
+if [ -f "flake.lock" ]; then
+  git add flake.lock
+  git commit -m "Add flake.lock" -q || true
+fi
+# Run formatter with --no-update-lock-file
+if run_with_timeout 60 "nix fmt --no-update-lock-file"; then
   echo -e "${GREEN}✓ Formatter ran successfully${NC}"
 else
   echo -e "${RED}✗ Formatter failed${NC}"
@@ -132,7 +147,7 @@ git commit -m "Format code" -q || true
 
 # Test flake check
 echo -e "\n${YELLOW}Running flake check...${NC}"
-if nix flake check; then
+if run_with_timeout 60 "nix flake check --no-update-lock-file"; then
   echo -e "${GREEN}✓ Flake check passed${NC}"
 else
   echo -e "${RED}✗ Flake check failed${NC}"
