@@ -104,13 +104,17 @@ if [ ! -f "justfile" ]; then
 fi
 echo -e "${GREEN}✓ justfile exists${NC}"
 
-# Step 4: Check flake metadata
+# Step 4: Check flake metadata (allow lock file creation for fresh flake)
 echo -e "\n${YELLOW}Step 4: Checking flake metadata...${NC}"
-if ! run_with_timeout 10 "nix flake metadata --no-update-lock-file"; then
+if ! run_with_timeout 30 "nix flake metadata"; then
     echo -e "${RED}Failed to check flake metadata${NC}"
     exit 1
 fi
 echo -e "${GREEN}✓ Flake metadata is valid${NC}"
+# Add the generated lock file to git
+if [ -f "flake.lock" ]; then
+    git add flake.lock
+fi
 
 # Step 5: Create test files for formatting (more comprehensive for default)
 echo -e "\n${YELLOW}Step 5: Creating test files...${NC}"
@@ -205,7 +209,7 @@ git commit -m "Initial commit" -q
 
 # Step 6: Run nix flake check
 echo -e "\n${YELLOW}Step 6: Running flake check...${NC}"
-if ! run_with_timeout 60 "nix flake check --no-update-lock-file"; then
+if ! run_with_timeout 60 "nix flake check"; then
     echo -e "${RED}Failed to check flake${NC}"
     exit 1
 fi
@@ -281,7 +285,7 @@ echo -e "${GREEN}✓ Format check passed${NC}"
 
 # Step 10: Test development shell
 echo -e "\n${YELLOW}Step 10: Testing development shell...${NC}"
-if ! run_with_timeout 30 "nix develop --no-update-lock-file -c treefmt --version"; then
+if ! run_with_timeout 30 "nix develop -c treefmt --version"; then
     echo -e "${RED}Development shell failed${NC}"
     exit 1
 fi

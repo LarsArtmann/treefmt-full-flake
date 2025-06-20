@@ -98,13 +98,17 @@ if [ ! -f "flake.nix" ]; then
 fi
 echo -e "${GREEN}✓ flake.nix exists${NC}"
 
-# Step 4: Check flake metadata
+# Step 4: Check flake metadata (allow lock file creation for fresh flake)
 echo -e "\n${YELLOW}Step 4: Checking flake metadata...${NC}"
-if ! run_with_timeout 10 "nix flake metadata --no-update-lock-file"; then
+if ! run_with_timeout 30 "nix flake metadata"; then
     echo -e "${RED}Failed to check flake metadata${NC}"
     exit 1
 fi
 echo -e "${GREEN}✓ Flake metadata is valid${NC}"
+# Add the generated lock file to git
+if [ -f "flake.lock" ]; then
+    git add flake.lock
+fi
 
 # Step 5: Create test files for formatting
 echo -e "\n${YELLOW}Step 5: Creating test files...${NC}"
