@@ -14,6 +14,7 @@ cd "$SCRIPT_DIR"
 
 # Source timing utilities
 source lib/timing.sh
+source lib/timeout.sh
 
 # Maximum parallel jobs (default to number of CPU cores)
 MAX_JOBS=${MAX_JOBS:-$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4)}
@@ -42,18 +43,8 @@ run_test() {
 
   echo -e "${YELLOW}[STARTED]${NC} $test_name"
 
-  # Run test and capture output with timeout
-  local timeout_cmd=""
-  if command -v timeout >/dev/null 2>&1; then
-    timeout_cmd="timeout 300"
-  elif command -v gtimeout >/dev/null 2>&1; then
-    timeout_cmd="gtimeout 300"
-  else
-    # No timeout command available, run without timeout
-    timeout_cmd=""
-  fi
-
-  if $timeout_cmd bash "$test_script" >"$log_file" 2>&1; then
+  # Run test and capture output with universal timeout wrapper
+  if run_with_timeout 300 "bash \"$test_script\"" >"$log_file" 2>&1; then
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     echo "PASS $duration" >"$result_file"
@@ -140,6 +131,7 @@ else
   cat >"$RESULTS_DIR/run_single_test.sh" <<'SCRIPT_EOF'
 #!/usr/bin/env bash
 source "$(dirname "$0")/../lib/timing.sh"
+source "$(dirname "$0")/../lib/timeout.sh"
 idx=$1
 IFS=' ' read -ra TEST_NAMES <<<"$TEST_NAMES_STR"
 IFS=' ' read -ra TEST_SCRIPTS <<<"$TEST_SCRIPTS_STR"
@@ -161,17 +153,8 @@ run_test() {
 
   echo -e "${YELLOW}[STARTED]${NC} $test_name"
 
-  # Run test and capture output with timeout
-  local timeout_cmd=""
-  if command -v timeout >/dev/null 2>&1; then
-    timeout_cmd="timeout 300"
-  elif command -v gtimeout >/dev/null 2>&1; then
-    timeout_cmd="gtimeout 300"
-  else
-    timeout_cmd=""
-  fi
-
-  if $timeout_cmd bash "$test_script" >"$log_file" 2>&1; then
+  # Run test and capture output with universal timeout wrapper
+  if run_with_timeout 300 "bash \"$test_script\"" >"$log_file" 2>&1; then
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     echo "PASS $duration" >"$result_file"
