@@ -69,9 +69,17 @@ if [ -f "${REPO_ROOT}/tests/templates/wrapper.sh" ]; then
     source "${REPO_ROOT}/tests/templates/wrapper.sh"
 fi
 
-# Step 1: Initialize the template
-echo -e "\n${YELLOW}Step 1: Initializing template...${NC}"
+# Step 1: Setup test directory and git
+echo -e "\n${YELLOW}Step 1: Setting up test directory...${NC}"
 cd "$TEST_DIR"
+# Initialize git repository first to avoid dirty tree warnings
+git init -q
+git config user.email "test@example.com"
+git config user.name "Test User"
+echo -e "${GREEN}✓ Test directory and git initialized${NC}"
+
+# Step 2: Initialize the template
+echo -e "\n${YELLOW}Step 2: Initializing template...${NC}"
 TEMPLATE_PATH="${REPO_ROOT}#minimal"
 if type get_template_path >/dev/null 2>&1; then
     TEMPLATE_PATH=$(get_template_path "minimal")
@@ -80,15 +88,9 @@ if ! run_with_timeout 30 "nix flake init -t ${TEMPLATE_PATH}"; then
     echo -e "${RED}Failed to initialize template${NC}"
     exit 1
 fi
-
-# Step 2: Initialize git repository
-echo -e "\n${YELLOW}Step 2: Initializing git repository...${NC}"
-git init -q
-git config user.email "test@example.com"
-git config user.name "Test User"
 # Stage the flake.nix file so Nix can see it
 git add flake.nix
-echo -e "${GREEN}✓ Git repository initialized${NC}"
+echo -e "${GREEN}✓ Template initialized${NC}"
 
 # Step 3: Verify template files exist
 echo -e "\n${YELLOW}Step 3: Verifying template files...${NC}"
@@ -174,7 +176,7 @@ git commit -m "Initial commit" -q
 
 # Step 6: Run nix flake check
 echo -e "\n${YELLOW}Step 6: Running flake check...${NC}"
-if ! run_with_timeout 60 "nix flake check --no-update-lock-file"; then
+if ! run_with_timeout 60 "nix flake check"; then
     echo -e "${RED}Failed to check flake${NC}"
     exit 1
 fi
