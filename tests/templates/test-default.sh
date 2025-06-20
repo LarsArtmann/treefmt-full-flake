@@ -217,6 +217,10 @@ if ! run_with_timeout 60 "nix fmt"; then
 fi
 echo -e "${GREEN}✓ Formatter ran successfully${NC}"
 
+# Commit the formatted changes to stabilize git state
+git add -A
+git commit -m "Format code" -q || true
+
 # Step 7: Run nix flake check (after formatting)
 echo -e "\n${YELLOW}Step 7: Running flake check...${NC}"
 if ! run_with_timeout 60 "nix flake check"; then
