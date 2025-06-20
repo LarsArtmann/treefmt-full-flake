@@ -50,6 +50,8 @@ if ! run_with_timeout 30 "nix flake init -t ${TEMPLATE_PATH}"; then
   echo -e "${RED}Failed to initialize template${NC}"
   exit 1
 fi
+# Patch flake.nix to use local repository for testing
+sed -i '' "s|git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git|path:${REPO_ROOT}|g" flake.nix
 echo -e "${GREEN}✓ Template initialized${NC}"
 
 # Step 3: Verify template files exist
