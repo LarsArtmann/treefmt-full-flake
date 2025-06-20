@@ -62,6 +62,9 @@ treefmtFlake = {
   yaml = true;       # Format YAML
   markdown = true;   # Format Markdown
   json = true;       # Format JSON
+
+  # Optional: Use deterministic nixfmt-rfc-style instead of alejandra
+  # nixFormatter = "nixfmt-rfc-style";
 };
 ```
 

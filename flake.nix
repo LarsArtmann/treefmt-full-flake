@@ -31,6 +31,7 @@
         # Export individual formatter modules
         formatterModules = {
           nix = ./formatters/nix.nix;
+          nix-nixfmt = ./formatters/nix-nixfmt.nix; # Alternative deterministic Nix formatter
           web = ./formatters/web.nix;
           python = ./formatters/python.nix;
           shell = ./formatters/shell.nix;
