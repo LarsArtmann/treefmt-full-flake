@@ -30,7 +30,8 @@ build/Release
 # TypeScript
 *.tsbuildinfo
 dist/
-lib/
+# Only ignore lib at root, not in tests
+/lib/
 out/
 
 # Logs
