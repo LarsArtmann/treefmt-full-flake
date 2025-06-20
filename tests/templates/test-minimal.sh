@@ -174,16 +174,8 @@ git add -A
 # Create initial commit so git has history
 git commit -m "Initial commit" -q
 
-# Step 6: Run nix flake check
-echo -e "\n${YELLOW}Step 6: Running flake check...${NC}"
-if ! run_with_timeout 60 "nix flake check"; then
-    echo -e "${RED}Failed to check flake${NC}"
-    exit 1
-fi
-echo -e "${GREEN}✓ Flake check passed${NC}"
-
-# Step 7: Test formatter
-echo -e "\n${YELLOW}Step 7: Testing formatter...${NC}"
+# Step 6: Test formatter (run before flake check)
+echo -e "\n${YELLOW}Step 6: Testing formatter...${NC}"
 # First, show the formatter is available
 if ! run_with_timeout 30 "nix fmt -- --version"; then
     echo -e "${RED}Formatter not available${NC}"
@@ -196,6 +188,14 @@ if ! run_with_timeout 60 "nix fmt"; then
     exit 1
 fi
 echo -e "${GREEN}✓ Formatter ran successfully${NC}"
+
+# Step 7: Run nix flake check (after formatting)
+echo -e "\n${YELLOW}Step 7: Running flake check...${NC}"
+if ! run_with_timeout 60 "nix flake check"; then
+    echo -e "${RED}Failed to check flake${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ Flake check passed${NC}"
 
 # Step 8: Verify files were formatted
 echo -e "\n${YELLOW}Step 8: Verifying formatting changes...${NC}"
