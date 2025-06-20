@@ -118,7 +118,7 @@ measure_time "format-small" '
     for i in {1..10}; do
         echo "{ pkgs, ... }: { test = $i; }" > src/file$i.nix
     done &&
-    nix fmt
+    nix fmt --no-update-lock-file
 '
 
 # Medium project (100 files)
@@ -128,7 +128,7 @@ measure_time "format-medium" '
     for i in {1..100}; do
         echo "{ pkgs, ... }: { test = $i; }" > src/file$i.nix
     done &&
-    nix fmt
+    nix fmt --no-update-lock-file
 '
 
 # Large project (500 files)
@@ -138,7 +138,7 @@ measure_time "format-large" '
     for i in {1..500}; do
         echo "{ pkgs, ... }: { test = $i; }" > src/file$i.nix
     done &&
-    nix fmt
+    nix fmt --no-update-lock-file
 '
 
 # Test 3: Format check performance
@@ -146,8 +146,8 @@ measure_time "format-check" '
     nix flake init -t '${REPO_ROOT}'#minimal &&
     mkdir -p src &&
     echo "{ pkgs, ... }: { test = true; }" > src/test.nix &&
-    nix fmt &&
-    nix fmt -- --check
+    nix fmt --no-update-lock-file &&
+    nix fmt --no-update-lock-file -- --check
 '
 
 # Close JSON
