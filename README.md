@@ -315,6 +315,27 @@ For dramatically faster CI builds (5-10x improvement), set up Cachix:
 
 See [Cachix Setup Guide](./docs/cachix-setup.md) for detailed instructions.
 
+## Development Setup
+
+### Git Hooks
+
+This project includes a pre-commit hook that automatically formats code before commits:
+
+```bash
+# Install the pre-commit hook
+./scripts/setup-hooks.sh
+```
+
+The hook will:
+- Run `nix fmt` on all staged files
+- Re-stage any files that were formatted
+- Prevent commits if formatting fails
+
+To skip the hook temporarily:
+```bash
+git commit --no-verify
+```
+
 ## License
 
 MIT
