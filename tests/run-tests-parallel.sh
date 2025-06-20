@@ -104,18 +104,18 @@ if [ -f "test-local-template.sh" ]; then
   TEST_NAMES+=("local-template")
 fi
 
+# Create jobs file for both parallel and xargs paths
+JOBS_FILE="$RESULTS_DIR/jobs.txt"
+for i in "${!TEST_NAMES[@]}"; do
+  echo "${TEST_NAMES[$i]} ${TEST_SCRIPTS[$i]}" >>"$JOBS_FILE"
+done
+
 # Start timing
 start_timer
 
 # Run tests in parallel using GNU parallel or xargs
 if command -v parallel >/dev/null 2>&1; then
   echo -e "${BLUE}Using GNU parallel${NC}\n"
-
-  # Create jobs file
-  JOBS_FILE="$RESULTS_DIR/jobs.txt"
-  for i in "${!TEST_NAMES[@]}"; do
-    echo "${TEST_NAMES[$i]} ${TEST_SCRIPTS[$i]}" >>"$JOBS_FILE"
-  done
 
   # Run parallel with progress bar
   parallel --jobs "$MAX_JOBS" --colsep ' ' --bar run_test {1} {2} :::: "$JOBS_FILE"
