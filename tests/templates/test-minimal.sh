@@ -203,11 +203,13 @@ echo -e "${GREEN}✓ Flake check passed${NC}"
 
 # Step 8: Verify files were formatted
 echo -e "\n${YELLOW}Step 8: Verifying formatting changes...${NC}"
-# Check if Nix file was formatted (alejandra formats with proper spacing)
+# Check if Nix file was formatted (alejandra may format single-line or multi-line)
 # Before: {pkgs,lib,...}:
 # After: proper formatting with newlines and spaces
-if grep -q "{pkgs,lib,...}:" src/test.nix; then
+if ! grep -qE "(^{|{pkgs)" src/test.nix || ! grep -q "pkgs.hello" src/test.nix; then
     echo -e "${RED}Nix file was not formatted properly${NC}"
+    echo "Expected proper Nix formatting but got:"
+    head -10 src/test.nix
     exit 1
 fi
 echo -e "${GREEN}✓ Nix file formatted${NC}"

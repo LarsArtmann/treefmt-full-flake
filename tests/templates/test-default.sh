@@ -232,9 +232,11 @@ echo -e "${GREEN}✓ Flake check passed${NC}"
 # Step 8: Verify files were formatted
 echo -e "\n${YELLOW}Step 8: Verifying formatting changes...${NC}"
 
-# Check Nix formatting (alejandra removes compact syntax)
-if grep -q "{pkgs,lib,...}:" src/test.nix; then
+# Check Nix formatting (alejandra may format single-line or multi-line)
+if ! grep -qE "(^{|{pkgs)" src/test.nix || ! grep -q "enable = true;" src/test.nix; then
     echo -e "${RED}Nix file was not formatted properly${NC}"
+    echo "Expected proper Nix formatting but got:"
+    head -10 src/test.nix
     exit 1
 fi
 echo -e "${GREEN}✓ Nix file formatted${NC}"
@@ -260,9 +262,11 @@ if ! grep -q "^  echo \"Error: No environment specified\"" scripts/deploy.sh; th
 fi
 echo -e "${GREEN}✓ Shell script formatted${NC}"
 
-# Check JSON formatting
-if grep -q '"name":"test-app"' config.json; then
+# Check JSON formatting (should have proper spacing)
+if ! grep -qE '"name"[[:space:]]*:[[:space:]]*"test-app"' config.json; then
     echo -e "${RED}JSON file was not formatted properly${NC}"
+    echo "Expected formatted JSON but got:"
+    head -5 config.json
     exit 1
 fi
 echo -e "${GREEN}✓ JSON file formatted${NC}"

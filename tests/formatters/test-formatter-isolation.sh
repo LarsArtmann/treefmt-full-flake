@@ -32,13 +32,13 @@ run_with_timeout() {
     local cmd="$@"
     
     if command -v timeout >/dev/null 2>&1; then
-        if ! timeout "$timeout" bash -c "$cmd" >/dev/null 2>&1; then
+        if ! timeout "$timeout" bash -c "$cmd"; then
             return 1
         fi
     else
         # macOS doesn't have timeout, use alternative
         ( 
-            eval "$cmd" >/dev/null 2>&1 &
+            eval "$cmd" &
             local pid=$!
             local count=0
             while kill -0 $pid 2>/dev/null && [ $count -lt $timeout ]; do
@@ -112,7 +112,7 @@ EOF
     git add "$test_file"
     
     # Run formatter
-    if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
+    if run_with_timeout 30 "nix fmt 2>&1"; then
         # Check if formatting was applied
         if grep -q "$expected_pattern" "$test_file"; then
             echo -e "${GREEN}✓${NC}"

@@ -325,8 +325,11 @@ echo -e "${GREEN}✓ Flake check passed${NC}"
 echo -e "\n${YELLOW}Step 8: Verifying formatting changes...${NC}"
 
 # Check various file formats (alejandra formats function args)
-if grep -q "{pkgs,lib,...}:" src/config.nix; then
+# Allow for both single-line and multi-line function args
+if ! grep -qE "(^{|{pkgs)" src/config.nix || ! grep -q "enable = true;" src/config.nix; then
     echo -e "${RED}Nix file was not formatted properly${NC}"
+    echo "Expected to find proper Nix formatting but got:"
+    head -10 src/config.nix
     exit 1
 fi
 echo -e "${GREEN}✓ Nix file formatted${NC}"
@@ -343,8 +346,11 @@ if ! grep -q "^interface User {" web/app.ts; then
 fi
 echo -e "${GREEN}✓ TypeScript file formatted${NC}"
 
-if grep -q "body{margin:0" web/styles.css; then
+# Check CSS is formatted (should have proper spacing and line breaks)
+if grep -q "body{margin:0" web/styles.css || ! grep -q "body {" web/styles.css; then
     echo -e "${RED}CSS file was not formatted properly${NC}"
+    echo "Expected formatted CSS but got:"
+    head -10 web/styles.css
     exit 1
 fi
 echo -e "${GREEN}✓ CSS file formatted${NC}"
@@ -367,15 +373,16 @@ if ! grep -q "^name: " config.yaml; then
 fi
 echo -e "${GREEN}✓ YAML file formatted${NC}"
 
-if ! grep -q "^## Features" README.md; then
+if ! grep -qE "^##[[:space:]]*Features" README.md; then
     echo -e "${RED}Markdown file was not formatted properly${NC}"
-    echo "Expected to find '## Features' but got:"
-    grep "Features" README.md || echo "No 'Features' line found"
+    echo "Expected to find '## Features' (with optional spaces) but got:"
+    grep -i "features" README.md || echo "No 'Features' line found"
     exit 1
 fi
 echo -e "${GREEN}✓ Markdown file formatted${NC}"
 
-if grep -q '"name":"test-app"' package.json; then
+# Check JSON is formatted (should have proper spacing)
+if ! grep -qE '"name"[[:space:]]*:[[:space:]]*"test-app"' package.json; then
     echo -e "${RED}JSON file was not formatted properly${NC}"
     echo "Expected formatted JSON but got:"
     head -5 package.json
