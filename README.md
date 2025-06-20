@@ -303,6 +303,18 @@ nix-collect-garbage -d
 - Review the [test scripts](./tests/) for examples
 - See CI workflow logs for working examples
 
+## Performance Optimization
+
+### Cachix Setup
+
+For dramatically faster CI builds (5-10x improvement), set up Cachix:
+
+1. Create account at [cachix.org](https://cachix.org)
+2. Add `CACHIX_AUTH_TOKEN` to GitHub secrets
+3. CI will automatically use the cache
+
+See [Cachix Setup Guide](./docs/cachix-setup.md) for detailed instructions.
+
 ## License
 
 MIT
