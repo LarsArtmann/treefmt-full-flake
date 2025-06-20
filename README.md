@@ -1,5 +1,8 @@
 # Treefmt Flake
 
+[![CI](https://github.com/LarsArtmann/treefmt-full-flake/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/treefmt-full-flake/actions/workflows/ci.yml)
+[![Basic CI](https://github.com/LarsArtmann/treefmt-full-flake/actions/workflows/ci-basic.yml/badge.svg)](https://github.com/LarsArtmann/treefmt-full-flake/actions/workflows/ci-basic.yml)
+
 A reusable [treefmt](https://github.com/numtide/treefmt) configuration for
 multiple projects, packaged as a Nix flake.
 
@@ -217,7 +220,7 @@ This repository includes both v1 and **v2** intelligent wrappers:
 ### 🚀 **[smart-treefmt-v2.sh](./smart-treefmt-v2.sh)** - Next Generation (Recommended)
 
 - ⚡ **25x faster startup** with command caching
-- 🔧 **Auto-fix capabilities** - resolves issues automatically  
+- 🔧 **Auto-fix capabilities** - resolves issues automatically
 - ✨ **Configuration wizard** - generates optimal configs
 - 🎯 **Interactive mode** - guided problem resolution
 - 📊 **Progress indicators** - beautiful real-time feedback
@@ -236,12 +239,69 @@ See [v2 Documentation](./docs/smart-treefmt-v2.md) | [v1 Documentation](./docs/s
 ### 🔮 **[smart-treefmt-v3-prototype.sh](./smart-treefmt-v3-prototype.sh)** - Revolutionary AI (Prototype)
 
 - 🧠 **AI-powered analysis** - semantic code understanding with local LLM
-- 🔮 **Predictive formatting** - prevent issues before they occur  
+- 🔮 **Predictive formatting** - prevent issues before they occur
 - 🧬 **Intelligent config evolution** - learns from team patterns
 - ⚡ **Advanced framework detection** - 95%+ accuracy with confidence scores
 - 📊 **Team pattern analysis** - extracts insights from git history
 
 See [Revolutionary Roadmap](./REVOLUTIONARY_ROADMAP.md) | [Revolutionary Improvements](./REVOLUTIONARY_IMPROVEMENTS.md)
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Formatter Conflicts
+
+**Problem**: Multiple formatters trying to format the same file type (e.g., both biome and jsonfmt formatting JSON files).
+
+**Solution**: 
+- We've configured biome to handle JSON files by default
+- If you need jsonfmt specifically, disable the web formatter group and enable json separately
+- Check [formatter coverage matrix](./tests/formatter-coverage-matrix.md) for details
+
+#### 2. Alejandra Formatting Inconsistency
+
+**Problem**: Alejandra formatter switches between single-line and multi-line formats non-deterministically.
+
+**Solution**:
+- Run `nix fmt` twice to ensure stable formatting
+- This is a known issue with Alejandra (see [issue #23](https://github.com/LarsArtmann/treefmt-full-flake/issues/23))
+- Consider using `nixfmt` as an alternative
+
+#### 3. Nix Flake Cache Issues
+
+**Problem**: Tests use outdated versions of the flake due to Nix caching.
+
+**Solution**:
+```bash
+# Force refresh the flake
+nix flake update --refresh
+
+# Or clear the cache
+nix-collect-garbage -d
+```
+
+#### 4. Git "Dirty Tree" Warnings
+
+**Problem**: Getting warnings about dirty git tree when initializing templates.
+
+**Solution**:
+- Initialize git repository before running `nix flake init`
+- Commit changes before running flake operations
+
+#### 5. Flake Check Failures
+
+**Problem**: `nix flake check` fails after formatting due to uncommitted changes.
+
+**Solution**:
+- Always commit formatted changes before running `nix flake check`
+- Use the provided test scripts which handle this automatically
+
+### Getting Help
+
+- Check existing [GitHub Issues](https://github.com/LarsArtmann/treefmt-full-flake/issues)
+- Review the [test scripts](./tests/) for examples
+- See CI workflow logs for working examples
 
 ## License
 

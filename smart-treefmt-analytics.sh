@@ -54,32 +54,32 @@ print_analytics() {
 
 # Function to initialize analytics
 init_analytics() {
-  if [[ ! -d "$ANALYTICS_DIR" ]]; then
+  if [[ ! -d $ANALYTICS_DIR ]]; then
     mkdir -p "$ANALYTICS_DIR"
     print_analytics "$GEAR" "$BLUE" "Initialized analytics directory: $ANALYTICS_DIR"
   fi
-  
+
   # Generate session ID
   SESSION_ID=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-  
+
   # Create temp directory for this session
   TEMP_DIR=$(mktemp -d)
-  
+
   # Auto-detect project ID from git or directory name
-  if [[ -z "$PROJECT_ID" ]]; then
+  if [[ -z $PROJECT_ID ]]; then
     if git rev-parse --git-dir >/dev/null 2>&1; then
       PROJECT_ID=$(basename "$(git rev-parse --show-toplevel)")
     else
       PROJECT_ID=$(basename "$(pwd)")
     fi
   fi
-  
+
   print_analytics "$SPARKLES" "$GREEN" "Analytics initialized for project: $PROJECT_ID"
 }
 
 # Function to load configuration
 load_config() {
-  if [[ -f "$CONFIG_FILE" ]]; then
+  if [[ -f $CONFIG_FILE ]]; then
     if command -v jq >/dev/null 2>&1; then
       ENABLE_ANALYTICS=$(jq -r '.enableAnalytics // true' "$CONFIG_FILE")
       PROJECT_ID=$(jq -r '.projectId // ""' "$CONFIG_FILE")
@@ -93,7 +93,7 @@ load_config() {
 
 # Function to save configuration
 save_config() {
-  cat > "$CONFIG_FILE" << EOF
+  cat >"$CONFIG_FILE" <<EOF
 {
   "enableAnalytics": $ENABLE_ANALYTICS,
   "projectId": "$PROJECT_ID",
@@ -109,7 +109,7 @@ EOF
 
 # Function to start performance monitoring
 start_monitoring() {
-  START_TIME=$(date +%s%3N)  # milliseconds
+  START_TIME=$(date +%s%3N) # milliseconds
   print_analytics "$CLOCK" "$CYAN" "Performance monitoring started"
 }
 
@@ -121,12 +121,12 @@ track_formatter() {
   local files_processed=$4
   local changes_made=${5:-0}
   local errors=${6:-0}
-  
+
   local execution_time=$((end_time - start_time))
-  
+
   # Store formatter metrics
   FORMATTER_METRICS+=("$formatter_name:$execution_time:$files_processed:$changes_made:$errors")
-  
+
   print_analytics "$TARGET" "$YELLOW" "Tracked $formatter_name: ${execution_time}ms, $files_processed files"
 }
 
@@ -137,25 +137,25 @@ track_file() {
   local processing_time=$3
   local changes_count=${4:-0}
   local file_size=${5:-0}
-  
+
   # Get file size if not provided
-  if [[ $file_size -eq 0 && -f "$file_path" ]]; then
+  if [[ $file_size -eq 0 && -f $file_path ]]; then
     file_size=$(stat -f%z "$file_path" 2>/dev/null || stat -c%s "$file_path" 2>/dev/null || echo "0")
   fi
-  
+
   # Detect language
   local language=$(detect_language "$file_path")
-  
+
   # Generate checksums
   local before_checksum=$(echo -n "before" | shasum -a 256 | cut -d' ' -f1)
   local after_checksum=$(echo -n "after" | shasum -a 256 | cut -d' ' -f1)
-  
+
   # Anonymize path if needed
   local tracked_path="$file_path"
-  if [[ "$ANONYMIZE_PATHS" == "true" ]]; then
+  if [[ $ANONYMIZE_PATHS == "true" ]]; then
     tracked_path=$(anonymize_path "$file_path")
   fi
-  
+
   # Store file metrics
   FILE_METRICS+=("$tracked_path:$formatter:$processing_time:$changes_count:$file_size:$language:$before_checksum:$after_checksum")
 }
@@ -164,32 +164,32 @@ track_file() {
 detect_language() {
   local file_path=$1
   local extension="${file_path##*.}"
-  
+
   case "$extension" in
-    js|jsx) echo "javascript" ;;
-    ts|tsx) echo "typescript" ;;
-    py) echo "python" ;;
-    rs) echo "rust" ;;
-    go) echo "go" ;;
-    java) echo "java" ;;
-    cpp|cc|cxx) echo "cpp" ;;
-    c) echo "c" ;;
-    css) echo "css" ;;
-    scss|sass) echo "scss" ;;
-    html|htm) echo "html" ;;
-    json) echo "json" ;;
-    yaml|yml) echo "yaml" ;;
-    md|markdown) echo "markdown" ;;
-    nix) echo "nix" ;;
-    sh|bash) echo "shell" ;;
-    *) echo "unknown" ;;
+  js | jsx) echo "javascript" ;;
+  ts | tsx) echo "typescript" ;;
+  py) echo "python" ;;
+  rs) echo "rust" ;;
+  go) echo "go" ;;
+  java) echo "java" ;;
+  cpp | cc | cxx) echo "cpp" ;;
+  c) echo "c" ;;
+  css) echo "css" ;;
+  scss | sass) echo "scss" ;;
+  html | htm) echo "html" ;;
+  json) echo "json" ;;
+  yaml | yml) echo "yaml" ;;
+  md | markdown) echo "markdown" ;;
+  nix) echo "nix" ;;
+  sh | bash) echo "shell" ;;
+  *) echo "unknown" ;;
   esac
 }
 
 # Function to anonymize file paths
 anonymize_path() {
   local path=$1
-  
+
   # Replace directory names with hashes but keep file extensions
   echo "$path" | sed -E 's|/[^/]+/|/dir_XXXX/|g' | sed -E 's|([^/]+)\.([^.]+)$|file_XXXX.\2|'
 }
@@ -198,10 +198,10 @@ anonymize_path() {
 collect_system_metrics() {
   local memory_mb=0
   local cpu_percent=0
-  
+
   # Get memory usage (cross-platform)
   if command -v ps >/dev/null 2>&1; then
-    if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ $OSTYPE == "darwin"* ]]; then
       # macOS
       memory_mb=$(ps -o rss= -p $$ | awk '{print $1/1024}')
     else
@@ -209,28 +209,28 @@ collect_system_metrics() {
       memory_mb=$(ps -o rss= -p $$ | awk '{print $1/1024}')
     fi
   fi
-  
+
   # Store in temp file for later collection
-  echo "$memory_mb:$cpu_percent" > "$TEMP_DIR/system_metrics.txt"
+  echo "$memory_mb:$cpu_percent" >"$TEMP_DIR/system_metrics.txt"
 }
 
 # Function to finalize analytics collection
 finalize_analytics() {
-  if [[ "$ENABLE_ANALYTICS" != "true" ]]; then
+  if [[ $ENABLE_ANALYTICS != "true" ]]; then
     return 0
   fi
-  
+
   local end_time=$(date +%s%3N)
   local total_time=$((end_time - START_TIME))
   local file_count=${#FILE_METRICS[@]}
-  
+
   # Calculate total lines processed (rough estimate)
   local total_lines=0
   for file_metric in "${FILE_METRICS[@]}"; do
     local file_size=$(echo "$file_metric" | cut -d':' -f5)
-    total_lines=$((total_lines + file_size / 50))  # Rough estimate: 50 chars per line
+    total_lines=$((total_lines + file_size / 50)) # Rough estimate: 50 chars per line
   done
-  
+
   # Get system metrics
   local memory_mb=0
   local cpu_percent=0
@@ -238,9 +238,10 @@ finalize_analytics() {
     memory_mb=$(cut -d':' -f1 "$TEMP_DIR/system_metrics.txt")
     cpu_percent=$(cut -d':' -f2 "$TEMP_DIR/system_metrics.txt")
   fi
-  
+
   # Create analytics data structure
-  local analytics_data=$(cat << EOF
+  local analytics_data=$(
+    cat <<EOF
 {
   "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
   "sessionId": "$SESSION_ID",
@@ -266,27 +267,27 @@ finalize_analytics() {
   "warnings": []
 }
 EOF
-)
-  
+  )
+
   # Save analytics data
   local analytics_file="$ANALYTICS_DIR/session_$(date +%Y%m%d_%H%M%S)_$SESSION_ID.json"
-  echo "$analytics_data" > "$analytics_file"
-  
+  echo "$analytics_data" >"$analytics_file"
+
   # Update analytics using TypeScript collector if available
   if command -v bun >/dev/null 2>&1 && [[ -f "analytics-collector.ts" ]]; then
     bun run analytics-collector.ts summary "$PROJECT_ID" 1 >/dev/null 2>&1 || true
   fi
-  
+
   print_analytics "$CHART" "$GREEN" "Analytics saved: ${total_time}ms, $file_count files processed"
-  
+
   # Show quick summary
   show_quick_summary "$total_time" "$file_count"
-  
+
   # Auto-launch dashboard if enabled
-  if [[ "$AUTO_DASHBOARD" == "true" ]]; then
+  if [[ $AUTO_DASHBOARD == "true" ]]; then
     launch_dashboard
   fi
-  
+
   # Cleanup
   rm -rf "$TEMP_DIR"
 }
@@ -294,9 +295,9 @@ EOF
 # Function to format formatter metrics for JSON
 format_formatter_metrics() {
   local json_items=()
-  
+
   for metric in "${FORMATTER_METRICS[@]}"; do
-    IFS=':' read -r name exec_time files_processed changes errors <<< "$metric"
+    IFS=':' read -r name exec_time files_processed changes errors <<<"$metric"
     json_items+=("    {
       \"name\": \"$name\",
       \"version\": \"unknown\",
@@ -307,16 +308,16 @@ format_formatter_metrics() {
       \"errors\": $errors
     }")
   done
-  
+
   printf '%s\n' "${json_items[@]}" | paste -sd','
 }
 
-# Function to format file metrics for JSON  
+# Function to format file metrics for JSON
 format_file_metrics() {
   local json_items=()
-  
+
   for metric in "${FILE_METRICS[@]}"; do
-    IFS=':' read -r path formatter proc_time changes size language before_hash after_hash <<< "$metric"
+    IFS=':' read -r path formatter proc_time changes size language before_hash after_hash <<<"$metric"
     json_items+=("    {
       \"path\": \"$path\",
       \"size\": $size,
@@ -328,7 +329,7 @@ format_file_metrics() {
       \"afterChecksum\": \"$after_hash\"
     }")
   done
-  
+
   printf '%s\n' "${json_items[@]}" | paste -sd','
 }
 
@@ -336,7 +337,7 @@ format_file_metrics() {
 show_quick_summary() {
   local total_time=$1
   local file_count=$2
-  
+
   echo
   print_analytics "$ROCKET" "$BOLD" "Performance Summary"
   echo "  ├─ Total Time: ${total_time}ms"
@@ -360,7 +361,7 @@ launch_dashboard() {
 export_analytics() {
   local format=${1:-"$EXPORT_FORMAT"}
   local days=${2:-7}
-  
+
   if command -v bun >/dev/null 2>&1 && [[ -f "analytics-collector.ts" ]]; then
     print_analytics "$CHART" "$BLUE" "Exporting analytics data ($format format, last $days days)..."
     bun run analytics-collector.ts export "$PROJECT_ID" "$format" "$days"
@@ -373,7 +374,7 @@ export_analytics() {
 show_analytics_status() {
   echo
   print_analytics "$CHART" "$BOLD" "Analytics Configuration"
-  echo "  ├─ Status: $(if [[ "$ENABLE_ANALYTICS" == "true" ]]; then echo "${GREEN}Enabled${NC}"; else echo "${RED}Disabled${NC}"; fi)"
+  echo "  ├─ Status: $(if [[ $ENABLE_ANALYTICS == "true" ]]; then echo "${GREEN}Enabled${NC}"; else echo "${RED}Disabled${NC}"; fi)"
   echo "  ├─ Project ID: $PROJECT_ID"
   echo "  ├─ Collect Personal Data: $COLLECT_PERSONAL_DATA"
   echo "  ├─ Anonymize Paths: $ANONYMIZE_PATHS"
@@ -388,7 +389,7 @@ configure_analytics() {
   echo
   print_analytics "$GEAR" "$CYAN" "Analytics Configuration"
   echo
-  
+
   # Enable/disable analytics
   read -p "Enable analytics collection? (y/N): " -n 1 -r
   echo
@@ -397,14 +398,14 @@ configure_analytics() {
   else
     ENABLE_ANALYTICS=false
   fi
-  
-  if [[ "$ENABLE_ANALYTICS" == "true" ]]; then
+
+  if [[ $ENABLE_ANALYTICS == "true" ]]; then
     # Project ID
     read -p "Project ID (default: $PROJECT_ID): " user_project_id
-    if [[ -n "$user_project_id" ]]; then
+    if [[ -n $user_project_id ]]; then
       PROJECT_ID="$user_project_id"
     fi
-    
+
     # Personal data
     read -p "Collect personal data (file paths, user info)? (y/N): " -n 1 -r
     echo
@@ -415,7 +416,7 @@ configure_analytics() {
       COLLECT_PERSONAL_DATA=false
       ANONYMIZE_PATHS=true
     fi
-    
+
     # Auto dashboard
     read -p "Auto-launch dashboard after formatting? (y/N): " -n 1 -r
     echo
@@ -425,7 +426,7 @@ configure_analytics() {
       AUTO_DASHBOARD=false
     fi
   fi
-  
+
   # Save configuration
   save_config
   print_analytics "$SPARKLES" "$GREEN" "Configuration saved to $CONFIG_FILE"
@@ -433,7 +434,7 @@ configure_analytics() {
 
 # Function to show help
 show_help() {
-  cat << EOF
+  cat <<EOF
 ${BOLD}Smart treefmt Analytics v$SCRIPT_VERSION${NC}
 
 ${BOLD}USAGE:${NC}
@@ -466,88 +467,88 @@ EOF
 main() {
   # Load configuration
   load_config
-  
+
   # Parse arguments
   local treefmt_args=()
   local analytics_action=""
-  
+
   while [[ $# -gt 0 ]]; do
     case $1 in
-      --analytics-status)
-        analytics_action="status"
-        shift
-        ;;
-      --analytics-config)
-        analytics_action="config"
-        shift
-        ;;
-      --analytics-dashboard)
-        analytics_action="dashboard"
-        shift
-        ;;
-      --analytics-export)
-        analytics_action="export"
-        EXPORT_FORMAT=${2:-"json"}
-        shift 2
-        ;;
-      --analytics-disable)
-        ENABLE_ANALYTICS=false
-        shift
-        ;;
-      --analytics-summary)
-        analytics_action="summary"
-        shift
-        ;;
-      --help-analytics)
-        show_help
-        exit 0
-        ;;
-      *)
-        treefmt_args+=("$1")
-        shift
-        ;;
+    --analytics-status)
+      analytics_action="status"
+      shift
+      ;;
+    --analytics-config)
+      analytics_action="config"
+      shift
+      ;;
+    --analytics-dashboard)
+      analytics_action="dashboard"
+      shift
+      ;;
+    --analytics-export)
+      analytics_action="export"
+      EXPORT_FORMAT=${2:-"json"}
+      shift 2
+      ;;
+    --analytics-disable)
+      ENABLE_ANALYTICS=false
+      shift
+      ;;
+    --analytics-summary)
+      analytics_action="summary"
+      shift
+      ;;
+    --help-analytics)
+      show_help
+      exit 0
+      ;;
+    *)
+      treefmt_args+=("$1")
+      shift
+      ;;
     esac
   done
-  
+
   # Handle analytics actions
   case "$analytics_action" in
-    status)
-      show_analytics_status
-      exit 0
-      ;;
-    config)
-      configure_analytics
-      exit 0
-      ;;
-    dashboard)
-      launch_dashboard
-      exit 0
-      ;;
-    export)
-      export_analytics "$EXPORT_FORMAT" 7
-      exit 0
-      ;;
-    summary)
-      if command -v bun >/dev/null 2>&1 && [[ -f "analytics-collector.ts" ]]; then
-        bun run analytics-collector.ts summary "$PROJECT_ID" 7
-      else
-        echo "Summary requires bun and analytics-collector.ts"
-      fi
-      exit 0
-      ;;
+  status)
+    show_analytics_status
+    exit 0
+    ;;
+  config)
+    configure_analytics
+    exit 0
+    ;;
+  dashboard)
+    launch_dashboard
+    exit 0
+    ;;
+  export)
+    export_analytics "$EXPORT_FORMAT" 7
+    exit 0
+    ;;
+  summary)
+    if command -v bun >/dev/null 2>&1 && [[ -f "analytics-collector.ts" ]]; then
+      bun run analytics-collector.ts summary "$PROJECT_ID" 7
+    else
+      echo "Summary requires bun and analytics-collector.ts"
+    fi
+    exit 0
+    ;;
   esac
-  
+
   # Initialize analytics if enabled
-  if [[ "$ENABLE_ANALYTICS" == "true" ]]; then
+  if [[ $ENABLE_ANALYTICS == "true" ]]; then
     init_analytics
     start_monitoring
     collect_system_metrics
   fi
-  
+
   # Execute treefmt with the remaining arguments
   local treefmt_start=$(date +%s%3N)
   local treefmt_exit_code=0
-  
+
   # Find treefmt command
   local treefmt_cmd=""
   if command -v treefmt >/dev/null 2>&1; then
@@ -560,7 +561,7 @@ main() {
     echo "Error: treefmt not found"
     exit 1
   fi
-  
+
   # Run treefmt and capture performance
   if $treefmt_cmd "${treefmt_args[@]}" 2>&1; then
     treefmt_exit_code=0
@@ -568,24 +569,24 @@ main() {
     treefmt_exit_code=$?
     ERROR_COUNT=$((ERROR_COUNT + 1))
   fi
-  
+
   local treefmt_end=$(date +%s%3N)
-  
+
   # Track treefmt execution if analytics enabled
-  if [[ "$ENABLE_ANALYTICS" == "true" ]]; then
+  if [[ $ENABLE_ANALYTICS == "true" ]]; then
     track_formatter "treefmt" "$treefmt_start" "$treefmt_end" "${#treefmt_args[@]}" 0 "$ERROR_COUNT"
-    
+
     # Track individual files if possible (simplified)
     for arg in "${treefmt_args[@]}"; do
-      if [[ -f "$arg" ]]; then
-        track_file "$arg" "treefmt" 100 0  # Simplified tracking
+      if [[ -f $arg ]]; then
+        track_file "$arg" "treefmt" 100 0 # Simplified tracking
       fi
     done
-    
+
     # Finalize analytics collection
     finalize_analytics
   fi
-  
+
   exit $treefmt_exit_code
 }
 

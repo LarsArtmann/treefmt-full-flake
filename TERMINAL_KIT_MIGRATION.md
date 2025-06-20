@@ -9,11 +9,13 @@ The Performance Analytics Dashboard has been successfully migrated from **blesse
 ### **Key Improvements**
 
 1. **Better Performance**
+
    - Direct terminal control without virtual DOM
    - Lower memory overhead
    - Faster rendering for real-time updates
 
 2. **Richer Features**
+
    - Built-in table rendering
    - Native progress bars
    - Better color support
@@ -27,34 +29,36 @@ The Performance Analytics Dashboard has been successfully migrated from **blesse
 ### **Code Changes**
 
 #### Old (blessed):
+
 ```typescript
 this.screen = blessed.screen({
   smartCSR: true,
-  title: 'Treefmt Performance Analytics'
+  title: "Treefmt Performance Analytics",
 });
 
 this.headerBox = blessed.box({
   top: 0,
   left: 0,
-  width: '100%',
+  width: "100%",
   height: 3,
-  border: { type: 'line' },
-  style: { fg: 'white', bg: 'blue' }
+  border: { type: "line" },
+  style: { fg: "white", bg: "blue" },
 });
 ```
 
 #### New (terminal-kit):
+
 ```typescript
 const term = termkit.terminal;
 
 // Direct drawing
 term.moveTo(1, 1);
-term.bgCyan.black('🚀 Treefmt Performance Analytics');
+term.bgCyan.black("🚀 Treefmt Performance Analytics");
 
 // Table rendering
 this.drawTable(2, 6, [
-  ['Formatter', 'Time', 'Status'],
-  ['Prettier', '245ms', '✅']
+  ["Formatter", "Time", "Status"],
+  ["Prettier", "245ms", "✅"],
 ]);
 ```
 
@@ -81,6 +85,7 @@ bun run dashboard
 ### **Features Maintained**
 
 ✅ All original features preserved:
+
 - Multiple view modes (Overview, Detailed, Trends, Team)
 - Real-time updates
 - Keyboard navigation
@@ -92,6 +97,7 @@ bun run dashboard
 ### **New Capabilities**
 
 🆕 Additional features now available:
+
 - Mouse support (click on elements)
 - Better performance for large datasets
 - Smoother animations

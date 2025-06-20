@@ -15,23 +15,23 @@ interface PerformanceTelemetry {
   sessionId: string;
   userId?: string;
   projectId: string;
-  
+
   // Performance Metrics
   formatTime: number;
   fileCount: number;
   totalLines: number;
   memoryUsage: number;
   cpuUsage: number;
-  
+
   // Formatter Details
   formatters: FormatterMetrics[];
-  
+
   // File Information
   files: FileMetrics[];
-  
+
   // Environment
   environment: EnvironmentInfo;
-  
+
   // Errors & Warnings
   errors: ErrorMetrics[];
   warnings: WarningMetrics[];
@@ -87,7 +87,7 @@ interface PrivacyConfig {
   collectPersonalData: boolean;
   anonymizeUserIds: boolean;
   encryptLocalStorage: boolean;
-  shareWithTeam: 'none' | 'aggregated' | 'full';
+  shareWithTeam: "none" | "aggregated" | "full";
   retentionPeriod: number; // days
 }
 
@@ -113,15 +113,18 @@ export class AnalyticsCollector {
   private config: PrivacyConfig;
   private dataDir: string;
 
-  constructor(dataDir: string = "./.treefmt-analytics", config?: Partial<PrivacyConfig>) {
+  constructor(
+    dataDir: string = "./.treefmt-analytics",
+    config?: Partial<PrivacyConfig>,
+  ) {
     this.dataDir = dataDir;
     this.config = {
       collectPersonalData: false,
       anonymizeUserIds: true,
       encryptLocalStorage: true,
-      shareWithTeam: 'aggregated',
+      shareWithTeam: "aggregated",
       retentionPeriod: 30,
-      ...config
+      ...config,
     };
 
     this.initializeStorage();
@@ -200,10 +203,18 @@ export class AnalyticsCollector {
     `);
 
     // Create indexes for performance
-    this.db.exec(`CREATE INDEX IF NOT EXISTS idx_sessions_timestamp ON performance_sessions(timestamp)`);
-    this.db.exec(`CREATE INDEX IF NOT EXISTS idx_sessions_project ON performance_sessions(project_id)`);
-    this.db.exec(`CREATE INDEX IF NOT EXISTS idx_formatter_name ON formatter_performance(formatter_name)`);
-    this.db.exec(`CREATE INDEX IF NOT EXISTS idx_file_language ON file_performance(language)`);
+    this.db.exec(
+      `CREATE INDEX IF NOT EXISTS idx_sessions_timestamp ON performance_sessions(timestamp)`,
+    );
+    this.db.exec(
+      `CREATE INDEX IF NOT EXISTS idx_sessions_project ON performance_sessions(project_id)`,
+    );
+    this.db.exec(
+      `CREATE INDEX IF NOT EXISTS idx_formatter_name ON formatter_performance(formatter_name)`,
+    );
+    this.db.exec(
+      `CREATE INDEX IF NOT EXISTS idx_file_language ON file_performance(language)`,
+    );
   }
 
   async collectTelemetry(telemetry: PerformanceTelemetry): Promise<void> {
@@ -218,7 +229,9 @@ export class AnalyticsCollector {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    const successRate = (sanitizedTelemetry.fileCount - sanitizedTelemetry.errors.length) / sanitizedTelemetry.fileCount;
+    const successRate =
+      (sanitizedTelemetry.fileCount - sanitizedTelemetry.errors.length) /
+      sanitizedTelemetry.fileCount;
 
     sessionStmt.run(
       sanitizedTelemetry.sessionId,
@@ -232,7 +245,7 @@ export class AnalyticsCollector {
       sanitizedTelemetry.cpuUsage,
       successRate,
       sanitizedTelemetry.errors.length,
-      sanitizedTelemetry.warnings.length
+      sanitizedTelemetry.warnings.length,
     );
 
     // Store formatter performance
@@ -252,7 +265,7 @@ export class AnalyticsCollector {
         formatter.filesProcessed,
         formatter.linesProcessed,
         formatter.changes,
-        formatter.errors
+        formatter.errors,
       );
     }
 
@@ -274,7 +287,7 @@ export class AnalyticsCollector {
         file.processingTime,
         file.changesCount,
         file.beforeChecksum,
-        file.afterChecksum
+        file.afterChecksum,
       );
     }
 
@@ -293,7 +306,7 @@ export class AnalyticsCollector {
         error.errorType,
         error.message,
         error.stack,
-        sanitizedTelemetry.timestamp.toISOString()
+        sanitizedTelemetry.timestamp.toISOString(),
       );
     }
 
@@ -328,8 +341,8 @@ export class AnalyticsCollector {
     `);
 
     const times = percentileQuery.all(projectId, since.toISOString()) as any[];
-    const sortedTimes = times.map(t => t.total_time_ms).sort((a, b) => a - b);
-    
+    const sortedTimes = times.map((t) => t.total_time_ms).sort((a, b) => a - b);
+
     const p95Index = Math.floor(sortedTimes.length * 0.95);
     const medianIndex = Math.floor(sortedTimes.length * 0.5);
 
@@ -347,7 +360,10 @@ export class AnalyticsCollector {
       LIMIT 5
     `);
 
-    const topFormatters = formattersQuery.all(projectId, since.toISOString()) as any[];
+    const topFormatters = formattersQuery.all(
+      projectId,
+      since.toISOString(),
+    ) as any[];
 
     // Get slowest files
     const slowFilesQuery = this.db.prepare(`
@@ -363,7 +379,10 @@ export class AnalyticsCollector {
       LIMIT 10
     `);
 
-    const slowestFiles = slowFilesQuery.all(projectId, since.toISOString()) as any[];
+    const slowestFiles = slowFilesQuery.all(
+      projectId,
+      since.toISOString(),
+    ) as any[];
 
     // Calculate trends (compare with previous period)
     const previousSince = new Date(since);
@@ -375,9 +394,15 @@ export class AnalyticsCollector {
       WHERE project_id = ? AND timestamp BETWEEN ? AND ?
     `);
 
-    const prevResult = prevPerfQuery.get(projectId, previousSince.toISOString(), since.toISOString()) as any;
-    const performanceChange = prevResult?.avg_time ? 
-      ((perfResult.avg_time - prevResult.avg_time) / prevResult.avg_time) * 100 : 0;
+    const prevResult = prevPerfQuery.get(
+      projectId,
+      previousSince.toISOString(),
+      since.toISOString(),
+    ) as any;
+    const performanceChange = prevResult?.avg_time
+      ? ((perfResult.avg_time - prevResult.avg_time) / prevResult.avg_time) *
+        100
+      : 0;
 
     return {
       avgFormatTime: perfResult.avg_time || 0,
@@ -386,25 +411,27 @@ export class AnalyticsCollector {
       totalFiles: perfResult.total_files || 0,
       successRate: perfResult.avg_success_rate || 0,
       errorRate: (perfResult.avg_errors || 0) / (perfResult.total_files || 1),
-      topFormatters: topFormatters.map(f => ({
+      topFormatters: topFormatters.map((f) => ({
         name: f.formatter_name,
         usage: f.usage_count,
-        avgTime: f.avg_time
+        avgTime: f.avg_time,
       })),
-      slowestFiles: slowestFiles.map(f => ({
+      slowestFiles: slowestFiles.map((f) => ({
         path: f.file_path,
         time: f.avg_time,
-        size: f.size
+        size: f.size,
       })),
       trends: {
         performanceChange,
         qualityChange: 0, // TODO: Calculate quality trends
-        usageChange: 0    // TODO: Calculate usage trends
-      }
+        usageChange: 0, // TODO: Calculate usage trends
+      },
     };
   }
 
-  private applyPrivacyControls(telemetry: PerformanceTelemetry): PerformanceTelemetry {
+  private applyPrivacyControls(
+    telemetry: PerformanceTelemetry,
+  ): PerformanceTelemetry {
     const sanitized = { ...telemetry };
 
     if (!this.config.collectPersonalData) {
@@ -417,15 +444,15 @@ export class AnalyticsCollector {
 
     // Anonymize file paths if needed
     if (!this.config.collectPersonalData) {
-      sanitized.files = sanitized.files.map(file => ({
+      sanitized.files = sanitized.files.map((file) => ({
         ...file,
-        path: this.anonymizePath(file.path)
+        path: this.anonymizePath(file.path),
       }));
 
-      sanitized.errors = sanitized.errors.map(error => ({
+      sanitized.errors = sanitized.errors.map((error) => ({
         ...error,
         file: this.anonymizePath(error.file),
-        stack: undefined // Remove stack traces for privacy
+        stack: undefined, // Remove stack traces for privacy
       }));
     }
 
@@ -433,23 +460,27 @@ export class AnalyticsCollector {
   }
 
   private hashString(input: string): string {
-    return createHash('sha256').update(input).digest('hex').substring(0, 16);
+    return createHash("sha256").update(input).digest("hex").substring(0, 16);
   }
 
   private anonymizePath(path: string): string {
     // Replace directory names with hashes but keep file extensions
-    const parts = path.split('/');
-    return parts.map((part, index) => {
-      if (index === parts.length - 1) {
-        // Last part (filename) - keep extension
-        const [name, ...extensions] = part.split('.');
-        if (extensions.length > 0) {
-          return `file_${this.hashString(name).substring(0, 8)}.${extensions.join('.')}`;
+    const parts = path.split("/");
+    return parts
+      .map((part, index) => {
+        if (index === parts.length - 1) {
+          // Last part (filename) - keep extension
+          const [name, ...extensions] = part.split(".");
+          if (extensions.length > 0) {
+            return `file_${this.hashString(name).substring(0, 8)}.${extensions.join(".")}`;
+          }
+          return `file_${this.hashString(part).substring(0, 8)}`;
         }
-        return `file_${this.hashString(part).substring(0, 8)}`;
-      }
-      return index === 0 ? part : `dir_${this.hashString(part).substring(0, 4)}`;
-    }).join('/');
+        return index === 0
+          ? part
+          : `dir_${this.hashString(part).substring(0, 4)}`;
+      })
+      .join("/");
   }
 
   private async cleanupOldData(): Promise<void> {
@@ -464,7 +495,11 @@ export class AnalyticsCollector {
     deleteStmt.run(cutoffDate.toISOString());
   }
 
-  exportData(projectId: string, format: 'json' | 'csv' = 'json', days: number = 30): string {
+  exportData(
+    projectId: string,
+    format: "json" | "csv" = "json",
+    days: number = 30,
+  ): string {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
@@ -482,23 +517,21 @@ export class AnalyticsCollector {
 
     const data = query.all(projectId, since.toISOString());
 
-    if (format === 'json') {
+    if (format === "json") {
       return JSON.stringify(data, null, 2);
     } else {
       // CSV format
-      if (data.length === 0) return '';
-      
+      if (data.length === 0) return "";
+
       const headers = Object.keys(data[0]);
       const csvRows = [
-        headers.join(','),
-        ...data.map(row => 
-          headers.map(header => 
-            JSON.stringify(row[header] ?? '')
-          ).join(',')
-        )
+        headers.join(","),
+        ...data.map((row) =>
+          headers.map((header) => JSON.stringify(row[header] ?? "")).join(","),
+        ),
       ];
-      
-      return csvRows.join('\n');
+
+      return csvRows.join("\n");
     }
   }
 
@@ -509,30 +542,30 @@ export class AnalyticsCollector {
 
 // Utility function to detect file language
 export function detectLanguage(filePath: string): string {
-  const extension = filePath.split('.').pop()?.toLowerCase();
-  
+  const extension = filePath.split(".").pop()?.toLowerCase();
+
   const languageMap: Record<string, string> = {
-    'js': 'javascript',
-    'jsx': 'javascript',
-    'ts': 'typescript',
-    'tsx': 'typescript',
-    'py': 'python',
-    'rs': 'rust',
-    'go': 'go',
-    'java': 'java',
-    'cpp': 'cpp',
-    'c': 'c',
-    'css': 'css',
-    'scss': 'scss',
-    'html': 'html',
-    'json': 'json',
-    'yaml': 'yaml',
-    'yml': 'yaml',
-    'md': 'markdown',
-    'nix': 'nix'
+    js: "javascript",
+    jsx: "javascript",
+    ts: "typescript",
+    tsx: "typescript",
+    py: "python",
+    rs: "rust",
+    go: "go",
+    java: "java",
+    cpp: "cpp",
+    c: "c",
+    css: "css",
+    scss: "scss",
+    html: "html",
+    json: "json",
+    yaml: "yaml",
+    yml: "yaml",
+    md: "markdown",
+    nix: "nix",
   };
 
-  return languageMap[extension || ''] || 'unknown';
+  return languageMap[extension || ""] || "unknown";
 }
 
 // Performance monitor wrapper
@@ -546,7 +579,7 @@ export class PerformanceMonitor {
     this.collector = collector;
     this.sessionId = crypto.randomUUID();
     this.startTime = performance.now();
-    
+
     this.telemetry = {
       sessionId: this.sessionId,
       projectId,
@@ -554,7 +587,7 @@ export class PerformanceMonitor {
       formatters: [],
       files: [],
       errors: [],
-      warnings: []
+      warnings: [],
     };
   }
 
@@ -576,24 +609,27 @@ export class PerformanceMonitor {
 
   async finalize(): Promise<void> {
     const endTime = performance.now();
-    
+
     this.telemetry.formatTime = endTime - this.startTime;
     this.telemetry.fileCount = this.telemetry.files?.length || 0;
-    this.telemetry.totalLines = this.telemetry.files?.reduce((sum, f) => sum + (f.size / 50), 0) || 0; // Rough estimate
-    
+    this.telemetry.totalLines =
+      this.telemetry.files?.reduce((sum, f) => sum + f.size / 50, 0) || 0; // Rough estimate
+
     // Get system metrics
     this.telemetry.memoryUsage = process.memoryUsage().heapUsed / 1024 / 1024; // MB
     this.telemetry.cpuUsage = process.cpuUsage().user / 1000; // ms
-    
+
     // Environment info
     this.telemetry.environment = {
       os: process.platform,
       arch: process.arch,
       nodeVersion: process.version,
-      treefmtVersion: '1.0.0' // TODO: Get actual version
+      treefmtVersion: "1.0.0", // TODO: Get actual version
     };
 
-    await this.collector.collectTelemetry(this.telemetry as PerformanceTelemetry);
+    await this.collector.collectTelemetry(
+      this.telemetry as PerformanceTelemetry,
+    );
   }
 }
 
@@ -601,41 +637,53 @@ export class PerformanceMonitor {
 export async function runAnalyticsCLI(): Promise<void> {
   const args = process.argv.slice(2);
   const command = args[0];
-  
+
   const collector = new AnalyticsCollector();
-  
+
   try {
     switch (command) {
-      case 'summary':
-        const projectId = args[1] || 'default';
+      case "summary":
+        const projectId = args[1] || "default";
         const days = parseInt(args[2]) || 7;
         const metrics = collector.getAggregatedMetrics(projectId, days);
-        
-        console.log('📊 Treefmt Performance Summary\n');
-        console.log(`Average Format Time: ${metrics.avgFormatTime.toFixed(0)}ms`);
+
+        console.log("📊 Treefmt Performance Summary\n");
+        console.log(
+          `Average Format Time: ${metrics.avgFormatTime.toFixed(0)}ms`,
+        );
         console.log(`Success Rate: ${(metrics.successRate * 100).toFixed(1)}%`);
         console.log(`Total Files: ${metrics.totalFiles}`);
-        console.log(`Performance Change: ${metrics.trends.performanceChange.toFixed(1)}%`);
-        
+        console.log(
+          `Performance Change: ${metrics.trends.performanceChange.toFixed(1)}%`,
+        );
+
         if (metrics.topFormatters.length > 0) {
-          console.log('\nTop Formatters:');
-          metrics.topFormatters.forEach(f => {
-            console.log(`  ${f.name}: ${f.usage} uses, ${f.avgTime.toFixed(0)}ms avg`);
+          console.log("\nTop Formatters:");
+          metrics.topFormatters.forEach((f) => {
+            console.log(
+              `  ${f.name}: ${f.usage} uses, ${f.avgTime.toFixed(0)}ms avg`,
+            );
           });
         }
         break;
-        
-      case 'export':
-        const exportProjectId = args[1] || 'default';
-        const format = (args[2] as 'json' | 'csv') || 'json';
+
+      case "export":
+        const exportProjectId = args[1] || "default";
+        const format = (args[2] as "json" | "csv") || "json";
         const exportDays = parseInt(args[3]) || 30;
-        
-        const exportData = collector.exportData(exportProjectId, format, exportDays);
+
+        const exportData = collector.exportData(
+          exportProjectId,
+          format,
+          exportDays,
+        );
         console.log(exportData);
         break;
-        
+
       default:
-        console.log('Usage: analytics-collector [summary|export] [projectId] [days]');
+        console.log(
+          "Usage: analytics-collector [summary|export] [projectId] [days]",
+        );
     }
   } finally {
     collector.close();

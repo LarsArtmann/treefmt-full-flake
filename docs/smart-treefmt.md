@@ -5,6 +5,7 @@
 ## Features
 
 ### 🔍 Multi-Source Resolution
+
 The script intelligently searches for treefmt in multiple locations:
 
 1. **Nix shell environment** - Checks if you're in a nix develop shell
@@ -14,6 +15,7 @@ The script intelligently searches for treefmt in multiple locations:
 5. **Common locations** - `/usr/local/bin`, Homebrew, Nix profile, etc.
 
 ### 🎯 Smart Configuration Detection
+
 Automatically finds treefmt configuration files:
 
 - Explicit `--config-file` argument
@@ -22,6 +24,7 @@ Automatically finds treefmt configuration files:
 - Searches up the directory tree for config files
 
 ### 💡 Intelligent Error Messages
+
 When something goes wrong, you get:
 
 - Clear explanation of what was attempted
@@ -30,6 +33,7 @@ When something goes wrong, you get:
 - Context-aware suggestions based on your project
 
 ### 🚀 Project Type Detection
+
 Automatically detects your project type and provides specific guidance:
 
 - Node.js/npm projects
@@ -133,15 +137,17 @@ To fix this:
 ## Installation
 
 1. **Make it executable:**
+
    ```bash
    chmod +x smart-treefmt.sh
    ```
 
 2. **Optionally, add to your PATH:**
+
    ```bash
    # Copy to a directory in your PATH
    cp smart-treefmt.sh ~/.local/bin/smart-treefmt
-   
+
    # Or create an alias
    alias smart-treefmt='./smart-treefmt.sh'
    ```

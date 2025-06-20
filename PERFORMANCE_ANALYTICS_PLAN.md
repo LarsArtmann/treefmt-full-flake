@@ -9,11 +9,13 @@ Transform treefmt from a simple formatting tool into a **data-driven performance
 ## 📋 Executive Summary
 
 ### What We're Building
+
 A comprehensive analytics system that collects, analyzes, and visualizes code formatting performance data to help developers and teams optimize their workflows, identify bottlenecks, and measure productivity improvements.
 
 ### Key Benefits
+
 - **🚀 Performance Optimization**: Identify and eliminate formatting bottlenecks
-- **📈 Productivity Measurement**: Quantify time saved and efficiency gains  
+- **📈 Productivity Measurement**: Quantify time saved and efficiency gains
 - **🎯 Quality Insights**: Track code quality improvements over time
 - **👥 Team Collaboration**: Share insights and best practices across teams
 - **🔍 Problem Detection**: Early warning system for performance degradation
@@ -56,11 +58,11 @@ graph TD
     D --> E[Analytics Engine]
     E --> F[Dashboard Renderer]
     F --> G[Terminal Display]
-    
+
     H[Git Events] --> B
     I[File System] --> B
     J[User Actions] --> B
-    
+
     K[Team Sync] --> C
     C --> L[Export System]
 ```
@@ -72,6 +74,7 @@ graph TD
 ### Tier 1: Core Performance Metrics
 
 #### 🏃‍♂️ **Speed & Efficiency**
+
 ```bash
 ┌─ Formatting Performance ─────────────────────────────────┐
 │ Average Time: 847ms     │ Median: 623ms      │ P95: 2.1s │
@@ -85,6 +88,7 @@ graph TD
 ```
 
 #### 🎯 **Quality & Reliability**
+
 ```bash
 ┌─ Quality Metrics ────────────────────────────────────────┐
 │ Success Rate: 99.7%     │ Errors: 0.3%      │ Warnings: 2.1% │
@@ -98,10 +102,11 @@ graph TD
 ```
 
 #### 📈 **Productivity Impact**
+
 ```bash
 ┌─ Team Productivity (Last 30 Days) ──────────────────────┐
 │ Time Saved: 47.2 hours │ Avg/Dev: 3.9h     │ ROI: 340% │
-│ Code Reviews: -23% time │ Style Conflicts: -89%        │ 
+│ Code Reviews: -23% time │ Style Conflicts: -89%        │
 │ Productivity Trends:                                    │
 │   ├─ Week 1: +12% efficiency                           │
 │   ├─ Week 2: +18% efficiency                           │
@@ -113,18 +118,21 @@ graph TD
 ### Tier 2: Advanced Analytics
 
 #### 🔍 **Bottleneck Analysis**
+
 - **File Type Performance**: Identify slow formatters per language
 - **Repository Hotspots**: Files/directories that take longest to format
 - **Pattern Detection**: Correlate performance with file size, complexity
 - **Dependency Impact**: How formatter chains affect overall speed
 
 #### 📊 **Usage Patterns**
+
 - **Peak Hours**: When is formatting most/least used
 - **Developer Habits**: Individual formatting patterns and preferences
 - **Tool Adoption**: Which formatters are used most frequently
 - **Integration Points**: IDE vs CLI vs git hooks usage
 
 #### 🎯 **Quality Trends**
+
 - **Code Health**: Style violation trends over time
 - **Team Consistency**: How well team follows style guidelines
 - **Regression Detection**: Identify when quality metrics decline
@@ -133,12 +141,14 @@ graph TD
 ### Tier 3: Predictive Intelligence
 
 #### 🔮 **Performance Forecasting**
+
 - **Load Prediction**: Forecast formatting workload based on git activity
 - **Bottleneck Prevention**: Predict when performance will degrade
 - **Capacity Planning**: Recommend infrastructure improvements
 - **Optimization Opportunities**: AI-powered performance recommendations
 
 #### 🧠 **Smart Insights**
+
 - **Anomaly Detection**: Identify unusual performance patterns
 - **Root Cause Analysis**: Automatically diagnose performance issues
 - **Recommendation Engine**: Suggest optimizations based on usage patterns
@@ -151,6 +161,7 @@ graph TD
 ### Terminal Dashboard (Primary Interface)
 
 #### Main Dashboard View
+
 ```bash
 ╭─────────────────────────────────────────────────────────────────╮
 │ 🚀 Treefmt Performance Analytics │ Live │ Last Updated: 14:23:45 │
@@ -178,7 +189,7 @@ graph TD
 │                                                                 │
 │ 💡 Recommendations                                              │
 │ ├─ Enable parallel processing for TypeScript (+34% speed)     │
-│ ├─ Update ESLint config to skip node_modules (+89% speed)     │ 
+│ ├─ Update ESLint config to skip node_modules (+89% speed)     │
 │ └─ Consider file size limits for complex formatters           │
 │                                                                 │
 │ [D]etailed View [T]rends [E]rrors [R]ecommendations [Q]uit    │
@@ -186,6 +197,7 @@ graph TD
 ```
 
 #### Detailed Performance View
+
 ```bash
 ╭─ Detailed Performance Analysis ─────────────────────────────────╮
 │                                                                 │
@@ -219,6 +231,7 @@ graph TD
 ```
 
 #### Team Productivity View
+
 ```bash
 ╭─ Team Productivity Analytics ───────────────────────────────────╮
 │                                                                 │
@@ -257,12 +270,13 @@ graph TD
 ### Command Line Interface
 
 #### Quick Status Command
+
 ```bash
 $ smart-treefmt --analytics
 
 📊 Quick Performance Summary:
 ├─ Last Run: 0.84s (↓12% vs avg)
-├─ Success Rate: 99.7% 
+├─ Success Rate: 99.7%
 ├─ Files Processed: 47
 └─ Issues Fixed: 23
 
@@ -270,6 +284,7 @@ $ smart-treefmt --analytics
 ```
 
 #### Detailed Analytics Command
+
 ```bash
 $ smart-treefmt --analytics --detailed --period=7d
 
@@ -289,7 +304,7 @@ Quality:
 
 Trends:
 ├─ Speed: +12% improvement
-├─ Quality: +3% improvement  
+├─ Quality: +3% improvement
 └─ Usage: +23% more files formatted
 
 Recommendations:
@@ -301,9 +316,10 @@ Recommendations:
 ### Web Interface (Optional)
 
 #### Dashboard Features
+
 - **Interactive Charts**: Drill down into performance data
 - **Team Collaboration**: Share insights and reports
-- **Export Capabilities**: PDF reports, CSV data exports  
+- **Export Capabilities**: PDF reports, CSV data exports
 - **Real-time Updates**: Live performance monitoring
 - **Custom Views**: Create personalized dashboard layouts
 
@@ -314,29 +330,30 @@ Recommendations:
 ### Data Collection Layer
 
 #### Performance Telemetry
+
 ```typescript
 interface PerformanceTelemetry {
   timestamp: Date;
   sessionId: string;
   userId?: string;
   projectId: string;
-  
+
   // Performance Metrics
   formatTime: number;
   fileCount: number;
   totalLines: number;
   memoryUsage: number;
   cpuUsage: number;
-  
+
   // Formatter Details
   formatters: FormatterMetrics[];
-  
+
   // File Information
   files: FileMetrics[];
-  
+
   // Environment
   environment: EnvironmentInfo;
-  
+
   // Errors & Warnings
   errors: ErrorMetrics[];
   warnings: WarningMetrics[];
@@ -365,6 +382,7 @@ interface FileMetrics {
 ```
 
 #### Data Storage Schema
+
 ```sql
 -- Performance Sessions
 CREATE TABLE performance_sessions (
@@ -411,74 +429,76 @@ CREATE INDEX idx_file_language ON file_performance(language);
 ### Analytics Engine
 
 #### Data Processing Pipeline
+
 ```typescript
 class AnalyticsEngine {
   private dataStore: DataStore;
   private aggregator: MetricsAggregator;
   private predictor: PerformancePredictor;
-  
+
   async processSession(telemetry: PerformanceTelemetry): Promise<void> {
     // Store raw data
     await this.dataStore.insert(telemetry);
-    
+
     // Update aggregated metrics
     await this.aggregator.updateMetrics(telemetry);
-    
+
     // Update predictive models
     await this.predictor.updateModels(telemetry);
-    
+
     // Check for anomalies
     await this.detectAnomalies(telemetry);
-    
+
     // Generate alerts if needed
     await this.checkAlerts(telemetry);
   }
-  
+
   async generateInsights(
-    projectId: string, 
-    timeRange: TimeRange
+    projectId: string,
+    timeRange: TimeRange,
   ): Promise<Insights> {
     const metrics = await this.aggregator.getMetrics(projectId, timeRange);
     const trends = await this.calculateTrends(metrics);
     const recommendations = await this.generateRecommendations(metrics);
-    
+
     return {
       metrics,
       trends,
       recommendations,
-      anomalies: await this.getAnomalies(projectId, timeRange)
+      anomalies: await this.getAnomalies(projectId, timeRange),
     };
   }
 }
 ```
 
 #### Real-time Metrics Aggregation
+
 ```typescript
 class MetricsAggregator {
   async updateMetrics(telemetry: PerformanceTelemetry): Promise<void> {
-    const timeWindows = ['1h', '24h', '7d', '30d'];
-    
+    const timeWindows = ["1h", "24h", "7d", "30d"];
+
     for (const window of timeWindows) {
       await this.updateTimeWindow(telemetry, window);
     }
   }
-  
+
   private async updateTimeWindow(
-    telemetry: PerformanceTelemetry, 
-    window: string
+    telemetry: PerformanceTelemetry,
+    window: string,
   ): Promise<void> {
     // Update rolling averages
     await this.updateRollingAverage(
       `avg_format_time_${window}`,
-      telemetry.formatTime
+      telemetry.formatTime,
     );
-    
+
     // Update percentiles
     await this.updatePercentiles(
       `format_time_percentiles_${window}`,
-      telemetry.formatTime
+      telemetry.formatTime,
     );
-    
+
     // Update counters
     await this.incrementCounter(`total_files_${window}`, telemetry.fileCount);
     await this.incrementCounter(`total_sessions_${window}`, 1);
@@ -489,82 +509,90 @@ class MetricsAggregator {
 ### Visualization Engine
 
 #### Terminal Dashboard Renderer
+
 ```typescript
 class TerminalDashboard {
   private blessed: any;
   private screen: any;
-  
+
   constructor() {
-    this.blessed = require('blessed');
+    this.blessed = require("blessed");
     this.screen = this.blessed.screen({
       smartCSR: true,
-      title: 'Treefmt Performance Analytics'
+      title: "Treefmt Performance Analytics",
     });
   }
-  
+
   render(insights: Insights): void {
     this.screen.destroy();
     this.screen = this.blessed.screen({
       smartCSR: true,
-      title: 'Treefmt Performance Analytics'
+      title: "Treefmt Performance Analytics",
     });
-    
+
     this.renderHeader(insights);
     this.renderPerformanceOverview(insights.metrics);
     this.renderTrends(insights.trends);
     this.renderRecommendations(insights.recommendations);
     this.renderFooter();
-    
+
     this.screen.render();
   }
-  
+
   private renderPerformanceChart(data: number[]): string {
     // ASCII chart generation
     const maxValue = Math.max(...data);
     const chartHeight = 10;
-    
-    return data.map(value => {
-      const normalized = (value / maxValue) * chartHeight;
-      return '█'.repeat(Math.floor(normalized));
-    }).join('\n');
+
+    return data
+      .map((value) => {
+        const normalized = (value / maxValue) * chartHeight;
+        return "█".repeat(Math.floor(normalized));
+      })
+      .join("\n");
   }
 }
 ```
 
 #### Chart Generation
+
 ```typescript
 class ChartGenerator {
   generateSparkline(data: number[], width: number = 50): string {
-    const sparkChars = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+    const sparkChars = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
     const max = Math.max(...data);
     const min = Math.min(...data);
     const range = max - min;
-    
-    return data.map(value => {
-      if (range === 0) return sparkChars[0];
-      const normalized = (value - min) / range;
-      const index = Math.floor(normalized * (sparkChars.length - 1));
-      return sparkChars[index];
-    }).join('');
+
+    return data
+      .map((value) => {
+        if (range === 0) return sparkChars[0];
+        const normalized = (value - min) / range;
+        const index = Math.floor(normalized * (sparkChars.length - 1));
+        return sparkChars[index];
+      })
+      .join("");
   }
-  
+
   generateBarChart(
     data: { label: string; value: number }[],
-    width: number = 40
+    width: number = 40,
   ): string {
-    const maxValue = Math.max(...data.map(d => d.value));
-    
-    return data.map(({ label, value }) => {
-      const barLength = Math.floor((value / maxValue) * width);
-      const bar = '█'.repeat(barLength) + '░'.repeat(width - barLength);
-      return `${label.padEnd(12)} ${bar} ${value}`;
-    }).join('\n');
+    const maxValue = Math.max(...data.map((d) => d.value));
+
+    return data
+      .map(({ label, value }) => {
+        const barLength = Math.floor((value / maxValue) * width);
+        const bar = "█".repeat(barLength) + "░".repeat(width - barLength);
+        return `${label.padEnd(12)} ${bar} ${value}`;
+      })
+      .join("\n");
   }
-  
+
   generateTrendIndicator(current: number, previous: number): string {
     const change = ((current - previous) / previous) * 100;
-    const indicator = change > 0 ? '↑' : change < 0 ? '↓' : '→';
-    const color = change > 0 ? 'green' : change < 0 ? 'red' : 'yellow';
+    const indicator = change > 0 ? "↑" : change < 0 ? "↓" : "→";
+    const color = change > 0 ? "green" : change < 0 ? "red" : "yellow";
     return `${indicator} ${Math.abs(change).toFixed(1)}%`;
   }
 }
@@ -577,44 +605,46 @@ class ChartGenerator {
 ### Data Protection Principles
 
 #### Privacy by Design
+
 ```typescript
 interface PrivacyConfig {
-  collectPersonalData: boolean;           // Default: false
-  anonymizeUserIds: boolean;              // Default: true
-  encryptLocalStorage: boolean;           // Default: true
-  shareWithTeam: 'none' | 'aggregated' | 'full'; // Default: 'aggregated'
-  retentionPeriod: number;                // Default: 30 days
+  collectPersonalData: boolean; // Default: false
+  anonymizeUserIds: boolean; // Default: true
+  encryptLocalStorage: boolean; // Default: true
+  shareWithTeam: "none" | "aggregated" | "full"; // Default: 'aggregated'
+  retentionPeriod: number; // Default: 30 days
   exportControls: ExportPermissions;
 }
 
 class PrivacyManager {
   async collectTelemetry(
     data: PerformanceTelemetry,
-    config: PrivacyConfig
+    config: PrivacyConfig,
   ): Promise<PerformanceTelemetry> {
     if (!config.collectPersonalData) {
       data.userId = undefined;
-      data.files = data.files.map(file => ({
+      data.files = data.files.map((file) => ({
         ...file,
-        path: this.anonymizePath(file.path)
+        path: this.anonymizePath(file.path),
       }));
     }
-    
+
     if (config.anonymizeUserIds && data.userId) {
       data.userId = this.hashUserId(data.userId);
     }
-    
+
     return data;
   }
-  
+
   private anonymizePath(path: string): string {
     // Replace sensitive path components with hashes
-    return path.replace(/\/[^\/]+\//g, '/****/');
+    return path.replace(/\/[^\/]+\//g, "/****/");
   }
 }
 ```
 
 #### Security Measures
+
 - **Local-first**: All sensitive data stored locally by default
 - **Encryption**: AES-256 encryption for local storage
 - **Anonymization**: User and file path anonymization options
@@ -626,6 +656,7 @@ class PrivacyManager {
 ## 📈 Implementation Roadmap
 
 ### Phase 1: Foundation (Month 1-2)
+
 ```bash
 Sprint 1 (Week 1-2): Core Data Collection
 ├─ Implement PerformanceTelemetry interface
@@ -643,6 +674,7 @@ Sprint 2 (Week 3-4): Basic Analytics
 ```
 
 ### Phase 2: Dashboard (Month 3-4)
+
 ```bash
 Sprint 3 (Week 5-6): Terminal UI
 ├─ Implement blessed-based dashboard
@@ -660,6 +692,7 @@ Sprint 4 (Week 7-8): Advanced Features
 ```
 
 ### Phase 3: Intelligence (Month 5-6)
+
 ```bash
 Sprint 5 (Week 9-10): Predictive Analytics
 ├─ Implement performance forecasting
@@ -681,18 +714,21 @@ Sprint 6 (Week 11-12): Integration & Polish
 ## 🎯 Success Metrics
 
 ### Technical KPIs
+
 - **Data Collection**: 99.9% uptime, <1ms overhead
 - **Dashboard Performance**: <100ms load time, 60fps updates
 - **Storage Efficiency**: <10MB per month per developer
 - **Analytics Accuracy**: ±2% error rate on performance metrics
 
 ### User Experience KPIs
+
 - **Adoption Rate**: 80% of teams using analytics within 30 days
 - **Engagement**: 70% of users check dashboard weekly
 - **Satisfaction**: 9.0+ NPS score for analytics features
 - **Value Delivery**: 25% average productivity improvement
 
 ### Business Impact KPIs
+
 - **Time Savings**: 40+ hours saved per team per month
 - **Quality Improvement**: 50% reduction in style-related discussions
 - **Onboarding Speed**: 75% faster new developer setup
@@ -703,18 +739,21 @@ Sprint 6 (Week 11-12): Integration & Polish
 ## 🔮 Future Enhancements
 
 ### Advanced AI Integration
+
 - **Code Quality Prediction**: ML models to predict code issues
 - **Smart Recommendations**: AI-powered optimization suggestions
 - **Automated Insights**: Natural language insights generation
 - **Anomaly Detection**: Advanced pattern recognition
 
 ### Enterprise Features
+
 - **Multi-organization Support**: Corporate hierarchy analytics
 - **Compliance Reporting**: Automated audit reports
 - **SLA Monitoring**: Performance SLA tracking
 - **Cost Analysis**: ROI and cost-benefit analysis
 
 ### Developer Experience
+
 - **IDE Integration**: Native analytics in popular editors
 - **Mobile Dashboard**: Performance monitoring on mobile
 - **Voice Alerts**: Audio notifications for critical issues

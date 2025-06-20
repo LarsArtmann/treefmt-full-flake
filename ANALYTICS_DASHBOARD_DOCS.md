@@ -33,7 +33,7 @@ $ ./smart-treefmt-analytics.sh --analytics-config
 
 Enable analytics collection? (y/N): y
 Project ID (default: treefmt-full-flake): my-project
-Collect personal data (file paths, user info)? (y/N): n  
+Collect personal data (file paths, user info)? (y/N): n
 Auto-launch dashboard after formatting? (y/N): y
 
 ✨ Configuration saved to ./.treefmt-analytics/config.json
@@ -72,19 +72,22 @@ Auto-launch dashboard after formatting? (y/N): y
 ### Key Metrics Displayed
 
 #### 🏃‍♂️ Performance Metrics
+
 - **Average Format Time**: Mean time to format files
-- **Median Format Time**: 50th percentile performance  
+- **Median Format Time**: 50th percentile performance
 - **95th Percentile**: Worst-case performance scenarios
 - **Files per Second**: Throughput measurements
 - **Success Rate**: Percentage of successful formatting operations
 
 #### 📈 Trend Analysis
+
 - **Performance Changes**: Week-over-week improvements/degradations
 - **Usage Patterns**: Peak hours and frequency analysis
 - **Quality Trends**: Style compliance over time
 - **Error Rate Tracking**: Failure pattern identification
 
 #### 🎯 Formatter Breakdown
+
 - **Individual Formatter Performance**: Time per formatter
 - **Usage Statistics**: Most/least used formatters
 - **Error Rates**: Formatter-specific failure analysis
@@ -99,24 +102,29 @@ Auto-launch dashboard after formatting? (y/N): y
 ```typescript
 // Analytics Collector - Data collection and storage
 class AnalyticsCollector {
-  collectTelemetry(telemetry: PerformanceTelemetry): Promise<void>
-  getAggregatedMetrics(projectId: string, days: number): AggregatedMetrics
-  exportData(projectId: string, format: 'json' | 'csv'): string
+  collectTelemetry(telemetry: PerformanceTelemetry): Promise<void>;
+  getAggregatedMetrics(projectId: string, days: number): AggregatedMetrics;
+  exportData(projectId: string, format: "json" | "csv"): string;
 }
 
 // Terminal Dashboard - Beautiful terminal UI (using terminal-kit)
 class TerminalDashboard {
-  start(): Promise<void>
-  updateDisplay(): Promise<void>
-  drawTable(x: number, y: number, data: string[][]): void
-  drawPerformanceChart(x: number, y: number, width: number, height: number): void
+  start(): Promise<void>;
+  updateDisplay(): Promise<void>;
+  drawTable(x: number, y: number, data: string[][]): void;
+  drawPerformanceChart(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+  ): void;
 }
 
 // Performance Monitor - Real-time tracking
 class PerformanceMonitor {
-  addFileMetrics(metrics: FileMetrics): void
-  addFormatterMetrics(metrics: FormatterMetrics): void
-  finalize(): Promise<void>
+  addFileMetrics(metrics: FileMetrics): void;
+  addFormatterMetrics(metrics: FormatterMetrics): void;
+  finalize(): Promise<void>;
 }
 ```
 
@@ -146,37 +154,41 @@ interface PerformanceTelemetry {
 
 ### Navigation Keys
 
-| Key | Action | Description |
-|-----|--------|-------------|
-| `1` or `O` | Overview | Main performance dashboard |
-| `2` or `D` | Detailed | Formatter breakdown view |
-| `3` or `T` | Trends | Historical trend analysis |
-| `4` or `M` | Team | Team productivity metrics |
-| `R` or `F5` | Refresh | Update all data |
-| `+` / `-` | Time Range | Adjust analysis period |
-| `Q` or `ESC` | Quit | Exit dashboard |
+| Key          | Action     | Description                |
+| ------------ | ---------- | -------------------------- |
+| `1` or `O`   | Overview   | Main performance dashboard |
+| `2` or `D`   | Detailed   | Formatter breakdown view   |
+| `3` or `T`   | Trends     | Historical trend analysis  |
+| `4` or `M`   | Team       | Team productivity metrics  |
+| `R` or `F5`  | Refresh    | Update all data            |
+| `+` / `-`    | Time Range | Adjust analysis period     |
+| `Q` or `ESC` | Quit       | Exit dashboard             |
 
 ### View Modes
 
 #### 1. Overview Mode
+
 - **Performance summary** with key metrics
 - **Trend visualization** using ASCII charts
 - **Top issues** and recommendations
 - **Quick insights** for immediate action
 
 #### 2. Detailed Mode
+
 - **Formatter breakdown** with execution times
 - **File type performance** analysis
 - **Slowest files** identification
 - **Optimization opportunities** listing
 
 #### 3. Trends Mode
+
 - **Historical performance** over time
 - **Pattern recognition** for usage
 - **Seasonal analysis** of formatting activity
 - **Predictive insights** for future performance
 
 #### 4. Team Mode
+
 - **Multi-developer** productivity metrics
 - **Team performance** comparisons
 - **Collaboration insights** and patterns
@@ -240,11 +252,13 @@ bun run dashboard my-project              # Launch dashboard
 #### Data Collection Levels
 
 1. **Essential Only** (Default)
+
    - Performance metrics only
    - Anonymized file paths
    - No personal information
 
 2. **Enhanced Analytics**
+
    - Full file paths
    - Git branch/commit info
    - User identification
@@ -258,15 +272,15 @@ bun run dashboard my-project              # Launch dashboard
 
 ```typescript
 // Path anonymization
-"/Users/john/project/src/components/App.tsx" 
+"/Users/john/project/src/components/App.tsx"
 → "/dir_XXXX/dir_YYYY/src/components/file_ZZZZ.tsx"
 
 // User ID hashing
-"john.doe@company.com" 
+"john.doe@company.com"
 → "a1b2c3d4e5f6g7h8"
 
 // Git info sanitization
-"feature/user-authentication" 
+"feature/user-authentication"
 → "feature/branch_XXXX"
 ```
 
@@ -277,34 +291,39 @@ bun run dashboard my-project              # Launch dashboard
 ### Performance Metrics
 
 #### Format Time
+
 - **Definition**: Total time from start to completion of formatting
 - **Includes**: File discovery, formatter execution, file writing
 - **Excludes**: Initial treefmt startup time
 - **Typical Range**: 100ms - 5s depending on project size
 
 #### Success Rate
+
 - **Calculation**: (Successful formats / Total attempts) × 100
 - **Success Criteria**: No errors, file successfully modified
 - **Target**: >99% for stable configurations
 - **Common Issues**: Syntax errors, permission problems
 
 #### Files Per Second
+
 - **Calculation**: Total files / Total time in seconds
 - **Factors**: File size, formatter complexity, system performance
-- **Benchmarks**: 
+- **Benchmarks**:
   - Fast: >50 files/sec
-  - Good: 20-50 files/sec  
+  - Good: 20-50 files/sec
   - Slow: <20 files/sec
 
 ### Quality Metrics
 
 #### Error Rate
+
 - **Types**: Syntax errors, formatter crashes, permission denied
 - **Tracking**: By formatter, file type, and time period
 - **Alerts**: Automatic notification when >5% error rate
 - **Resolution**: Detailed error logs and suggestions
 
 #### Consistency Score
+
 - **Measurement**: Adherence to configured style rules
 - **Calculation**: Based on changes made during formatting
 - **Improvement**: Tracks reduction in style violations over time
@@ -378,6 +397,7 @@ Recommendations:
 ### Data Protection
 
 #### Local-First Architecture
+
 - **Primary Storage**: Local SQLite database
 - **Encryption**: AES-256 for sensitive data
 - **Retention**: Configurable data lifecycle (default: 30 days)
@@ -388,7 +408,7 @@ Recommendations:
 ```bash
 Privacy Configuration:
 ├─ Personal Data Collection: Disabled by default
-├─ Path Anonymization: Enabled by default  
+├─ Path Anonymization: Enabled by default
 ├─ User ID Hashing: Enabled when user tracking active
 ├─ Team Sharing: Aggregated metrics only
 └─ Export Controls: Redacted sensitive information
@@ -438,15 +458,15 @@ bun run analytics team-summary
 ```typescript
 // Create custom dashboard views
 const customDashboard = new TerminalDashboard(collector, {
-  projectId: 'my-project',
+  projectId: "my-project",
   timeRange: 30,
-  theme: 'light',
+  theme: "light",
   customPanels: [
-    'performance-overview',
-    'formatter-comparison', 
-    'error-analysis',
-    'team-productivity'
-  ]
+    "performance-overview",
+    "formatter-comparison",
+    "error-analysis",
+    "team-productivity",
+  ],
 });
 ```
 
@@ -458,19 +478,19 @@ const customDashboard = new TerminalDashboard(collector, {
 
 ```typescript
 class AnalyticsCollector {
-  constructor(dataDir?: string, config?: PrivacyConfig)
-  
+  constructor(dataDir?: string, config?: PrivacyConfig);
+
   // Data Collection
-  async collectTelemetry(telemetry: PerformanceTelemetry): Promise<void>
-  
+  async collectTelemetry(telemetry: PerformanceTelemetry): Promise<void>;
+
   // Data Retrieval
-  getAggregatedMetrics(projectId: string, days?: number): AggregatedMetrics
-  
+  getAggregatedMetrics(projectId: string, days?: number): AggregatedMetrics;
+
   // Data Export
-  exportData(projectId: string, format?: 'json' | 'csv', days?: number): string
-  
+  exportData(projectId: string, format?: "json" | "csv", days?: number): string;
+
   // Cleanup
-  close(): void
+  close(): void;
 }
 ```
 
@@ -478,16 +498,16 @@ class AnalyticsCollector {
 
 ```typescript
 class PerformanceMonitor {
-  constructor(collector: AnalyticsCollector, projectId: string)
-  
+  constructor(collector: AnalyticsCollector, projectId: string);
+
   // Metric Tracking
-  addFileMetrics(metrics: FileMetrics): void
-  addFormatterMetrics(metrics: FormatterMetrics): void
-  addError(error: ErrorMetrics): void
-  addWarning(warning: WarningMetrics): void
-  
+  addFileMetrics(metrics: FileMetrics): void;
+  addFormatterMetrics(metrics: FormatterMetrics): void;
+  addError(error: ErrorMetrics): void;
+  addWarning(warning: WarningMetrics): void;
+
   // Session Management
-  async finalize(): Promise<void>
+  async finalize(): Promise<void>;
 }
 ```
 
@@ -495,15 +515,15 @@ class PerformanceMonitor {
 
 ```typescript
 class TerminalDashboard {
-  constructor(collector: AnalyticsCollector, config?: DashboardConfig)
-  
+  constructor(collector: AnalyticsCollector, config?: DashboardConfig);
+
   // Lifecycle
-  async start(): Promise<void>
-  stop(): void
-  
+  async start(): Promise<void>;
+  stop(): void;
+
   // Display Control
-  private async updateDisplay(): Promise<void>
-  private renderCharts(data: ChartData): string
+  private async updateDisplay(): Promise<void>;
+  private renderCharts(data: ChartData): string;
 }
 ```
 
@@ -547,7 +567,7 @@ bun run analytics team-summary 7
   run: |
     ./smart-treefmt-analytics.sh --check
     ./smart-treefmt-analytics.sh --analytics-export json > format-metrics.json
-    
+
 - name: Upload Analytics
   uses: actions/upload-artifact@v3
   with:
@@ -580,6 +600,7 @@ fi
 ### Configuration Recommendations
 
 #### For Individual Developers
+
 ```json
 {
   "enableAnalytics": true,
@@ -591,6 +612,7 @@ fi
 ```
 
 #### For Teams
+
 ```json
 {
   "enableAnalytics": true,
@@ -602,6 +624,7 @@ fi
 ```
 
 #### For Organizations
+
 ```json
 {
   "enableAnalytics": true,
@@ -623,7 +646,7 @@ fi
 ### Team Collaboration Guidelines
 
 1. **Share Aggregated Metrics**: Preserve individual privacy
-2. **Weekly Performance Reviews**: Track team improvements  
+2. **Weekly Performance Reviews**: Track team improvements
 3. **Standardize Configurations**: Reduce setup friction
 4. **Document Best Practices**: Share optimization discoveries
 5. **Celebrate Improvements**: Recognize performance gains
@@ -635,18 +658,21 @@ fi
 ### Planned Features
 
 #### Phase 1: Enhanced Analytics (Next 3 months)
+
 - **Predictive Performance Modeling**: ML-powered forecasting
 - **Advanced Anomaly Detection**: Automatic issue identification
 - **Custom Alert System**: Configurable performance thresholds
 - **Enhanced Team Features**: Real-time collaboration metrics
 
 #### Phase 2: Cloud Integration (3-6 months)
+
 - **Cloud Dashboard**: Web-based analytics interface
 - **Team Synchronization**: Real-time metric sharing
 - **Enterprise Features**: SSO, RBAC, audit logs
 - **API Platform**: RESTful analytics API
 
 #### Phase 3: AI-Powered Insights (6-12 months)
+
 - **Smart Recommendations**: AI-generated optimization suggestions
 - **Code Quality Prediction**: ML models for quality forecasting
 - **Automated Configuration**: Self-optimizing formatter settings
@@ -668,6 +694,7 @@ The analytics dashboard is designed to be extensible and welcomes contributions:
 ### Common Issues
 
 #### Dashboard Won't Start
+
 ```bash
 # Check dependencies
 bun --version
@@ -681,6 +708,7 @@ chmod +x smart-treefmt-analytics.sh
 ```
 
 #### Analytics Not Collecting
+
 ```bash
 # Verify configuration
 ./smart-treefmt-analytics.sh --analytics-status
@@ -693,6 +721,7 @@ DEBUG=1 ./smart-treefmt-analytics.sh .
 ```
 
 #### Performance Issues
+
 ```bash
 # Check database size
 du -sh .treefmt-analytics/
@@ -706,12 +735,12 @@ sqlite3 .treefmt-analytics/analytics.db "VACUUM;"
 
 ### Error Messages
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| `Analytics collector not found` | Missing TypeScript files | Run `bun install` |
-| `Permission denied` | Script not executable | Run `chmod +x smart-treefmt-analytics.sh` |
-| `Database locked` | Concurrent access | Wait and retry |
-| `Memory error` | Large dataset | Reduce retention period |
+| Error                           | Cause                    | Solution                                  |
+| ------------------------------- | ------------------------ | ----------------------------------------- |
+| `Analytics collector not found` | Missing TypeScript files | Run `bun install`                         |
+| `Permission denied`             | Script not executable    | Run `chmod +x smart-treefmt-analytics.sh` |
+| `Database locked`               | Concurrent access        | Wait and retry                            |
+| `Memory error`                  | Large dataset            | Reduce retention period                   |
 
 ### Debug Mode
 

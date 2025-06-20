@@ -71,6 +71,7 @@ treefmt-full-flake/
 5. **Update templates** if the formatter is commonly needed
 
 Example formatter module structure:
+
 ```nix
 { config, lib, ... }:
 {
@@ -137,6 +138,7 @@ Test your changes with a real project:
 ### Pull Request Process
 
 1. **Create a feature branch** from main:
+
    ```bash
    git checkout -b feature/my-improvement
    ```
@@ -144,6 +146,7 @@ Test your changes with a real project:
 2. **Make your changes** following the guidelines above
 
 3. **Test thoroughly**:
+
    ```bash
    nix flake check
    nix fmt
@@ -151,12 +154,14 @@ Test your changes with a real project:
    ```
 
 4. **Commit with clear messages**:
+
    ```bash
    git add .
    git commit -m "feat: add support for new language formatter"
    ```
 
 5. **Push to your fork**:
+
    ```bash
    git push origin feature/my-improvement
    ```
@@ -174,6 +179,7 @@ Test your changes with a real project:
 ### Commit Message Format
 
 Use conventional commits format:
+
 - `feat:` for new features
 - `fix:` for bug fixes
 - `docs:` for documentation changes
@@ -184,7 +190,7 @@ Use conventional commits format:
 ## Getting Help
 
 - **Questions**: Open a GitHub issue with the "question" label
-- **Bugs**: Open a GitHub issue with the "bug" label  
+- **Bugs**: Open a GitHub issue with the "bug" label
 - **Feature requests**: Open a GitHub issue with the "enhancement" label
 - **Discussions**: Use GitHub Discussions for general topics
 

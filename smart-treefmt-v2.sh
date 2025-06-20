@@ -101,7 +101,7 @@ start_spinner() {
     local i=0
     while true; do
       printf "\r${CYAN}%s${NC} %s" "${SPINNER_FRAMES[$i]}" "$message"
-      i=$(( (i + 1) % ${#SPINNER_FRAMES[@]} ))
+      i=$(((i + 1) % ${#SPINNER_FRAMES[@]}))
       sleep 0.1
     done
   ) &
@@ -133,12 +133,12 @@ read_cache() {
   local key=$1
   local cache_file
   cache_file=$(get_cache_file "$key")
-  
+
   if [[ $NO_CACHE == true ]]; then
     verbose "Cache disabled, skipping read for $key"
     return 1
   fi
-  
+
   if [[ -f $cache_file ]]; then
     local age
     age=$(($(date +%s) - $(stat -f%m "$cache_file" 2>/dev/null || stat -c%Y "$cache_file" 2>/dev/null || echo 0)))
@@ -162,7 +162,7 @@ write_cache() {
   ensure_cache_dir
   local cache_file
   cache_file=$(get_cache_file "$key")
-  echo "$value" > "$cache_file"
+  echo "$value" >"$cache_file"
   verbose "Cached $key"
 }
 
@@ -171,27 +171,27 @@ prompt_yes_no() {
   local prompt=$1
   local default=${2:-n}
   local response
-  
+
   if [[ $default == "y" ]]; then
     prompt="$prompt [Y/n]: "
   else
     prompt="$prompt [y/N]: "
   fi
-  
+
   if [[ $INTERACTIVE == false ]] && [[ $AUTO_FIX == false ]]; then
     return 1
   fi
-  
+
   read -r -p "$prompt" response
   response=${response:-$default}
-  
+
   case "$response" in
-    [yY][eE][sS]|[yY])
-      return 0
-      ;;
-    *)
-      return 1
-      ;;
+  [yY][eE][sS] | [yY])
+    return 0
+    ;;
+  *)
+    return 1
+    ;;
   esac
 }
 
@@ -202,7 +202,7 @@ select_option() {
   local options=("$@")
   local selected=0
   local key
-  
+
   # Print menu
   echo "$prompt"
   for i in "${!options[@]}"; do
@@ -212,22 +212,22 @@ select_option() {
       echo "  ${options[$i]}"
     fi
   done
-  
+
   # Read user input
   while true; do
     read -r -s -n1 key
     case "$key" in
-      A) # Up arrow
-        selected=$(( (selected - 1 + ${#options[@]}) % ${#options[@]} ))
-        ;;
-      B) # Down arrow
-        selected=$(( (selected + 1) % ${#options[@]} ))
-        ;;
-      "") # Enter
-        return $selected
-        ;;
+    A) # Up arrow
+      selected=$(((selected - 1 + ${#options[@]}) % ${#options[@]}))
+      ;;
+    B) # Down arrow
+      selected=$(((selected + 1) % ${#options[@]}))
+      ;;
+    "") # Enter
+      return $selected
+      ;;
     esac
-    
+
     # Redraw menu
     printf "\033[${#options[@]}A" # Move cursor up
     for i in "${!options[@]}"; do
@@ -244,18 +244,18 @@ select_option() {
 find_treefmt_command() {
   local cache_key="treefmt_command_$(pwd | md5sum | cut -d' ' -f1)"
   local cached_command
-  
+
   # Try to read from cache first
   if cached_command=$(read_cache "$cache_key"); then
     TREEFMT_COMMAND="$cached_command"
     success "Found treefmt (cached): $TREEFMT_COMMAND"
     return 0
   fi
-  
+
   local attempts=()
-  
+
   start_spinner "Searching for treefmt..."
-  
+
   # 1. Check if running in Nix environment with treefmt
   if [[ -n ${IN_NIX_SHELL:-} ]] && command_exists treefmt; then
     TREEFMT_COMMAND="treefmt"
@@ -266,7 +266,7 @@ find_treefmt_command() {
   else
     attempts+=("Nix shell environment: not in Nix shell or treefmt not available")
   fi
-  
+
   # 2. Check for direnv/mise environments
   if [[ -f .envrc ]] && command_exists direnv; then
     verbose "Found .envrc, checking direnv environment"
@@ -280,7 +280,7 @@ find_treefmt_command() {
       attempts+=("direnv environment: .envrc found but treefmt not available")
     fi
   fi
-  
+
   if [[ -f .tool-versions ]] && command_exists mise; then
     verbose "Found .tool-versions, checking mise environment"
     if eval "$(mise env 2>/dev/null)" && command_exists treefmt; then
@@ -293,7 +293,7 @@ find_treefmt_command() {
       attempts+=("mise environment: .tool-versions found but treefmt not available")
     fi
   fi
-  
+
   # 3. Check for nix fmt command (preferred for flake-based projects)
   if command_exists nix && [[ -f "flake.nix" ]]; then
     if nix eval --impure --expr 'builtins.pathExists ./flake.nix' &>/dev/null; then
@@ -315,7 +315,7 @@ find_treefmt_command() {
       attempts+=("'nix fmt' command: no flake.nix found")
     fi
   fi
-  
+
   # 4. Check for ./result/bin/treefmt (nix build output)
   if [[ -x "./result/bin/treefmt" ]]; then
     TREEFMT_COMMAND="./result/bin/treefmt"
@@ -326,7 +326,7 @@ find_treefmt_command() {
   else
     attempts+=("Nix build result: ./result/bin/treefmt not found or not executable")
   fi
-  
+
   # 5. Check if treefmt is in PATH
   if command_exists treefmt; then
     TREEFMT_COMMAND="treefmt"
@@ -337,7 +337,7 @@ find_treefmt_command() {
   else
     attempts+=("System PATH: treefmt command not found")
   fi
-  
+
   # 6. Check common installation locations
   local common_paths=(
     "/usr/local/bin/treefmt"
@@ -346,7 +346,7 @@ find_treefmt_command() {
     "$HOME/.nix-profile/bin/treefmt"
     "/run/current-system/sw/bin/treefmt"
   )
-  
+
   for path in "${common_paths[@]}"; do
     if [[ -x $path ]]; then
       TREEFMT_COMMAND="$path"
@@ -358,9 +358,9 @@ find_treefmt_command() {
       attempts+=("Common location $path: not found or not executable")
     fi
   done
-  
+
   stop_spinner
-  
+
   # If we get here, treefmt was not found
   echo
   error "treefmt not found"
@@ -369,37 +369,37 @@ find_treefmt_command() {
   for attempt in "${attempts[@]}"; do
     failure "$attempt"
   done
-  
+
   # Auto-fix options
   if [[ $AUTO_FIX == true ]] || [[ $INTERACTIVE == true ]]; then
     echo
     print_color "$YELLOW" "${MAGIC} Auto-fix available!"
     echo
-    
+
     local fix_options=()
     local fix_commands=()
-    
+
     if [[ -f "flake.nix" ]] && command_exists nix; then
       fix_options+=("Enter Nix development shell (nix develop)")
       fix_commands+=("nix develop")
-      
+
       fix_options+=("Build treefmt with Nix (nix build)")
       fix_commands+=("nix build")
     fi
-    
+
     if command_exists nix; then
       fix_options+=("Install treefmt globally with Nix")
       fix_commands+=("nix-env -iA nixpkgs.treefmt")
     fi
-    
+
     if command_exists brew; then
       fix_options+=("Install treefmt with Homebrew")
       fix_commands+=("brew install treefmt")
     fi
-    
+
     fix_options+=("Skip auto-fix and exit")
     fix_commands+=("exit")
-    
+
     if [[ $INTERACTIVE == true ]]; then
       select_option "Select an auto-fix option:" "${fix_options[@]}"
       local selected=$?
@@ -407,13 +407,13 @@ find_treefmt_command() {
       # In auto-fix mode, try the first available option
       local selected=0
     fi
-    
+
     if [[ $selected -lt ${#fix_commands[@]} ]]; then
       local cmd="${fix_commands[$selected]}"
       if [[ $cmd == "exit" ]]; then
         return 1
       fi
-      
+
       info "Running: $cmd"
       if [[ $DRY_RUN == true ]]; then
         print_color "$YELLOW" "🏃 Would run: $cmd"
@@ -451,16 +451,16 @@ find_treefmt_command() {
     echo "  • https://github.com/numtide/treefmt"
     echo "  • https://github.com/LarsArtmann/treefmt-full-flake"
   fi
-  
+
   return 1
 }
 
 # Function to find treefmt configuration
 find_treefmt_config() {
   local attempts=()
-  
+
   verbose "Searching for treefmt configuration..."
-  
+
   # 1. Check for explicit config file argument
   for ((i = 0; i < ${#TREEFMT_ARGS[@]}; i++)); do
     if [[ ${TREEFMT_ARGS[i]} == "--config-file" ]] && [[ $((i + 1)) -lt ${#TREEFMT_ARGS[@]} ]]; then
@@ -474,28 +474,28 @@ find_treefmt_config() {
       fi
     fi
   done
-  
+
   # 2. Check for flake.nix (indicates Nix-based configuration)
   if [[ -f "flake.nix" ]] && grep -q "treefmt" "flake.nix" 2>/dev/null; then
     verbose "Found treefmt configuration in flake.nix"
     # Nix-based projects don't need explicit config file
     return 0
   fi
-  
+
   # 3. Check for treefmt.toml in current directory
   if [[ -f "treefmt.toml" ]]; then
     TREEFMT_CONFIG="treefmt.toml"
     verbose "Found treefmt.toml in current directory"
     return 0
   fi
-  
+
   # 4. Check for .treefmt.toml in current directory
   if [[ -f ".treefmt.toml" ]]; then
     TREEFMT_CONFIG=".treefmt.toml"
     verbose "Found .treefmt.toml in current directory"
     return 0
   fi
-  
+
   # 5. Search up the directory tree
   local dir="$PWD"
   while [[ $dir != "/" ]]; do
@@ -511,13 +511,13 @@ find_treefmt_config() {
     fi
     dir="$(dirname "$dir")"
   done
-  
+
   # Configuration not found, but that might be OK for Nix-based projects
   if [[ -f "flake.nix" ]]; then
     verbose "No explicit treefmt config file found, but flake.nix exists (may use Nix-based config)"
     return 0
   fi
-  
+
   # Warn about missing configuration
   warning "No treefmt configuration found"
   echo
@@ -525,7 +525,7 @@ find_treefmt_config() {
   failure "treefmt.toml or .treefmt.toml in current directory"
   failure "treefmt.toml or .treefmt.toml in parent directories"
   failure "treefmt configuration in flake.nix"
-  
+
   # Offer to generate configuration
   if [[ $GENERATE_CONFIG == true ]] || ([[ $INTERACTIVE == true ]] && prompt_yes_no "Would you like to generate a treefmt configuration?"); then
     generate_treefmt_config
@@ -543,14 +543,14 @@ find_treefmt_config() {
     echo "   ${BOLD}$0 --generate-config${NC}"
     echo
   fi
-  
+
   return 1
 }
 
 # Function to detect project languages
 detect_languages() {
   local languages=()
-  
+
   # Detect by file extensions
   find . -type f -name "*.nix" -not -path "*/.*" | head -1 >/dev/null 2>&1 && languages+=("nix")
   find . -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \) -not -path "*/node_modules/*" -not -path "*/.*" | head -1 >/dev/null 2>&1 && languages+=("javascript")
@@ -565,7 +565,7 @@ detect_languages() {
   find . -type f \( -name "*.c" -o -name "*.cpp" -o -name "*.cc" -o -name "*.h" -o -name "*.hpp" \) -not -path "*/.*" | head -1 >/dev/null 2>&1 && languages+=("c/c++")
   find . -type f -name "*.java" -not -path "*/.*" | head -1 >/dev/null 2>&1 && languages+=("java")
   find . -type f \( -name "*.html" -o -name "*.css" -o -name "*.scss" -o -name "*.less" \) -not -path "*/.*" | head -1 >/dev/null 2>&1 && languages+=("web")
-  
+
   echo "${languages[@]}"
 }
 
@@ -573,21 +573,21 @@ detect_languages() {
 generate_treefmt_config() {
   print_color "$MAGENTA" "${MAGIC} Configuration Generation Wizard"
   echo
-  
+
   start_spinner "Analyzing project structure..."
   local languages=($(detect_languages))
   stop_spinner
-  
+
   if [[ ${#languages[@]} -eq 0 ]]; then
     warning "No supported languages detected in the project"
     return 1
   fi
-  
+
   success "Detected languages: ${languages[*]}"
   echo
-  
+
   # Generate configuration
-  cat > treefmt.toml << EOF
+  cat >treefmt.toml <<EOF
 # Generated by smart-treefmt
 # https://github.com/LarsArtmann/treefmt-full-flake
 
@@ -603,12 +603,12 @@ excludes = [
 ]
 
 EOF
-  
+
   # Add formatters based on detected languages
   for lang in "${languages[@]}"; do
     case "$lang" in
-      nix)
-        cat >> treefmt.toml << EOF
+    nix)
+      cat >>treefmt.toml <<EOF
 [formatter.alejandra]
 command = "alejandra"
 includes = ["*.nix"]
@@ -624,9 +624,9 @@ includes = ["*.nix"]
 options = ["fix"]
 
 EOF
-        ;;
-      javascript)
-        cat >> treefmt.toml << EOF
+      ;;
+    javascript)
+      cat >>treefmt.toml <<EOF
 [formatter.prettier]
 command = "prettier"
 includes = ["*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs"]
@@ -638,9 +638,9 @@ includes = ["*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs"]
 options = ["--fix"]
 
 EOF
-        ;;
-      python)
-        cat >> treefmt.toml << EOF
+      ;;
+    python)
+      cat >>treefmt.toml <<EOF
 [formatter.black]
 command = "black"
 includes = ["*.py"]
@@ -655,17 +655,17 @@ includes = ["*.py"]
 options = ["check", "--fix"]
 
 EOF
-        ;;
-      rust)
-        cat >> treefmt.toml << EOF
+      ;;
+    rust)
+      cat >>treefmt.toml <<EOF
 [formatter.rustfmt]
 command = "rustfmt"
 includes = ["*.rs"]
 
 EOF
-        ;;
-      go)
-        cat >> treefmt.toml << EOF
+      ;;
+    go)
+      cat >>treefmt.toml <<EOF
 [formatter.gofmt]
 command = "gofmt"
 includes = ["*.go"]
@@ -677,9 +677,9 @@ includes = ["*.go"]
 options = ["-w"]
 
 EOF
-        ;;
-      shell)
-        cat >> treefmt.toml << EOF
+      ;;
+    shell)
+      cat >>treefmt.toml <<EOF
 [formatter.shfmt]
 command = "shfmt"
 includes = ["*.sh", "*.bash"]
@@ -690,48 +690,48 @@ command = "shellcheck"
 includes = ["*.sh", "*.bash"]
 
 EOF
-        ;;
-      yaml)
-        cat >> treefmt.toml << EOF
+      ;;
+    yaml)
+      cat >>treefmt.toml <<EOF
 [formatter.yamlfmt]
 command = "yamlfmt"
 includes = ["*.yml", "*.yaml"]
 
 EOF
-        ;;
-      markdown)
-        cat >> treefmt.toml << EOF
+      ;;
+    markdown)
+      cat >>treefmt.toml <<EOF
 [formatter.mdformat]
 command = "mdformat"
 includes = ["*.md"]
 options = ["--number"]
 
 EOF
-        ;;
-      json)
-        cat >> treefmt.toml << EOF
+      ;;
+    json)
+      cat >>treefmt.toml <<EOF
 [formatter.jsonfmt]
 command = "jsonfmt"
 includes = ["*.json"]
 
 EOF
-        ;;
-      toml)
-        cat >> treefmt.toml << EOF
+      ;;
+    toml)
+      cat >>treefmt.toml <<EOF
 [formatter.tomlfmt]
 command = "tomlfmt"
 includes = ["*.toml"]
 
 EOF
-        ;;
+      ;;
     esac
   done
-  
+
   success "Generated treefmt.toml with formatters for: ${languages[*]}"
   echo
   info "Note: You'll need to install the formatters used in this configuration."
   echo "For Nix users, consider using https://github.com/LarsArtmann/treefmt-full-flake"
-  
+
   TREEFMT_CONFIG="treefmt.toml"
   return 0
 }
@@ -739,14 +739,14 @@ EOF
 # Function to check for common issues
 check_common_issues() {
   verbose "Checking for common issues..."
-  
+
   # Check if in git repository
   if ! git rev-parse --git-dir >/dev/null 2>&1; then
     warning "Not in a git repository"
     echo "   Some treefmt features may not work correctly outside of a git repository."
     echo
   fi
-  
+
   # Check for .gitignore
   if [[ ! -f ".gitignore" ]]; then
     warning "No .gitignore file found"
@@ -758,9 +758,9 @@ check_common_issues() {
 # Function to detect project type and provide specific guidance
 detect_project_type() {
   verbose "Detecting project type..."
-  
+
   local project_types=()
-  
+
   # Detect various project types
   [[ -f "package.json" ]] && project_types+=("Node.js/npm")
   [[ -f "Cargo.toml" ]] && project_types+=("Rust/Cargo")
@@ -770,10 +770,10 @@ detect_project_type() {
   [[ -f "shell.nix" ]] || [[ -f "default.nix" ]] && project_types+=("Nix")
   [[ -f ".envrc" ]] && project_types+=("direnv")
   [[ -f ".tool-versions" ]] && project_types+=("asdf/mise")
-  
+
   if [[ ${#project_types[@]} -gt 0 ]]; then
     verbose "Detected project types: ${project_types[*]}"
-    
+
     # Provide project-specific tips
     if [[ " ${project_types[*]} " =~ " Nix Flake " ]] && [[ ! -f "flake.nix" ]]; then
       echo
@@ -789,17 +789,17 @@ check_for_updates() {
   if [[ $NO_CACHE == true ]]; then
     return
   fi
-  
+
   local cache_key="update_check"
   local last_check
-  
+
   # Only check once per day
   if last_check=$(read_cache "$cache_key"); then
     return
   fi
-  
+
   verbose "Checking for script updates..."
-  
+
   # Check GitHub for latest version
   local latest_version
   if latest_version=$(curl -s "$SCRIPT_URL" | grep -oP '(?<=readonly SCRIPT_VERSION=")[^"]+' 2>/dev/null); then
@@ -809,7 +809,7 @@ check_for_updates() {
       echo
     fi
   fi
-  
+
   # Cache the check
   write_cache "$cache_key" "$(date +%s)"
 }
@@ -817,10 +817,10 @@ check_for_updates() {
 # Function to update the script
 update_script() {
   info "Updating smart-treefmt..."
-  
+
   local temp_file
   temp_file=$(mktemp)
-  
+
   if curl -s -o "$temp_file" "$SCRIPT_URL"; then
     if chmod +x "$temp_file" && mv "$temp_file" "$0"; then
       success "Updated to latest version!"
@@ -842,14 +842,14 @@ log_history() {
   local action=$1
   local details=$2
   local history_dir="$CACHE_DIR/history"
-  
+
   mkdir -p "$history_dir"
-  
+
   local timestamp
   timestamp=$(date '+%Y-%m-%d %H:%M:%S')
   local history_file="$history_dir/$(date '+%Y-%m').log"
-  
-  echo "[$timestamp] $action - $details" >> "$history_file"
+
+  echo "[$timestamp] $action - $details" >>"$history_file"
   verbose "Logged to history: $action"
 }
 
@@ -857,30 +857,30 @@ log_history() {
 run_treefmt() {
   # Build the command
   local cmd=()
-  
+
   # Handle "nix fmt --" as a special case
   if [[ $TREEFMT_COMMAND == "nix fmt --" ]]; then
     cmd=("nix" "fmt" "--")
   else
     cmd=("$TREEFMT_COMMAND")
   fi
-  
+
   # Add config file if found and not using nix fmt
   if [[ -n $TREEFMT_CONFIG ]] && [[ $TREEFMT_COMMAND != "nix fmt --" ]]; then
     cmd+=("--config-file" "$TREEFMT_CONFIG")
   fi
-  
+
   # Add all arguments
   if [[ ${#TREEFMT_ARGS[@]} -gt 0 ]]; then
     cmd+=("${TREEFMT_ARGS[@]}")
   fi
-  
+
   # Show what we're running in verbose mode
   verbose "Executing: ${cmd[*]}"
-  
+
   # Log to history
   log_history "format" "command: ${cmd[*]}"
-  
+
   # Run the command
   if [[ $DRY_RUN == true ]]; then
     print_color "$YELLOW" "🏃 Would run: ${cmd[*]}"
@@ -890,19 +890,19 @@ run_treefmt() {
     if [[ ! " ${TREEFMT_ARGS[*]} " =~ " --fail-on-change " ]]; then
       start_spinner "Formatting files..."
     fi
-    
+
     # Execute the command, preserving the exit code
     set +e
     local output
     output=$("${cmd[@]}" 2>&1)
     local exit_code=$?
     set -e
-    
+
     stop_spinner
-    
+
     # Display output
     echo "$output"
-    
+
     # Handle specific exit codes
     case $exit_code in
     0)
@@ -939,14 +939,14 @@ run_treefmt() {
       log_history "format_error" "exit_code: $exit_code"
       ;;
     esac
-    
+
     return $exit_code
   fi
 }
 
 # Function to show usage
 usage() {
-  cat << EOF
+  cat <<EOF
 ${BOLD}smart-treefmt v${SCRIPT_VERSION}${NC} - Next-generation intelligent treefmt wrapper
 
 ${BOLD}USAGE:${NC}
@@ -1067,28 +1067,28 @@ done
 main() {
   print_color "$BOLD" "${ROBOT} Smart treefmt v${SCRIPT_VERSION} - Next-Gen Intelligent Code Formatter"
   echo
-  
+
   # Check for updates in background
   check_for_updates
-  
+
   # Find treefmt command
   if ! find_treefmt_command; then
     exit 1
   fi
-  
+
   echo
-  
+
   # Find configuration (optional)
   find_treefmt_config
-  
+
   # Check for common issues
   check_common_issues
-  
+
   # Detect project type for better guidance
   detect_project_type
-  
+
   echo
-  
+
   # Run treefmt
   run_treefmt
 }

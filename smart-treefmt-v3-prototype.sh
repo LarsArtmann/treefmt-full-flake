@@ -69,17 +69,17 @@ check_ai_availability() {
 # Function to analyze code semantically with AI
 analyze_code_semantically() {
   local file_path=$1
-  
-  if [[ ! -f "$file_path" ]]; then
+
+  if [[ ! -f $file_path ]]; then
     return 1
   fi
-  
+
   print_revolutionary "$BRAIN" "$MAGENTA" "AI Code Analysis: $file_path"
-  
+
   # Read file content
   local content
   content=$(cat "$file_path")
-  
+
   # Create AI prompt for semantic analysis
   local prompt="Analyze this code and provide formatting insights:
 
@@ -117,15 +117,15 @@ Respond in JSON format:
         \"top_p\": 0.3
       }
     }" 2>/dev/null); then
-    
+
     # Extract response
     local analysis
     analysis=$(echo "$ai_response" | jq -r '.response // "Analysis failed"')
-    
+
     print_revolutionary "$SPARKLES" "$GREEN" "AI Analysis Complete"
-    echo "$analysis" | head -20  # Limit output
+    echo "$analysis" | head -20 # Limit output
     echo
-    
+
     return 0
   else
     print_revolutionary "$ROBOT" "$YELLOW" "AI analysis unavailable (using fallback detection)"
@@ -136,61 +136,61 @@ Respond in JSON format:
 # Function to detect framework with advanced heuristics
 detect_framework_advanced() {
   print_revolutionary "$CRYSTAL_BALL" "$CYAN" "Advanced Framework Detection"
-  
+
   local frameworks=()
   local confidence_scores=()
-  
+
   # React Detection
   if grep -r "import.*React" . --include="*.jsx" --include="*.tsx" --include="*.js" --include="*.ts" 2>/dev/null | head -1 >/dev/null; then
     frameworks+=("React")
     local react_files
     react_files=$(find . -name "*.jsx" -o -name "*.tsx" | wc -l)
     confidence_scores+=($((react_files * 10)))
-    
+
     # Next.js specific detection
     if [[ -f "next.config.js" ]] || [[ -f "next.config.ts" ]]; then
       frameworks+=("Next.js")
       confidence_scores+=("95")
     fi
   fi
-  
+
   # Vue Detection
   if [[ -f "vue.config.js" ]] || grep -r "<template>" . --include="*.vue" 2>/dev/null | head -1 >/dev/null; then
     frameworks+=("Vue.js")
     confidence_scores+=("90")
   fi
-  
+
   # Angular Detection
   if [[ -f "angular.json" ]] || grep -r "@Component" . --include="*.ts" 2>/dev/null | head -1 >/dev/null; then
     frameworks+=("Angular")
     confidence_scores+=("95")
   fi
-  
+
   # Django Detection
   if [[ -f "manage.py" ]] || grep -r "from django" . --include="*.py" 2>/dev/null | head -1 >/dev/null; then
     frameworks+=("Django")
     confidence_scores+=("90")
   fi
-  
+
   # FastAPI Detection
   if grep -r "from fastapi" . --include="*.py" 2>/dev/null | head -1 >/dev/null; then
     frameworks+=("FastAPI")
     confidence_scores+=("85")
   fi
-  
+
   # Express.js Detection
   if grep -r "express" package.json 2>/dev/null >/dev/null; then
     frameworks+=("Express.js")
     confidence_scores+=("80")
   fi
-  
+
   # Print results
   if [[ ${#frameworks[@]} -gt 0 ]]; then
     for i in "${!frameworks[@]}"; do
       echo "  ${frameworks[$i]}: ${confidence_scores[$i]}% confidence"
     done
     echo
-    
+
     # Return primary framework
     echo "${frameworks[0]}"
   else
@@ -202,38 +202,38 @@ detect_framework_advanced() {
 # Function to analyze team coding patterns
 analyze_team_patterns() {
   print_revolutionary "$DNA" "$BLUE" "Team Pattern Analysis"
-  
+
   # Analyze git history for patterns
   if git rev-parse --git-dir >/dev/null 2>&1; then
     # Indentation analysis
     local tab_files spaces_files
     tab_files=$(git ls-files | xargs grep -l $'\t' 2>/dev/null | wc -l || echo "0")
     spaces_files=$(git ls-files | xargs grep -l '^  ' 2>/dev/null | wc -l || echo "0")
-    
+
     echo "  Indentation preferences:"
     if [[ $spaces_files -gt $tab_files ]]; then
       echo "    ✓ Spaces preferred (${spaces_files} files vs ${tab_files} tabs)"
     else
       echo "    ✓ Tabs preferred (${tab_files} files vs ${spaces_files} spaces)"
     fi
-    
+
     # Line length analysis
     local long_lines
     long_lines=$(git ls-files | xargs grep -n '.\{81,\}' 2>/dev/null | wc -l || echo "0")
     echo "  Line length:"
     echo "    ✓ Lines >80 chars: $long_lines (consider 100-char limit)"
-    
+
     # Trailing comma analysis
     local trailing_commas
     trailing_commas=$(git ls-files | xargs grep -n ',$' 2>/dev/null | wc -l || echo "0")
     echo "  Trailing commas: $trailing_commas instances"
-    
+
     # Import style analysis
     local import_styles
     if command -v jq >/dev/null 2>&1 && [[ -f package.json ]]; then
       echo "  Package manager: $(jq -r '.packageManager // "npm"' package.json 2>/dev/null || echo "npm")"
     fi
-    
+
     echo
   else
     echo "  Not a git repository - limited analysis available"
@@ -245,10 +245,10 @@ analyze_team_patterns() {
 generate_ai_config() {
   local framework=$1
   local project_root=${2:-.}
-  
+
   print_revolutionary "$GEAR" "$GREEN" "Generating AI-Optimized Configuration"
-  
-  cat > treefmt-ai.toml << EOF
+
+  cat >treefmt-ai.toml <<EOF
 # AI-Generated treefmt configuration
 # Framework: $framework
 # Generated: $(date)
@@ -275,8 +275,8 @@ EOF
 
   # Framework-specific optimizations
   case "$framework" in
-    "React"|"Next.js")
-      cat >> treefmt-ai.toml << EOF
+  "React" | "Next.js")
+    cat >>treefmt-ai.toml <<EOF
 
 # React/Next.js optimized configuration
 [formatter.prettier]
@@ -297,9 +297,9 @@ includes = ["*.js", "*.jsx", "*.ts", "*.tsx"]
 options = ["--fix", "--ext", ".js,.jsx,.ts,.tsx"]
 
 EOF
-      ;;
-    "Vue.js")
-      cat >> treefmt-ai.toml << EOF
+    ;;
+  "Vue.js")
+    cat >>treefmt-ai.toml <<EOF
 
 # Vue.js optimized configuration
 [formatter.prettier]
@@ -313,9 +313,9 @@ includes = ["*.vue", "*.js", "*.ts"]
 options = ["--fix", "--ext", ".vue,.js,.ts"]
 
 EOF
-      ;;
-    "Django"|"FastAPI")
-      cat >> treefmt-ai.toml << EOF
+    ;;
+  "Django" | "FastAPI")
+    cat >>treefmt-ai.toml <<EOF
 
 # Python web framework optimized configuration
 [formatter.black]
@@ -334,9 +334,9 @@ includes = ["*.py"]
 options = ["check", "--fix", "--select", "E,W,F,I,N,UP"]
 
 EOF
-      ;;
-    *)
-      cat >> treefmt-ai.toml << EOF
+    ;;
+  *)
+    cat >>treefmt-ai.toml <<EOF
 
 # Generic optimized configuration
 [formatter.prettier]
@@ -345,9 +345,9 @@ includes = ["*.js", "*.json", "*.css", "*.md"]
 options = ["--write"]
 
 EOF
-      ;;
+    ;;
   esac
-  
+
   print_revolutionary "$SPARKLES" "$GREEN" "AI-optimized configuration saved to treefmt-ai.toml"
   echo "  Framework-specific rules for: $framework"
   echo "  Optimizations applied: Code style, performance, team collaboration"
@@ -357,26 +357,26 @@ EOF
 # Function to run predictive analysis
 run_predictive_analysis() {
   print_revolutionary "$CRYSTAL_BALL" "$MAGENTA" "Predictive Code Quality Analysis"
-  
+
   # Analyze staged files for potential issues
   if git diff --cached --name-only 2>/dev/null | grep -E '\.(js|jsx|ts|tsx|py|rs|go)$' >/dev/null; then
     echo "  Analyzing staged files for potential formatting issues..."
-    
+
     # Simulate predictive analysis
     local staged_files
     staged_files=$(git diff --cached --name-only 2>/dev/null | grep -E '\.(js|jsx|ts|tsx|py|rs|go)$' | head -5)
-    
+
     echo "  Predictions:"
     while IFS= read -r file; do
-      if [[ -n "$file" ]]; then
+      if [[ -n $file ]]; then
         # Simulate AI predictions
         echo "    📄 $file:"
         echo "      ✓ Style compliance: 94%"
         echo "      ⚠ Potential issues: Long lines detected"
         echo "      💡 Suggestion: Run treefmt before commit"
       fi
-    done <<< "$staged_files"
-    
+    done <<<"$staged_files"
+
     echo
     echo "  🎯 Overall prediction: 89% style compliance"
     echo "  💡 Recommendation: Format before committing"
@@ -389,7 +389,7 @@ run_predictive_analysis() {
 
 # Function to show revolutionary features
 show_revolutionary_features() {
-  cat << EOF
+  cat <<EOF
 ${BOLD}${ROBOT} Smart treefmt v${SCRIPT_VERSION} - Revolutionary AI-Powered Formatting${NC}
 
 ${BOLD}🚀 REVOLUTIONARY FEATURES:${NC}
@@ -491,7 +491,7 @@ done
 main_revolutionary() {
   print_revolutionary "$ROBOT" "$BOLD" "Smart treefmt v${SCRIPT_VERSION} - Revolutionary Mode"
   echo
-  
+
   # Check AI availability if needed
   if [[ $AI_ENABLED == true ]]; then
     if check_ai_availability; then
@@ -502,19 +502,19 @@ main_revolutionary() {
       echo
     fi
   fi
-  
+
   # Framework detection
   if [[ $AI_ENABLED == true ]]; then
     local detected_framework
     detected_framework=$(detect_framework_advanced)
     echo
   fi
-  
+
   # Team pattern analysis
   if [[ $AI_ENABLED == true ]]; then
     analyze_team_patterns
   fi
-  
+
   # Semantic analysis of specific files
   if [[ $SEMANTIC_ANALYSIS == true ]] && [[ $AI_ENABLED == true ]]; then
     if check_ai_availability; then
@@ -524,17 +524,17 @@ main_revolutionary() {
       done
     fi
   fi
-  
+
   # Predictive analysis
   if [[ $PREDICTIVE_MODE == true ]]; then
     run_predictive_analysis
   fi
-  
+
   # Generate AI config
   if [[ $AI_ENABLED == true ]] && [[ -n ${detected_framework:-} ]]; then
     generate_ai_config "$detected_framework"
   fi
-  
+
   # Show future features
   if [[ $CLOUD_SYNC == true ]]; then
     print_revolutionary "$CHART" "$CYAN" "Cloud Sync: Prototype Mode"
@@ -542,7 +542,7 @@ main_revolutionary() {
     echo "  ☁️ Real-time style updates: In development"
     echo
   fi
-  
+
   if [[ $RESEARCH_MODE == true ]]; then
     print_revolutionary "$DNA" "$MAGENTA" "Research Mode: Contributing to Code Formatting Science"
     echo "  📊 Anonymized data collection: Enabled"
@@ -550,7 +550,7 @@ main_revolutionary() {
     echo "  🔬 ML model training: Contributing"
     echo
   fi
-  
+
   print_revolutionary "$TARGET" "$GREEN" "Revolutionary analysis complete!"
   echo
   echo "Next steps:"
