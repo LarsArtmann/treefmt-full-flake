@@ -4,21 +4,21 @@ on:
   push:
     branches: [master, main]
     paths:
-      - 'templates/**'
-      - 'formatters/**'
-      - 'flake-module.nix'
-      - 'flake.nix'
-      - 'tests/templates/**'
-      - '.github/workflows/test-templates.yml'
+      - "templates/**"
+      - "formatters/**"
+      - "flake-module.nix"
+      - "flake.nix"
+      - "tests/templates/**"
+      - ".github/workflows/test-templates.yml"
   pull_request:
     branches: [master, main]
     paths:
-      - 'templates/**'
-      - 'formatters/**'
-      - 'flake-module.nix'
-      - 'flake.nix'
-      - 'tests/templates/**'
-      - '.github/workflows/test-templates.yml'
+      - "templates/**"
+      - "formatters/**"
+      - "flake-module.nix"
+      - "flake.nix"
+      - "tests/templates/**"
+      - ".github/workflows/test-templates.yml"
   workflow_dispatch:
 
 jobs:
@@ -30,21 +30,21 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v14
         with:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-      
+
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
-      
+
       - name: Setup CI environment
         run: |
           ./tests/setup-ci.sh
-      
+
       - name: Run minimal template test
         run: |
           echo "Testing minimal template on ${{ matrix.os }}"
@@ -60,21 +60,21 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v14
         with:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-      
+
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
-      
+
       - name: Setup CI environment
         run: |
           ./tests/setup-ci.sh
-      
+
       - name: Run default template test
         run: |
           echo "Testing default template on ${{ matrix.os }}"
@@ -90,21 +90,21 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v14
         with:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-      
+
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
-      
+
       - name: Setup CI environment
         run: |
           ./tests/setup-ci.sh
-      
+
       - name: Run complete template test
         run: |
           echo "Testing complete template on ${{ matrix.os }}"
@@ -118,21 +118,21 @@ jobs:
     needs: [test-minimal, test-default, test-complete]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v14
         with:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-      
+
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
-      
+
       - name: Setup CI environment
         run: |
           ./tests/setup-ci.sh
-      
+
       - name: Run all template tests
         run: |
           echo "Running integration test for all templates"
@@ -145,23 +145,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v14
         with:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-      
+
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
-      
+
       - name: Check flake
         run: |
           echo "Checking flake configuration..."
           nix flake check --all-systems
         timeout-minutes: 10
-      
+
       - name: Build formatter modules
         run: |
           echo "Building individual formatter modules..."

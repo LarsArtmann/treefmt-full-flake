@@ -5,6 +5,7 @@ This directory contains comprehensive test suites for validating the treefmt-ful
 ## Overview
 
 The testing framework ensures that all templates (minimal, default, complete) work correctly by:
+
 - Initializing templates in isolated environments
 - Creating test files with formatting issues
 - Running formatters and verifying corrections
@@ -29,11 +30,13 @@ tests/
 ### Local Testing
 
 Run all tests:
+
 ```bash
 ./tests/run-all-tests.sh
 ```
 
 Run specific template test:
+
 ```bash
 ./tests/run-all-tests.sh minimal
 ./tests/run-all-tests.sh default
@@ -41,6 +44,7 @@ Run specific template test:
 ```
 
 Run individual test directly:
+
 ```bash
 ./tests/templates/test-minimal.sh
 ```
@@ -48,6 +52,7 @@ Run individual test directly:
 ### CI Testing
 
 The tests automatically adapt for CI environments. The GitHub Actions workflow:
+
 1. Runs `setup-ci.sh` to create mock repositories
 2. Patches templates to use local file:// URLs instead of SSH
 3. Executes tests with CI-specific configurations
@@ -55,14 +60,17 @@ The tests automatically adapt for CI environments. The GitHub Actions workflow:
 ## Test Coverage
 
 ### Minimal Template
+
 - **Formatters**: Nix (alejandra), Markdown (mdformat), YAML (yamlfmt)
 - **Features**: Basic formatting, development shell
 
-### Default Template  
+### Default Template
+
 - **Formatters**: All from minimal plus Python (black, isort, ruff), Web (biome), Shell (shfmt), JSON
 - **Features**: Justfile integration, multi-language support
 
 ### Complete Template
+
 - **Formatters**: All available formatters including Rust, TOML, Protocol Buffers, GitHub Actions
 - **Features**: Incremental formatting, performance profiles, advanced configurations
 
@@ -71,7 +79,7 @@ The tests automatically adapt for CI environments. The GitHub Actions workflow:
 Each test follows this sequence:
 
 1. **Template Initialization** - Creates template in temporary directory
-2. **Git Repository Setup** - Initializes git for version control features  
+2. **Git Repository Setup** - Initializes git for version control features
 3. **File Verification** - Ensures template files exist
 4. **Flake Metadata Check** - Validates flake configuration
 5. **Test File Creation** - Creates files with formatting issues
@@ -101,20 +109,24 @@ Since the repository is private, CI environments need special handling:
 ### Common Issues
 
 **Test fails with "flake requires lock file changes"**
+
 - Ensure git is initialized in test directory
 - Check that flake inputs are properly locked
 
 **Formatter not found**
+
 - Verify formatter is enabled in template configuration
 - Check that Nix cache is populated
 
 **SSH authentication errors**
+
 - Run `setup-ci.sh` to use mock repository
 - Ensure templates use correct URL format
 
 ### Debug Mode
 
 Run tests with bash debugging:
+
 ```bash
 bash -x ./tests/templates/test-minimal.sh
 ```
@@ -131,6 +143,7 @@ To add tests for new formatters:
 4. Update this documentation
 
 Example:
+
 ```bash
 # Create test file
 cat > test.ext << 'EOF'
@@ -147,6 +160,7 @@ fi
 ## GitHub Actions Integration
 
 The workflow runs on:
+
 - Push to master/main affecting templates or tests
 - Pull requests with template/test changes
 - Manual workflow dispatch

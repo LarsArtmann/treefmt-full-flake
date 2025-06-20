@@ -17,8 +17,8 @@ echo "Test directory: $TEST_DIR"
 
 # Cleanup function
 cleanup() {
-    echo -e "${YELLOW}Cleaning up test directory...${NC}"
-    rm -rf "$TEST_DIR"
+  echo -e "${YELLOW}Cleaning up test directory...${NC}"
+  rm -rf "$TEST_DIR"
 }
 trap cleanup EXIT
 
@@ -29,7 +29,7 @@ git config user.email "test@example.com"
 git config user.name "Test User"
 
 # Create a test flake that uses the local path
-cat > flake.nix << EOF
+cat >flake.nix <<EOF
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -68,7 +68,7 @@ git add flake.nix
 mkdir -p src web
 
 # Nix file
-cat > src/test.nix << 'EOF'
+cat >src/test.nix <<'EOF'
 {pkgs,lib,...}:
 let
   myVar="value";
@@ -79,13 +79,13 @@ in{
 EOF
 
 # JavaScript file
-cat > web/test.js << 'EOF'
+cat >web/test.js <<'EOF'
 const x=1;const y=2;
 function test(){console.log(x+y);}
 EOF
 
 # JSON file
-cat > web/data.json << 'EOF'
+cat >web/data.json <<'EOF'
 {"name":"test","version":"1.0.0","data":[1,2,3]}
 EOF
 
@@ -95,10 +95,10 @@ git commit -m "Initial commit" -q
 # Test formatting
 echo -e "\n${YELLOW}Running formatter...${NC}"
 if nix fmt; then
-    echo -e "${GREEN}✓ Formatter ran successfully${NC}"
+  echo -e "${GREEN}✓ Formatter ran successfully${NC}"
 else
-    echo -e "${RED}✗ Formatter failed${NC}"
-    exit 1
+  echo -e "${RED}✗ Formatter failed${NC}"
+  exit 1
 fi
 
 # Check if files were formatted
@@ -106,24 +106,24 @@ echo -e "\n${YELLOW}Checking formatting results...${NC}"
 
 # Check for both possible alejandra formatting styles
 if grep -q "enable = true;" src/test.nix && (grep -q "{pkgs, ...}:" src/test.nix || grep -q "^{$" src/test.nix); then
-    echo -e "${GREEN}✓ Nix file formatted correctly${NC}"
+  echo -e "${GREEN}✓ Nix file formatted correctly${NC}"
 else
-    echo -e "${RED}✗ Nix file not formatted correctly${NC}"
-    cat src/test.nix
+  echo -e "${RED}✗ Nix file not formatted correctly${NC}"
+  cat src/test.nix
 fi
 
 if grep -q "^const x = 1;" web/test.js; then
-    echo -e "${GREEN}✓ JavaScript file formatted correctly${NC}"
+  echo -e "${GREEN}✓ JavaScript file formatted correctly${NC}"
 else
-    echo -e "${RED}✗ JavaScript file not formatted correctly${NC}"
-    cat web/test.js
+  echo -e "${RED}✗ JavaScript file not formatted correctly${NC}"
+  cat web/test.js
 fi
 
 if grep -q '"name": "test"' web/data.json; then
-    echo -e "${GREEN}✓ JSON file formatted correctly${NC}"
+  echo -e "${GREEN}✓ JSON file formatted correctly${NC}"
 else
-    echo -e "${RED}✗ JSON file not formatted correctly${NC}"
-    cat web/data.json
+  echo -e "${RED}✗ JSON file not formatted correctly${NC}"
+  cat web/data.json
 fi
 
 # Commit formatted changes
@@ -133,10 +133,10 @@ git commit -m "Format code" -q || true
 # Test flake check
 echo -e "\n${YELLOW}Running flake check...${NC}"
 if nix flake check; then
-    echo -e "${GREEN}✓ Flake check passed${NC}"
+  echo -e "${GREEN}✓ Flake check passed${NC}"
 else
-    echo -e "${RED}✗ Flake check failed${NC}"
-    exit 1
+  echo -e "${RED}✗ Flake check failed${NC}"
+  exit 1
 fi
 
 echo -e "\n${GREEN}✅ All tests passed!${NC}"

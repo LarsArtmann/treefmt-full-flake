@@ -254,7 +254,8 @@ See [Revolutionary Roadmap](./REVOLUTIONARY_ROADMAP.md) | [Revolutionary Improve
 
 **Problem**: Multiple formatters trying to format the same file type (e.g., both biome and jsonfmt formatting JSON files).
 
-**Solution**: 
+**Solution**:
+
 - We've configured biome to handle JSON files by default
 - If you need jsonfmt specifically, disable the web formatter group and enable json separately
 - Check [formatter coverage matrix](./tests/formatter-coverage-matrix.md) for details
@@ -264,6 +265,7 @@ See [Revolutionary Roadmap](./REVOLUTIONARY_ROADMAP.md) | [Revolutionary Improve
 **Problem**: Alejandra formatter switches between single-line and multi-line formats non-deterministically.
 
 **Solution**:
+
 - Run `nix fmt` twice to ensure stable formatting
 - This is a known issue with Alejandra (see [issue #23](https://github.com/LarsArtmann/treefmt-full-flake/issues/23))
 - Consider using `nixfmt` as an alternative
@@ -273,6 +275,7 @@ See [Revolutionary Roadmap](./REVOLUTIONARY_ROADMAP.md) | [Revolutionary Improve
 **Problem**: Tests use outdated versions of the flake due to Nix caching.
 
 **Solution**:
+
 ```bash
 # Force refresh the flake
 nix flake update --refresh
@@ -286,6 +289,7 @@ nix-collect-garbage -d
 **Problem**: Getting warnings about dirty git tree when initializing templates.
 
 **Solution**:
+
 - Initialize git repository before running `nix flake init`
 - Commit changes before running flake operations
 
@@ -294,6 +298,7 @@ nix-collect-garbage -d
 **Problem**: `nix flake check` fails after formatting due to uncommitted changes.
 
 **Solution**:
+
 - Always commit formatted changes before running `nix flake check`
 - Use the provided test scripts which handle this automatically
 
@@ -327,11 +332,13 @@ This project includes a pre-commit hook that automatically formats code before c
 ```
 
 The hook will:
+
 - Run `nix fmt` on all staged files
 - Re-stage any files that were formatted
 - Prevent commits if formatting fails
 
 To skip the hook temporarily:
+
 ```bash
 git commit --no-verify
 ```
