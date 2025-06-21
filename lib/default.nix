@@ -9,7 +9,8 @@ let
   configSchema = import ./config-schema.nix { inherit lib; };
   performanceTracking = import ./performance-tracking.nix { inherit lib; };
   projectDetection = import ./project-detection.nix { inherit lib; };
-  # formatterRegistry = import ./formatter-registry.nix { inherit lib; }; # Temporarily disabled to debug
+  errorFormatting = import ./error-formatting.nix { inherit lib; };
+  formatterRegistry = import ./formatter-registry.nix { inherit lib; };
 in
 {
   # Export all library functions with organized namespaces
@@ -19,7 +20,8 @@ in
     configSchema
     performanceTracking
     projectDetection
-    # formatterRegistry # Temporarily disabled
+    errorFormatting
+    formatterRegistry
     ;
 
   # Convenience exports for commonly used functions
@@ -27,7 +29,7 @@ in
   inherit (configSchema.validation) validateConfig migrateConfig;
   inherit (securityValidation) validateSecurity secureFileCheck;
   inherit (projectDetection) generateAutoConfig mergeWithUserConfig;
-  # inherit (formatterRegistry) getFormatterModule getAllFormatterModules; # Temporarily disabled
+  inherit (formatterRegistry) getFormatterModule getAllFormatterModules loadFormatterModules;
 
   # Version information
   version = "2.0.0";
