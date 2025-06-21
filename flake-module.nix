@@ -6,27 +6,17 @@
   # Import security validation
   securityValidation = import ./lib/security-validation.nix {inherit lib;};
 
-  # Inline validation helpers for now
-  betterEnum = values: description: exampleValue:
-    lib.types.enum values
-    // {
-      name = "enum";
-      description = "${description}\nAllowed values: ${lib.concatStringsSep ", " values}\nExample: ${exampleValue}";
-      check = x:
-        if lib.elem x values
-        then true
-        else throw "Invalid value '${toString x}'. Must be one of: ${lib.concatStringsSep ", " values}";
-    };
+  # Import config validation
+  configValidation = import ./lib/config-validation.nix {inherit lib;};
 
-  # Simple filename validation
+  # Use imported validation helpers
+  inherit (configValidation) betterEnum;
+
+  # Use proper filename validation
   validatedFileName =
-    lib.types.str
-    // {
-      check = x:
-        if lib.isString x && !lib.hasInfix "/" x && x != ""
-        then true
-        else throw "projectRootFile must be a filename (not a path) that exists in your project root. Got: '${toString x}'";
-    };
+    configValidation.validatedString
+    configValidation.stringValidators.isFileName
+    "projectRootFile must be a filename (not a path) that exists in your project root";
 
   # Runtime validation warnings with security checks
   generateRuntimeValidation = cfg: let
