@@ -2,6 +2,7 @@
 # This provides a single entry point for all library functions
 {lib}: let
   # Import all library modules
+  types = import ./types.nix {inherit lib;};
   securityValidation = import ./security-validation.nix {inherit lib;};
   configValidation = import ./config-validation.nix {inherit lib;};
   configSchema = import ./config-schema.nix {inherit lib;};
@@ -12,6 +13,7 @@
 in {
   # Export all library functions with organized namespaces
   inherit
+    types
     securityValidation
     configValidation
     configSchema
