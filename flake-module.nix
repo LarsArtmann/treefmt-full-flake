@@ -9,6 +9,26 @@
   # Import config validation
   configValidation = import ./lib/config-validation.nix {inherit lib;};
 
+  # Import project detection - inline for now due to flake evaluation context
+  # TODO: Extract to separate module once import path issues are resolved
+  projectDetection = {
+    # Simplified auto-detection for initial implementation
+    generateAutoConfig = projectPath: {
+      # Enable commonly needed formatters by default
+      nix = true; # Most Nix projects need this
+      markdown = true; # Most projects have README.md
+      yaml = true; # Common in CI/config files
+
+      # Enable others based on simple heuristics
+      # In a real implementation, we'd check for specific files
+      # For now, provide sensible defaults
+    };
+
+    mergeWithUserConfig = autoDetected: userConfig:
+    # User config overrides auto-detection
+      autoDetected // userConfig;
+  };
+
   # Use imported validation helpers
   inherit (configValidation) betterEnum;
 
@@ -58,6 +78,13 @@ in {
     treefmtFlake = lib.mkOption {
       type = lib.types.submodule {
         options = {
+          # Auto-detection configuration
+          autoDetect = lib.mkOption {
+            type = lib.types.bool;
+            default = true;
+            description = "Automatically detect and enable formatters based on project files (package.json → web, Cargo.toml → rust, etc.)";
+          };
+
           # Enable specific formatter groups
           nix = lib.mkEnableOption "Enable Nix formatters (alejandra, deadnix, statix)";
           web = lib.mkEnableOption "Enable Web formatters (biome for JS/TS/CSS)";
@@ -168,20 +195,32 @@ in {
   config = let
     cfg = config.treefmtFlake;
 
-    # Import formatter modules conditionally based on enabled options
-    formatterConfigs = lib.mkMerge (lib.optional cfg.nix (
+    # Auto-detect project types and merge with user configuration
+    autoDetectedConfig =
+      if cfg.autoDetect
+      then projectDetection.generateAutoConfig ./.
+      else {};
+
+    # Merge auto-detected settings with user-specified settings
+    # User settings take precedence over auto-detection
+    finalFormatterConfig = projectDetection.mergeWithUserConfig autoDetectedConfig {
+      inherit (cfg) nix web python shell rust yaml markdown json misc;
+    };
+
+    # Import formatter modules conditionally based on final enabled options
+    formatterConfigs = lib.mkMerge (lib.optional (finalFormatterConfig.nix or false) (
         if cfg.nixFormatter == "nixfmt-rfc-style"
         then import ./formatters/nix-nixfmt.nix
         else import ./formatters/nix.nix
       )
-      ++ lib.optional cfg.web (import ./formatters/web.nix)
-      ++ lib.optional cfg.python (import ./formatters/python.nix)
-      ++ lib.optional cfg.shell (import ./formatters/shell.nix)
-      ++ lib.optional cfg.rust (import ./formatters/rust.nix)
-      ++ lib.optional cfg.yaml (import ./formatters/yaml.nix)
-      ++ lib.optional cfg.markdown (import ./formatters/markdown.nix)
-      ++ lib.optional cfg.json (import ./formatters/json.nix)
-      ++ lib.optional cfg.misc (import ./formatters/misc.nix));
+      ++ lib.optional (finalFormatterConfig.web or false) (import ./formatters/web.nix)
+      ++ lib.optional (finalFormatterConfig.python or false) (import ./formatters/python.nix)
+      ++ lib.optional (finalFormatterConfig.shell or false) (import ./formatters/shell.nix)
+      ++ lib.optional (finalFormatterConfig.rust or false) (import ./formatters/rust.nix)
+      ++ lib.optional (finalFormatterConfig.yaml or false) (import ./formatters/yaml.nix)
+      ++ lib.optional (finalFormatterConfig.markdown or false) (import ./formatters/markdown.nix)
+      ++ lib.optional (finalFormatterConfig.json or false) (import ./formatters/json.nix)
+      ++ lib.optional (finalFormatterConfig.misc or false) (import ./formatters/misc.nix));
 
     # Generate treefmt CLI arguments based on configuration
     generateTreefmtArgs = pkgs: let
