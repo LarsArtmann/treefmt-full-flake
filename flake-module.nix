@@ -308,7 +308,7 @@ in
           );
 
           # Cache directory configuration
-          cacheArgs = lib.optionals (cfg.incremental.enable && cfg.incremental.cache != "~/.cache/treefmt") [
+          cacheArgs = lib.optionals (cfg.incremental.enable && cfg.incremental.cache != "./.cache/treefmt") [
             "--cache-dir=${cfg.incremental.cache}"
           ];
         in
@@ -467,7 +467,7 @@ in
               {
                 allowMissingTools = cfg.behavior.allowMissingFormatter;
               }
-              // lib.optionalAttrs (cfg.incremental.enable && cfg.incremental.cache != "~/.cache/treefmt") {
+              // lib.optionalAttrs (cfg.incremental.enable && cfg.incremental.cache != "./.cache/treefmt") {
                 # Configure cache directory if specified
                 cache-dir = cfg.incremental.cache;
               }
@@ -493,8 +493,177 @@ in
             else
               config.treefmt.build.wrapper;
 
-          # Add development packages and scripts
-          packages = lib.optionalAttrs cfg.incremental.enable {
+          # Add development packages and CLI tools
+          packages = {
+            # Debug tool - always available
+            treefmt-debug = pkgs.writeShellScriptBin "treefmt-debug" ''
+              echo "🔧 treefmt-flake Debug Information"
+              echo "=================================="
+              echo ""
+              
+              # Configuration summary
+              echo "📋 Configuration Summary:"
+              echo "  Project Root: ${cfg.projectRootFile}"
+              echo "  Auto-Detection: ${if cfg.autoDetection.enable then "enabled" else "disabled"}"
+              echo "  Performance Profile: ${cfg.behavior.performance}"
+              echo "  Incremental Mode: ${if cfg.incremental.enable then "enabled (${cfg.incremental.mode})" else "disabled"}"
+              echo "  Cache Directory: ''${CACHE_DIR:-${cfg.incremental.cache}}"
+              echo ""
+              
+              # Enabled formatters
+              echo "🎯 Enabled Formatters:"
+              ${lib.concatMapStringsSep "\n" (name: 
+                let enabled = finalFormatterConfig.${name} or false; in
+                "echo \"  ${name}: ${if enabled then "✅ enabled" else "❌ disabled"}\""
+              ) ["nix" "web" "python" "shell" "rust" "yaml" "markdown" "json" "misc"]}
+              echo ""
+              
+              # Formatter details
+              echo "⚙️  Formatter Details:"
+              ${lib.optionalString (finalFormatterConfig.nix or false) ''
+                echo "  • Nix: ${cfg.formatters.nix.formatter} (deadnix: ${if cfg.formatters.nix.linting.deadnix then "✅" else "❌"}, statix: ${if cfg.formatters.nix.linting.statix then "✅" else "❌"})"
+              ''}
+              ${lib.optionalString (finalFormatterConfig.web or false) ''
+                echo "  • Web: ${cfg.formatters.web.formatter} (JS: ${if cfg.formatters.web.languages.javascript then "✅" else "❌"}, TS: ${if cfg.formatters.web.languages.typescript then "✅" else "❌"}, CSS: ${if cfg.formatters.web.languages.css then "✅" else "❌"})"
+              ''}
+              echo ""
+              
+              # Project analysis
+              echo "📂 Project Analysis:"
+              if [[ -f "${cfg.projectRootFile}" ]]; then
+                echo "  Project root file: ✅ found"
+              else
+                echo "  Project root file: ❌ not found"
+              fi
+              
+              if [[ -d ".git" ]]; then
+                echo "  Git repository: ✅ detected"
+                if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
+                  echo "  Git status: 📝 dirty ($(git status --porcelain 2>/dev/null | wc -l) changes)"
+                else
+                  echo "  Git status: ✅ clean"
+                fi
+              else
+                echo "  Git repository: ❌ not detected"
+              fi
+              echo ""
+              
+              # File counts by type
+              echo "📊 File Statistics:"
+              for ext in nix js ts py rs sh yml yaml md json toml; do
+                count=$(find . -name "*.$ext" -type f 2>/dev/null | wc -l)
+                if [[ $count -gt 0 ]]; then
+                  echo "  *.$ext files: $count"
+                fi
+              done
+              echo ""
+              
+              # Validation
+              echo "✅ Configuration Validation:"
+              if ${if validationResult.isValid then "true" else "false"}; then
+                echo "  Status: ✅ Valid configuration"
+              else
+                echo "  Status: ❌ Configuration errors detected"
+                ${lib.concatMapStringsSep "\n" (error: "echo \"    - ${error}\"") (validationResult.errors or [])}
+              fi
+              
+              ${lib.optionalString (validationResult.warnings != []) ''
+                echo "  Warnings:"
+                ${lib.concatMapStringsSep "\n" (warning: "echo \"    ⚠️  ${warning}\"") validationResult.warnings}
+              ''}
+              echo ""
+              
+              # Migration status
+              ${lib.optionalString hasLegacyOptions ''
+                echo "🚨 Legacy Configuration Detected:"
+                echo "  You are using deprecated configuration options."
+                echo "  Run 'nix run .#treefmt-validate' for migration guidance."
+                echo ""
+              ''}
+              
+              echo "💡 Available Commands:"
+              echo "  nix fmt                    - Format all files"
+              echo "  nix fmt -- --check        - Check formatting without changes"
+              echo "  nix run .#treefmt-debug   - Show this debug information"
+              echo "  nix run .#treefmt-validate - Validate configuration"
+              ${lib.optionalString cfg.incremental.enable ''
+                echo "  nix run .#treefmt-fast    - Fast formatting (no cache)"
+                echo "  nix run .#treefmt-staged  - Format only staged files"
+                echo "  nix run .#treefmt-since   - Format files since commit"
+              ''}
+            '';
+
+            # Validation tool - always available
+            treefmt-validate = pkgs.writeShellScriptBin "treefmt-validate" ''
+              echo "🔍 treefmt-flake Configuration Validation"
+              echo "========================================="
+              echo ""
+              
+              # Run all validation checks
+              ${generateRuntimeValidation cfg deprecationWarnings}
+              
+              # Configuration validation
+              echo "📋 Schema Validation:"
+              if ${if validationResult.isValid then "true" else "false"}; then
+                echo "  ✅ Configuration schema is valid"
+              else
+                echo "  ❌ Configuration schema has errors:"
+                ${lib.concatMapStringsSep "\n" (error: "echo \"     - ${error}\"") (validationResult.errors or [])}
+                exit 1
+              fi
+              
+              # Formatter availability check
+              echo ""
+              echo "🔧 Formatter Availability:"
+              errors=0
+              
+              ${lib.concatMapStringsSep "\n" (formatter: ''
+                if ${if finalFormatterConfig.${formatter} or false then "true" else "false"}; then
+                  # Check if the formatter tools are available
+                  case "${formatter}" in
+                    nix)
+                      if command -v ${if cfg.formatters.nix.formatter == "nixfmt-rfc-style" then "nixfmt" else "alejandra"} >/dev/null 2>&1; then
+                        echo "  ✅ ${formatter}: ${if cfg.formatters.nix.formatter == "nixfmt-rfc-style" then "nixfmt" else "alejandra"} available"
+                      else
+                        echo "  ❌ ${formatter}: ${if cfg.formatters.nix.formatter == "nixfmt-rfc-style" then "nixfmt" else "alejandra"} not found"
+                        errors=$((errors + 1))
+                      fi
+                      ;;
+                    web)
+                      if command -v ${cfg.formatters.web.formatter or "biome"} >/dev/null 2>&1; then
+                        echo "  ✅ ${formatter}: ${cfg.formatters.web.formatter or "biome"} available"
+                      else
+                        echo "  ❌ ${formatter}: ${cfg.formatters.web.formatter or "biome"} not found"
+                        errors=$((errors + 1))
+                      fi
+                      ;;
+                    *)
+                      echo "  ℹ️  ${formatter}: enabled (tool check not implemented)"
+                      ;;
+                  esac
+                fi
+              '') ["nix" "web" "python" "shell" "rust" "yaml" "markdown" "json" "misc"]}
+              
+              echo ""
+              
+              # Final validation summary
+              if [[ $errors -eq 0 ]]; then
+                echo "🎉 Validation Complete: All checks passed!"
+                echo ""
+                echo "💡 Your treefmt-flake configuration is ready to use."
+                echo "   Run 'nix fmt' to format your files."
+              else
+                echo "❌ Validation Failed: $errors error(s) found"
+                echo ""
+                echo "💡 To fix formatter availability issues:"
+                echo "   - Make sure you're in a 'nix develop' shell"
+                echo "   - Check that all required formatters are installed"
+                echo "   - Consider using 'allowMissingFormatter = true' for optional formatters"
+                exit 1
+              fi
+            '';
+          } // lib.optionalAttrs cfg.incremental.enable {
+            # Incremental tools - only when incremental mode is enabled
             treefmt-fast = pkgs.writeShellScriptBin "treefmt-fast" ''
               ${
                 if cfg.incremental.enable then

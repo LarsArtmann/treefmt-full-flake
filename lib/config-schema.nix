@@ -1,13 +1,15 @@
-{lib}: let
+{ lib }:
+let
   # Import other validation modules
-  configValidation = import ./config-validation.nix {inherit lib;};
-  securityValidation = import ./security-validation.nix {inherit lib;};
+  configValidation = import ./config-validation.nix { inherit lib; };
+  securityValidation = import ./security-validation.nix { inherit lib; };
 
   inherit (configValidation) betterEnum validatedString stringValidators;
   inherit (securityValidation) secureTypes;
 
   # Enhanced type helpers
-  mkEnableOptionWithDefault = default: description:
+  mkEnableOptionWithDefault =
+    default: description:
     lib.mkOption {
       type = lib.types.bool;
       inherit default description;
@@ -22,10 +24,9 @@
 
         formatter = lib.mkOption {
           type =
-            betterEnum
-            ["alejandra" "nixfmt-rfc-style"]
-            "Which Nix formatter to use. nixfmt-rfc-style is deterministic and recommended for consistent formatting across environments"
-            "nixfmt-rfc-style";
+            betterEnum [ "alejandra" "nixfmt-rfc-style" ]
+              "Which Nix formatter to use. nixfmt-rfc-style is deterministic and recommended for consistent formatting across environments"
+              "nixfmt-rfc-style";
           default = "nixfmt-rfc-style";
           description = "Nix code formatter selection";
         };
@@ -52,11 +53,11 @@
         enable = lib.mkEnableOption "Enable Web formatters (biome for JS/TS/CSS)";
 
         formatter = lib.mkOption {
-          type =
-            betterEnum
-            ["biome" "prettier" "eslint"]
-            "Which web formatter to use. biome is fast and comprehensive, prettier is widely adopted"
-            "biome";
+          type = betterEnum [
+            "biome"
+            "prettier"
+            "eslint"
+          ] "Which web formatter to use. biome is fast and comprehensive, prettier is widely adopted" "biome";
           default = "biome";
           description = "Web code formatter selection";
         };
@@ -72,14 +73,15 @@
               html = mkEnableOptionWithDefault false "Format HTML files";
             };
           };
-          default = {};
+          default = { };
           description = "Web language-specific formatting options";
         };
       };
     };
 
     # Generic language configuration template
-    genericLanguageConfig = name: formatters:
+    genericLanguageConfig =
+      name: formatters:
       lib.types.submodule {
         options = {
           enable = lib.mkEnableOption "Enable ${name} formatters";
@@ -98,10 +100,7 @@
     options = {
       # Root project settings
       projectRootFile = lib.mkOption {
-        type =
-          validatedString
-          stringValidators.isFileName
-          "projectRootFile must be a filename (not a path) that exists in your project root";
+        type = validatedString stringValidators.isFileName "projectRootFile must be a filename (not a path) that exists in your project root";
         default = "flake.nix";
         description = "File that marks the project root. Common choices: flake.nix, package.json, Cargo.toml, pyproject.toml";
         example = "package.json";
@@ -124,13 +123,17 @@
             };
 
             override = lib.mkOption {
-              type = lib.types.enum ["user" "auto" "merge"];
+              type = lib.types.enum [
+                "user"
+                "auto"
+                "merge"
+              ];
               default = "merge";
               description = "How to handle conflicts between auto-detection and user settings";
             };
           };
         };
-        default = {};
+        default = { };
         description = "Automatic formatter detection configuration";
       };
 
@@ -141,51 +144,58 @@
             # Core languages
             nix = lib.mkOption {
               type = formatterTypes.nixConfig;
-              default = {};
+              default = { };
               description = "Nix language formatting and linting";
             };
 
             web = lib.mkOption {
               type = formatterTypes.webConfig;
-              default = {};
+              default = { };
               description = "Web development (JS/TS/CSS) formatting";
             };
 
             # Other languages using generic template
             python = lib.mkOption {
-              type = formatterTypes.genericLanguageConfig "Python" ["black" "isort" "ruff"];
-              default = {};
+              type = formatterTypes.genericLanguageConfig "Python" [
+                "black"
+                "isort"
+                "ruff"
+              ];
+              default = { };
               description = "Python code formatting";
             };
 
             rust = lib.mkOption {
-              type = formatterTypes.genericLanguageConfig "Rust" ["rustfmt"];
-              default = {};
+              type = formatterTypes.genericLanguageConfig "Rust" [ "rustfmt" ];
+              default = { };
               description = "Rust code formatting";
             };
 
             shell = lib.mkOption {
-              type = formatterTypes.genericLanguageConfig "Shell" ["shfmt" "shellcheck"];
-              default = {};
+              type = formatterTypes.genericLanguageConfig "Shell" [
+                "shfmt"
+                "shellcheck"
+              ];
+              default = { };
               description = "Shell script formatting and linting";
             };
 
             # Documentation and configuration
             markdown = lib.mkOption {
-              type = formatterTypes.genericLanguageConfig "Markdown" ["mdformat"];
-              default = {};
+              type = formatterTypes.genericLanguageConfig "Markdown" [ "mdformat" ];
+              default = { };
               description = "Markdown document formatting";
             };
 
             yaml = lib.mkOption {
-              type = formatterTypes.genericLanguageConfig "YAML" ["yamlfmt"];
-              default = {};
+              type = formatterTypes.genericLanguageConfig "YAML" [ "yamlfmt" ];
+              default = { };
               description = "YAML file formatting";
             };
 
             json = lib.mkOption {
-              type = formatterTypes.genericLanguageConfig "JSON" ["jsonfmt"];
-              default = {};
+              type = formatterTypes.genericLanguageConfig "JSON" [ "jsonfmt" ];
+              default = { };
               description = "JSON file formatting";
             };
 
@@ -204,17 +214,17 @@
                         actionlint = mkEnableOptionWithDefault true "GitHub Actions workflow linting";
                       };
                     };
-                    default = {};
+                    default = { };
                     description = "Miscellaneous formatting tools";
                   };
                 };
               };
-              default = {};
+              default = { };
               description = "Miscellaneous formatting tools";
             };
           };
         };
-        default = {};
+        default = { };
         description = "Formatter configurations organized by domain";
       };
 
@@ -224,10 +234,9 @@
           options = {
             performance = lib.mkOption {
               type =
-                betterEnum
-                ["fast" "balanced" "thorough"]
-                "Performance profile that balances speed vs thoroughness. 'fast' skips caching for speed, 'balanced' is recommended for most use cases, 'thorough' enables comprehensive checking but may be slower"
-                "balanced";
+                betterEnum [ "fast" "balanced" "thorough" ]
+                  "Performance profile that balances speed vs thoroughness. 'fast' skips caching for speed, 'balanced' is recommended for most use cases, 'thorough' enables comprehensive checking but may be slower"
+                  "balanced";
               default = "balanced";
               description = "Performance vs thoroughness trade-off";
             };
@@ -245,7 +254,7 @@
             };
           };
         };
-        default = {};
+        default = { };
         description = "Performance and behavior configuration";
       };
 
@@ -257,17 +266,16 @@
 
             mode = lib.mkOption {
               type =
-                betterEnum
-                ["git" "cache" "auto"]
-                "Incremental mode: git (use git for change detection), cache (use treefmt cache), auto (detect best method)"
-                "auto";
+                betterEnum [ "git" "cache" "auto" ]
+                  "Incremental mode: git (use git for change detection), cache (use treefmt cache), auto (detect best method)"
+                  "auto";
               default = "auto";
               description = "Incremental formatting strategy";
             };
 
             cache = lib.mkOption {
               type = secureTypes.securePath;
-              default = "~/.cache/treefmt";
+              default = "./.cache/treefmt";
               description = "Cache directory for treefmt (security validated)";
             };
 
@@ -284,12 +292,12 @@
                   };
                 };
               };
-              default = {};
+              default = { };
               description = "Incremental formatting performance settings";
             };
           };
         };
-        default = {};
+        default = { };
         description = "Incremental formatting configuration";
       };
 
@@ -318,59 +326,63 @@
                   prePush = mkEnableOptionWithDefault false "Install pre-push hook";
                 };
               };
-              default = {};
+              default = { };
               description = "Git hook configuration";
             };
           };
         };
-        default = {};
+        default = { };
         description = "Git integration configuration";
       };
     };
   };
 
   # Validation functions for the unified schema
-  validateUnifiedConfig = config: let
-    # Use existing validation functions
-    securityReport = securityValidation.validateSecurity {
-      projectRootFile = config.projectRootFile;
-      incremental = {
-        enable = config.incremental.enable;
-        cache = config.incremental.cache;
+  validateUnifiedConfig =
+    config:
+    let
+      # Use existing validation functions
+      securityReport = securityValidation.validateSecurity {
+        inherit (config) projectRootFile;
+        incremental = {
+          inherit (config.incremental) enable;
+          inherit (config.incremental) cache;
+        };
+        gitOptions = {
+          inherit (config.git) sinceCommit branch;
+          inherit (config.git) stagedOnly;
+        };
+        inherit (config.behavior) allowMissingFormatter;
       };
-      gitOptions = {
-        inherit (config.git) sinceCommit branch;
-        stagedOnly = config.git.stagedOnly;
-      };
-      allowMissingFormatter = config.behavior.allowMissingFormatter;
-    };
 
-    # Additional unified schema validation
-    formattersEnabled = let
-      fmt = config.formatters;
+      # Additional unified schema validation
+      formattersEnabled =
+        let
+          fmt = config.formatters;
+        in
+        fmt.nix.enable
+        || fmt.web.enable
+        || fmt.python.enable
+        || fmt.rust.enable
+        || fmt.shell.enable
+        || fmt.markdown.enable
+        || fmt.yaml.enable
+        || fmt.json.enable
+        || fmt.misc.enable;
+
+      logicalErrors = lib.optionals (!formattersEnabled) [
+        "No formatters enabled. Enable at least one formatter or disable autoDetection to prevent this error."
+      ];
+
+      allErrors = securityReport.errors ++ logicalErrors;
+      allWarnings = securityReport.warnings;
     in
-      fmt.nix.enable
-      || fmt.web.enable
-      || fmt.python.enable
-      || fmt.rust.enable
-      || fmt.shell.enable
-      || fmt.markdown.enable
-      || fmt.yaml.enable
-      || fmt.json.enable
-      || fmt.misc.enable;
-
-    logicalErrors = lib.optionals (!formattersEnabled) [
-      "No formatters enabled. Enable at least one formatter or disable autoDetection to prevent this error."
-    ];
-
-    allErrors = securityReport.errors ++ logicalErrors;
-    allWarnings = securityReport.warnings;
-  in {
-    isValid = allErrors == [];
-    errors = allErrors;
-    warnings = allWarnings;
-    recommendations = securityReport.recommendations;
-  };
+    {
+      isValid = allErrors == [ ];
+      errors = allErrors;
+      warnings = allWarnings;
+      inherit (securityReport) recommendations;
+    };
 
   # Migration helpers for backward compatibility
   migrateFromLegacyConfig = legacyConfig: {
@@ -407,10 +419,13 @@
       enableDefaultExcludes = legacyConfig.enableDefaultExcludes or true;
     };
 
-    incremental = legacyConfig.incremental or {};
-    git = legacyConfig.gitOptions or {};
+    incremental = (legacyConfig.incremental or { }) // {
+      cache = (legacyConfig.incremental or {}).cache or "./.cache/treefmt";
+    };
+    git = legacyConfig.gitOptions or { };
   };
-in {
+in
+{
   inherit
     projectConfigSchema
     formatterTypes
@@ -421,9 +436,9 @@ in {
   # Export type helpers
   types = {
     projectConfig = projectConfigSchema;
-    nixConfig = formatterTypes.nixConfig;
-    webConfig = formatterTypes.webConfig;
-    genericLanguageConfig = formatterTypes.genericLanguageConfig;
+    inherit (formatterTypes) nixConfig;
+    inherit (formatterTypes) webConfig;
+    inherit (formatterTypes) genericLanguageConfig;
   };
 
   # Export validation
