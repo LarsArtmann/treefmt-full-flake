@@ -16,7 +16,7 @@ let
 
   # Runtime validation warnings with security checks
   generateRuntimeValidation =
-    cfg:
+    cfg: deprecationWarnings:
     let
       securityReport = treefmtLib.securityValidation.validateSecurity cfg;
     in
@@ -26,6 +26,12 @@ let
         echo "🔒 Security validation failed:"
         ${lib.concatMapStringsSep "\n" (error: "echo \"❌ ${error}\"") securityReport.errors}
         exit 1
+      ''}
+
+      # Deprecation warnings for legacy configuration
+      ${lib.optionalString (deprecationWarnings != [ ]) ''
+        ${lib.concatMapStringsSep "\n" (warning: "echo \"⚠️  ${warning}\"") deprecationWarnings}
+        echo ""
       ''}
 
       # Security warnings and recommendations
@@ -63,21 +69,177 @@ in
       description = "Configuration for treefmt-flake using unified schema";
     };
 
-    # Legacy compatibility layer - will be deprecated in future versions
-    # These options are automatically migrated to the new unified schema
-    _legacyCompatMode = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
+    # Legacy compatibility layer - automatically migrates old configuration format
+    # Deprecated: Use the unified schema in treefmtFlake instead
+    # These options are automatically migrated and will be removed in v3.0
+    _legacyOptions = lib.mkOption {
+      type = lib.types.submodule {
+        options = {
+          # Old scattered options for backward compatibility
+          autoDetect = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.autoDetection.enable instead";
+          };
+          
+          nix = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.formatters.nix.enable instead";
+          };
+          
+          nixFormatter = lib.mkOption {
+            type = lib.types.nullOr (treefmtLib.betterEnum [ "alejandra" "nixfmt-rfc-style" ] "" "nixfmt-rfc-style");
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.formatters.nix.formatter instead";
+          };
+          
+          web = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.formatters.web.enable instead";
+          };
+          
+          python = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.formatters.python.enable instead";
+          };
+          
+          rust = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.formatters.rust.enable instead";
+          };
+          
+          shell = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.formatters.shell.enable instead";
+          };
+          
+          yaml = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.formatters.yaml.enable instead";
+          };
+          
+          markdown = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.formatters.markdown.enable instead";
+          };
+          
+          json = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.formatters.json.enable instead";
+          };
+          
+          misc = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.formatters.misc.enable instead";
+          };
+          
+          performance = lib.mkOption {
+            type = lib.types.nullOr (treefmtLib.betterEnum [ "fast" "balanced" "thorough" ] "" "balanced");
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.behavior.performance instead";
+          };
+          
+          allowMissingFormatter = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.behavior.allowMissingFormatter instead";
+          };
+          
+          enableDefaultExcludes = lib.mkOption {
+            type = lib.types.nullOr lib.types.bool;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.behavior.enableDefaultExcludes instead";
+          };
+          
+          incremental = lib.mkOption {
+            type = lib.types.nullOr lib.types.attrs;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.incremental instead";
+          };
+          
+          gitOptions = lib.mkOption {
+            type = lib.types.nullOr lib.types.attrs;
+            default = null;
+            description = "DEPRECATED: Use treefmtFlake.git instead";
+          };
+        };
+      };
+      default = { };
       internal = true;
-      description = "Internal flag for legacy compatibility mode";
+      description = "Legacy options for backward compatibility - automatically migrated";
     };
   };
 
   config =
     let
-      cfg = config.treefmtFlake;
+      legacyCfg = config._legacyOptions;
+      
+      # Detect if legacy options are being used
+      hasLegacyOptions = lib.any (name: legacyCfg.${name} != null) (lib.attrNames legacyCfg);
+      
+      # Filter out null values from legacy config
+      cleanLegacyConfig = lib.filterAttrs (name: value: value != null) legacyCfg;
+      
+      # Migrate legacy configuration to unified schema if needed
+      migratedConfig = if hasLegacyOptions then
+        treefmtLib.migrateConfig cleanLegacyConfig
+      else
+        { };
+      
+      # Merge user's unified config with migrated legacy config
+      # User's unified config takes precedence over migrated legacy config
+      finalConfig = lib.recursiveUpdate migratedConfig config.treefmtFlake;
+      
+      cfg = finalConfig;
 
-      # Validate the unified configuration
+      # Generate deprecation warnings for legacy options
+      deprecationWarnings = lib.optionals hasLegacyOptions [
+        ''
+          WARNING: You are using deprecated treefmt-flake configuration options.
+          Please migrate to the new unified schema. Legacy options will be removed in v3.0.
+          
+          Migration guide:
+          ${lib.concatMapStringsSep "\n" (name: 
+            let value = legacyCfg.${name}; in
+            if value != null then
+              "  ${name} = ${lib.generators.toPretty {} value}; → treefmtFlake.${
+                {
+                  autoDetect = "autoDetection.enable";
+                  nix = "formatters.nix.enable";
+                  nixFormatter = "formatters.nix.formatter";
+                  web = "formatters.web.enable";
+                  python = "formatters.python.enable";
+                  rust = "formatters.rust.enable";
+                  shell = "formatters.shell.enable";
+                  yaml = "formatters.yaml.enable";
+                  markdown = "formatters.markdown.enable";
+                  json = "formatters.json.enable";
+                  misc = "formatters.misc.enable";
+                  performance = "behavior.performance";
+                  allowMissingFormatter = "behavior.allowMissingFormatter";
+                  enableDefaultExcludes = "behavior.enableDefaultExcludes";
+                  incremental = "incremental";
+                  gitOptions = "git";
+                }.${name} or name
+              } = ${lib.generators.toPretty {} value};"
+            else
+              ""
+          ) (lib.attrNames legacyCfg)}
+          
+          For more details, see: https://github.com/LarsArtmann/treefmt-full-flake/blob/main/MIGRATION.md
+        ''
+      ];
+
+      # Validate the final unified configuration
       validationResult = treefmtLib.validateConfig cfg;
 
       # Auto-detect project types and merge with user configuration
@@ -158,7 +320,7 @@ in
         pkgs.writeShellScriptBin "treefmt-incremental" (
           treefmtLib.securityValidation.createSecureWrapper ''
             # Runtime configuration validation
-            ${generateRuntimeValidation cfg}
+            ${generateRuntimeValidation cfg deprecationWarnings}
 
             # Default treefmt wrapper
             TREEFMT_CMD="${baseWrapper}/bin/treefmt"
