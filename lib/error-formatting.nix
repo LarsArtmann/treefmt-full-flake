@@ -1,13 +1,11 @@
 # Enhanced error formatting with colors and structured output
-{ lib }:
-
-let
+{lib}: let
   # ANSI color codes for terminal output
   colors = {
     reset = "\033[0m";
     bold = "\033[1m";
     dim = "\033[2m";
-    
+
     # Foreground colors
     red = "\033[31m";
     green = "\033[32m";
@@ -17,13 +15,13 @@ let
     cyan = "\033[36m";
     white = "\033[37m";
     gray = "\033[90m";
-    
+
     # Background colors
     bgRed = "\033[41m";
     bgGreen = "\033[42m";
     bgYellow = "\033[43m";
     bgBlue = "\033[44m";
-    
+
     # Bright colors
     brightRed = "\033[91m";
     brightGreen = "\033[92m";
@@ -35,7 +33,7 @@ let
 
   # Color helper functions
   colorize = color: text: "${color}${text}${colors.reset}";
-  
+
   red = colorize colors.red;
   green = colorize colors.green;
   yellow = colorize colors.yellow;
@@ -43,7 +41,7 @@ let
   cyan = colorize colors.cyan;
   bold = colorize colors.bold;
   dim = colorize colors.dim;
-  
+
   # Semantic color functions
   error = text: "${colors.brightRed}❌ ${text}${colors.reset}";
   warning = text: "${colors.brightYellow}⚠️  ${text}${colors.reset}";
@@ -99,113 +97,118 @@ let
   horizontalLine = width: char: lib.concatStrings (lib.genList (_: char) width);
 
   # Create a bordered box around text
-  createBox = title: content: 
-    let
-      lines = lib.splitString "\n" content;
-      maxWidth = lib.foldl (max: line: lib.max max (lib.stringLength line)) 0 lines;
-      titleWidth = lib.stringLength title;
-      boxWidth = lib.max maxWidth (titleWidth + 4);
-      
-      topLine = "${box.topLeft}${horizontalLine (boxWidth + 2) box.horizontal}${box.topRight}";
-      titleLine = "${box.vertical} ${bold title}${lib.fixedWidthString (boxWidth - titleWidth) " " ""}${box.vertical}";
-      separator = "${box.tee.right}${horizontalLine (boxWidth + 2) box.horizontal}${box.tee.left}";
-      bottomLine = "${box.bottomLeft}${horizontalLine (boxWidth + 2) box.horizontal}${box.bottomRight}";
-      
-      contentLines = lib.map (line: 
-        "${box.vertical} ${line}${lib.fixedWidthString (boxWidth - lib.stringLength line) " " ""} ${box.vertical}"
-      ) lines;
-    in
+  createBox = title: content: let
+    lines = lib.splitString "\n" content;
+    maxWidth = lib.foldl (max: line: lib.max max (lib.stringLength line)) 0 lines;
+    titleWidth = lib.stringLength title;
+    boxWidth = lib.max maxWidth (titleWidth + 4);
+
+    topLine = "${box.topLeft}${horizontalLine (boxWidth + 2) box.horizontal}${box.topRight}";
+    titleLine = "${box.vertical} ${bold title}${lib.fixedWidthString (boxWidth - titleWidth) " " ""}${box.vertical}";
+    separator = "${box.tee.right}${horizontalLine (boxWidth + 2) box.horizontal}${box.tee.left}";
+    bottomLine = "${box.bottomLeft}${horizontalLine (boxWidth + 2) box.horizontal}${box.bottomRight}";
+
+    contentLines =
+      lib.map (
+        line: "${box.vertical} ${line}${lib.fixedWidthString (boxWidth - lib.stringLength line) " " ""} ${box.vertical}"
+      )
+      lines;
+  in
     lib.concatStringsSep "\n" ([topLine titleLine separator] ++ contentLines ++ [bottomLine]);
 
   # Format a list of items with consistent indentation
-  formatList = prefix: items: 
+  formatList = prefix: items:
     lib.concatMapStringsSep "\n" (item: "  ${prefix} ${item}") items;
 
   # Format errors with enhanced styling
   formatErrors = errors:
-    if errors == [] then ""
-    else 
-      let
-        formattedErrors = lib.map (error: "• ${error}") errors;
-        content = lib.concatStringsSep "\n" formattedErrors;
-      in
+    if errors == []
+    then ""
+    else let
+      formattedErrors = lib.map (error: "• ${error}") errors;
+      content = lib.concatStringsSep "\n" formattedErrors;
+    in
       createBox "${error "Validation Errors"}" content;
 
   # Format warnings with enhanced styling
   formatWarnings = warnings:
-    if warnings == [] then ""
-    else
-      let
-        formattedWarnings = lib.map (warning: "• ${warning}") warnings;
-        content = lib.concatStringsSep "\n" formattedWarnings;
-      in
+    if warnings == []
+    then ""
+    else let
+      formattedWarnings = lib.map (warning: "• ${warning}") warnings;
+      content = lib.concatStringsSep "\n" formattedWarnings;
+    in
       createBox "${warning "Warnings"}" content;
 
-  # Format recommendations with enhanced styling  
+  # Format recommendations with enhanced styling
   formatRecommendations = recommendations:
-    if recommendations == [] then ""
-    else
-      let
-        formattedRecommendations = lib.map (rec: "• ${rec}") recommendations;
-        content = lib.concatStringsSep "\n" formattedRecommendations;
-      in
+    if recommendations == []
+    then ""
+    else let
+      formattedRecommendations = lib.map (recommendation: "• ${recommendation}") recommendations;
+      content = lib.concatStringsSep "\n" formattedRecommendations;
+    in
       createBox "${info "Recommendations"}" content;
 
   # Format security report with full styling
-  formatSecurityReport = report:
-    let
-      status = if report.isValid then 
-        "${success "Security validation passed"}"
-      else 
-        "${error "Security validation failed"}";
-        
-      parts = lib.filter (part: part != "") [
-        status
-        (formatErrors report.errors)
-        (formatWarnings report.warnings) 
-        (formatRecommendations report.recommendations)
-      ];
-    in
+  formatSecurityReport = report: let
+    status =
+      if report.isValid
+      then "${success "Security validation passed"}"
+      else "${error "Security validation failed"}";
+
+    parts = lib.filter (part: part != "") [
+      status
+      (formatErrors report.errors)
+      (formatWarnings report.warnings)
+      (formatRecommendations report.recommendations)
+    ];
+  in
     lib.concatStringsSep "\n\n" parts;
 
   # Format deprecation warnings with migration guidance
   formatDeprecationWarnings = warnings:
-    if warnings == [] then ""
-    else
-      let
-        header = "${warning "Deprecated Configuration Detected"}";
-        migrationNote = "${info "Migration required before v3.0"}";
-        formattedWarnings = lib.map (w: "• ${w}") warnings;
-        content = lib.concatStringsSep "\n" ([migrationNote ""] ++ formattedWarnings);
-      in
+    if warnings == []
+    then ""
+    else let
+      header = "${warning "Deprecated Configuration Detected"}";
+      migrationNote = "${info "Migration required before v3.0"}";
+      formattedWarnings = lib.map (w: "• ${w}") warnings;
+      content = lib.concatStringsSep "\n" ([migrationNote ""] ++ formattedWarnings);
+    in
       createBox header content;
 
   # Format configuration summary with colors
-  formatConfigSummary = config:
-    let
-      items = [
-        "${icons.file} Project Root: ${cyan config.projectRootFile}"
-        "${icons.gear} Auto-Detection: ${if config.autoDetection.enable then green "enabled" else red "disabled"}"
-        "${icons.performance} Performance: ${yellow config.behavior.performance}"
-        "${icons.target} Incremental: ${if config.incremental.enable then green "enabled (${config.incremental.mode})" else red "disabled"}"
-        "${icons.directory} Cache: ${blue config.incremental.cache}"
-      ];
-      content = lib.concatStringsSep "\n" items;
-    in
+  formatConfigSummary = config: let
+    items = [
+      "${icons.file} Project Root: ${cyan config.projectRootFile}"
+      "${icons.gear} Auto-Detection: ${
+        if config.autoDetection.enable
+        then green "enabled"
+        else red "disabled"
+      }"
+      "${icons.performance} Performance: ${yellow config.behavior.performance}"
+      "${icons.target} Incremental: ${
+        if config.incremental.enable
+        then green "enabled (${config.incremental.mode})"
+        else red "disabled"
+      }"
+      "${icons.directory} Cache: ${blue config.incremental.cache}"
+    ];
+    content = lib.concatStringsSep "\n" items;
+  in
     createBox "${icons.config} Configuration Summary" content;
 
   # Format formatter status with visual indicators
-  formatFormatterStatus = formatters:
-    let
-      formatFormatter = name: enabled:
-        if enabled then
-          "${icons.success} ${bold name}: ${green "enabled"}"
-        else
-          "${icons.error} ${name}: ${dim "disabled"}";
-          
-      formatterList = lib.mapAttrsToList formatFormatter formatters;
-      content = lib.concatStringsSep "\n" formatterList;
-    in
+  formatFormatterStatus = formatters: let
+    formatFormatter = name: enabled:
+      if enabled
+      then "${icons.success} ${bold name}: ${green "enabled"}"
+      else "${icons.error} ${name}: ${dim "disabled"}";
+
+    formatterList = lib.mapAttrsToList formatFormatter formatters;
+    content = lib.concatStringsSep "\n" formatterList;
+  in
     createBox "${icons.gear} Formatter Status" content;
 
   # Generate colored shell output
@@ -213,24 +216,37 @@ let
     lib.concatStringsSep "\n\n" (lib.filter (section: section != "") sections);
 
   # Progress bar generator
-  generateProgressBar = current: total: width:
-    let
-      percentage = if total > 0 then (current * 100) / total else 100;
-      filled = (current * width) / total;
-      filledChars = lib.genList (_: "█") (lib.toInt filled);
-      emptyChars = lib.genList (_: "░") (width - lib.toInt filled);
-      bar = lib.concatStrings (filledChars ++ emptyChars);
-      percentText = "${toString (lib.toInt percentage)}%";
-    in
-    "${cyan bar} ${bold percentText}";
+  generateProgressBar = current: total: width: let
+    percentage =
+      if total > 0
+      then (current * 100) / total
+      else 100;
+    filled = (current * width) / total;
+    filledChars = lib.genList (_: "█") (lib.toInt filled);
+    emptyChars = lib.genList (_: "░") (width - lib.toInt filled);
+    bar = lib.concatStrings (filledChars ++ emptyChars);
+    percentText = "${toString (lib.toInt percentage)}%";
+  in "${cyan bar} ${bold percentText}";
 
-in
-{
+  # Terminal capability detection
+  supportsColorCheck = ''[[ -t 1 && "''${TERM:-}" != "dumb" ]]'';
+in {
   inherit
     colors
     colorize
-    red green yellow blue cyan bold dim
-    error warning success info debug security
+    red
+    green
+    yellow
+    blue
+    cyan
+    bold
+    dim
+    error
+    warning
+    success
+    info
+    debug
+    security
     icons
     box
     horizontalLine
@@ -245,74 +261,80 @@ in
     formatFormatterStatus
     generateShellOutput
     generateProgressBar
+    supportsColorCheck
     ;
 
   # Utility functions
   utils = {
     inherit colorize;
-    
+
     # Check if terminal supports colors
-    supportsColor = ''[[ -t 1 && "''${TERM:-}" != "dumb" ]]'';
-    
+    supportsColor = supportsColorCheck;
+
     # Conditional color wrapper
     maybeColor = color: text: ''
-      if ${utils.supportsColor}; then
+      if ${supportsColorCheck}; then
         echo "${colorize color text}"
       else
         echo "${text}"
       fi
     '';
-    
+
     # Strip ANSI codes for non-color terminals
-    stripColors = text: builtins.replaceStrings 
-      (lib.attrValues colors) 
+    stripColors = text:
+      builtins.replaceStrings
+      (lib.attrValues colors)
       (lib.genList (_: "") (lib.length (lib.attrValues colors)))
       text;
   };
 
   # Generators using lib.generators for complex formatting
   generators = {
-    # Generate formatted JSON with colors
-    toColoredJSON = attrs: 
-      let
-        jsonStr = lib.generators.toJSON {} attrs;
-        # Add syntax highlighting to JSON
-        coloredJSON = builtins.replaceStrings
-          ["\"", ":", "{", "}", "[", "]", "true", "false", "null"]
-          ["${cyan "\"\""}${cyan}", "${yellow ":"}", "${bold "{"}", "${bold "}"}", "${bold "["}", "${bold "]"}", "${green "true"}", "${red "false"}", "${dim "null"}"]
-          jsonStr;
-      in
-      coloredJSON;
-      
+    # Generate formatted JSON (colors can be added later)
+    toColoredJSON = attrs: lib.generators.toJSON {} attrs;
+
     # Generate formatted YAML-like output
     toFormattedConfig = attrs:
       lib.generators.toPretty {
         allowPrettyValues = true;
         multiline = true;
-      } attrs;
+      }
+      attrs;
   };
 
   # Pre-built formatting functions for common use cases
   prebuilt = {
     # Security validation output
-    securityValidation = report: generateShellOutput [
-      (formatSecurityReport report)
-    ];
-    
+    securityValidation = report:
+      generateShellOutput [
+        (formatSecurityReport report)
+      ];
+
     # Full validation report
-    validationReport = { security, deprecation, config, formatters }: generateShellOutput [
-      (formatConfigSummary config)
-      (formatFormatterStatus formatters)
-      (formatSecurityReport security)
-      (formatDeprecationWarnings deprecation)
-    ];
-    
+    validationReport = {
+      security,
+      deprecation,
+      config,
+      formatters,
+    }:
+      generateShellOutput [
+        (formatConfigSummary config)
+        (formatFormatterStatus formatters)
+        (formatSecurityReport security)
+        (formatDeprecationWarnings deprecation)
+      ];
+
     # Error summary
-    errorSummary = { errors, warnings, recommendations }: generateShellOutput [
-      (formatErrors errors)
-      (formatWarnings warnings)
-      (formatRecommendations recommendations)
-    ];
+    errorSummary = {
+      errors,
+      warnings,
+      recommendations,
+    }:
+      generateShellOutput [
+        (formatErrors errors)
+        (formatWarnings warnings)
+        (formatRecommendations recommendations)
+      ];
   };
 
   # Metadata
