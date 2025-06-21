@@ -2,7 +2,7 @@
   # JSON formatter
   jsonfmt = {
     enable = true;
-    includes = ["**/*.json"];
+    includes = ["*.json"];
     priority = 1;
   };
 }

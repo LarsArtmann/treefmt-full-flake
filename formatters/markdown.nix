@@ -2,7 +2,7 @@
   # Markdown formatter
   mdformat = {
     enable = true;
-    includes = ["**/*.md"];
+    includes = ["*.md"];
     priority = 1;
   };
 }
