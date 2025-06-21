@@ -290,16 +290,38 @@ in {
 
   # Generators using lib.generators for complex formatting
   generators = {
-    # Generate formatted JSON (colors can be added later)
+    # Generate formatted JSON with indentation
     toColoredJSON = attrs: lib.generators.toJSON {} attrs;
 
-    # Generate formatted YAML-like output
+    # Generate formatted YAML-like output with custom indentation
     toFormattedConfig = attrs:
       lib.generators.toPretty {
         allowPrettyValues = true;
         multiline = true;
+        indent = "  ";
       }
       attrs;
+
+    # Generate shell-escaped strings for safe output
+    toShellVar = name: value: "${name}=${lib.strings.escapeShellArg (toString value)}";
+
+    # Generate key-value pairs with alignment
+    toKeyValue = attrs:
+      lib.generators.toKeyValue {
+        mkKeyValue = k: v: "${k} = ${lib.generators.toPretty {} v}";
+      }
+      attrs;
+
+    # Generate INI-style configuration
+    toINI = lib.generators.toINI {};
+
+    # Generate Git config style output
+    toGitConfig = attrs:
+      lib.generators.toGitINI {} attrs;
+
+    # Generate formatted list with bullets
+    toBulletList = items: prefix:
+      lib.concatMapStringsSep "\n" (item: "${prefix}${item}") items;
   };
 
   # Pre-built formatting functions for common use cases

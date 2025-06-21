@@ -1,5 +1,84 @@
 {lib}: let
   # Performance tracking and benchmarking utilities for treefmt
+  # Enhanced with lib.debug, lib.generators, and lib.trivial for better functionality
+  # Debug utilities using lib.debug for performance analysis
+  debugUtils = {
+    # Trace performance values for debugging
+    tracePerf = name: value: lib.debug.traceVal "PERF[${name}]: ${toString value}";
+
+    # Trace benchmark results with structured output
+    traceBenchmark = result: lib.debug.traceVal "BENCHMARK: ${lib.generators.toPretty {} result}";
+
+    # Conditional tracing for verbose mode
+    traceIfVerbose = condition: message: lib.debug.traceIf condition message;
+  };
+
+  # Functional utilities using lib.trivial
+  functionalUtils = {
+    inherit (lib.trivial) pipe const id;
+
+    # Compose functions for data processing pipelines
+    compose = f: g: x: f (g x);
+
+    # Process with optional debugging
+    processWithDebug = name: processor: input:
+      lib.trivial.pipe input [
+        (x: debugUtils.traceIfVerbose true "Processing ${name}: ${toString x}")
+        processor
+        (debugUtils.tracePerf name)
+      ];
+  };
+
+  # Enhanced JSON generation using lib.generators
+  jsonUtils = {
+    # Generate properly formatted benchmark data
+    generateBenchmarkData = {
+      timestamp,
+      profile,
+      fileCount,
+      duration,
+    }:
+      lib.generators.toJSON {} {
+        inherit timestamp profile;
+        file_count = lib.toInt fileCount;
+        duration = lib.toFloat duration;
+        files_per_sec =
+          if duration > 0
+          then (lib.toFloat fileCount) / (lib.toFloat duration)
+          else 0;
+        generated_by = "treefmt-flake";
+        version = "2.0.0";
+      };
+
+    # Generate performance report structure
+    generatePerfReport = data:
+      lib.generators.toPretty {
+        allowPrettyValues = true;
+        indent = "  ";
+        multiline = true;
+      }
+      data;
+
+    # Generate CSV-formatted performance data
+    generateCSV = headers: rows:
+      lib.concatStringsSep "\n" ([
+          (lib.concatStringsSep "," headers)
+        ]
+        ++ (lib.map (
+            row:
+              lib.concatStringsSep "," (lib.map (h: toString (row.${h} or "")) headers)
+          )
+          rows));
+
+    # Generate performance comparison table
+    generateComparisonTable = runs:
+      lib.generators.toPretty {
+        allowPrettyValues = true;
+        mkKeyValue = k: v: "${lib.fixedWidthString 20 " " k}: ${toString v}";
+      }
+      runs;
+  };
+
   # Performance metrics collection
   performanceMetrics = {
     # Core timing metrics
@@ -305,6 +384,9 @@ in {
     benchmarkUtils
     generatePerformanceReport
     exportFunctions
+    debugUtils
+    functionalUtils
+    jsonUtils
     ;
 
   # Export shell script helpers
@@ -317,8 +399,8 @@ in {
     analyzeFiles = performanceMetrics.fileMetrics.countFilesByExtension;
 
     # Complete reporting
-    fullReport = generatePerformanceReport.fullReport;
-    quickReport = generatePerformanceReport.quickReport;
+    inherit (generatePerformanceReport) fullReport;
+    inherit (generatePerformanceReport) quickReport;
 
     # Export all functions
     exportAll = exportFunctions;
