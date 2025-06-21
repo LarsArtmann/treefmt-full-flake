@@ -12,6 +12,7 @@ let
   configValidation = import ./lib/config-validation.nix { inherit lib; };
 
   # Import unified config schema
+  configSchema = import ./lib/config-schema.nix { inherit lib; };
 
   # Import performance tracking
   performanceTracking = import ./lib/performance-tracking.nix { inherit lib; };
@@ -78,13 +79,13 @@ let
       # Secure file existence checks
       ${securityValidation.secureFileCheck cfg.projectRootFile "projectRootFile"}
 
-      ${lib.optionalString cfg.nix ''
+      ${lib.optionalString cfg.formatters.nix.enable ''
         if [[ ! -f "flake.nix" && ! -f "default.nix" && ! -f "shell.nix" ]]; then
           echo "💡 Info: Nix formatters enabled - will format *.nix files if found"
         fi
       ''}
 
-      ${lib.optionalString cfg.rust ''
+      ${lib.optionalString cfg.formatters.rust.enable ''
         if [[ ! -f "Cargo.toml" ]]; then
           echo "💡 Info: Rust formatters enabled - will format *.rs files if found"
         fi
@@ -94,158 +95,18 @@ in
 {
   options = {
     treefmtFlake = lib.mkOption {
-      type = lib.types.submodule {
-        options = {
-          # Auto-detection configuration
-          autoDetect = lib.mkOption {
-            type = lib.types.bool;
-            default = true;
-            description = "Automatically detect and enable formatters based on project files (package.json → web, Cargo.toml → rust, etc.)";
-          };
-
-          # Enable specific formatter groups
-          # Note: These default to null to allow auto-detection, not false
-          nix = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "Enable Nix formatters (alejandra, deadnix, statix). null = auto-detect, true = force enable, false = disable";
-          };
-          web = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "Enable Web formatters (biome for JS/TS/CSS). null = auto-detect, true = force enable, false = disable";
-          };
-
-          # Nix formatter choice
-          nixFormatter = lib.mkOption {
-            type =
-              betterEnum [ "alejandra" "nixfmt-rfc-style" ]
-                "Which Nix formatter to use. nixfmt-rfc-style is deterministic and recommended for consistent formatting across environments"
-                "nixfmt-rfc-style";
-            default = "nixfmt-rfc-style";
-            description = "Nix code formatter selection";
-          };
-          python = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "Enable Python formatters (black, isort, ruff). null = auto-detect, true = force enable, false = disable";
-          };
-          shell = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "Enable Shell formatters (shfmt, shellcheck). null = auto-detect, true = force enable, false = disable";
-          };
-          rust = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "Enable Rust formatters (rustfmt). null = auto-detect, true = force enable, false = disable";
-          };
-          yaml = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "Enable YAML formatters (yamlfmt). null = auto-detect, true = force enable, false = disable";
-          };
-          markdown = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "Enable Markdown formatters (mdformat). null = auto-detect, true = force enable, false = disable";
-          };
-          json = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "Enable JSON formatters (jsonfmt, jq). null = auto-detect, true = force enable, false = disable";
-          };
-          misc = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "Enable miscellaneous formatters. null = auto-detect, true = force enable, false = disable";
-          };
-
-          # Configuration options
-          projectRootFile = lib.mkOption {
-            type = validatedFileName;
-            default = "flake.nix";
-            description = "File that marks the project root. Common choices: flake.nix, package.json, Cargo.toml, pyproject.toml";
-            example = "package.json";
-          };
-
-          enableDefaultExcludes = lib.mkOption {
-            type = lib.types.bool;
-            default = true;
-            description = "Enable default excludes for common patterns";
-          };
-
-          allowMissingFormatter = lib.mkOption {
-            type = lib.types.bool;
-            default = false;
-            description = "Allow missing formatters";
-          };
-
-          # Incremental formatting options
-          incremental = lib.mkOption {
-            type = lib.types.submodule {
-              options = {
-                enable = lib.mkEnableOption "Enable incremental formatting features";
-
-                mode = lib.mkOption {
-                  type = lib.types.enum [
-                    "git"
-                    "cache"
-                    "auto"
-                  ];
-                  default = "auto";
-                  description = "Incremental mode: git (use git for change detection), cache (use treefmt cache), auto (detect best method)";
-                };
-
-                cache = lib.mkOption {
-                  type = lib.types.str;
-                  default = "~/.cache/treefmt";
-                  description = "Cache directory for treefmt";
-                };
-
-                gitBased = lib.mkEnableOption "Use git for change detection";
-              };
-            };
-            default = { };
-            description = "Incremental formatting configuration";
-          };
-
-          # Performance profiles
-          performance = lib.mkOption {
-            type =
-              betterEnum [ "fast" "balanced" "thorough" ]
-                "Performance profile that balances speed vs thoroughness. 'fast' skips caching for speed, 'balanced' is recommended for most use cases, 'thorough' enables comprehensive checking but may be slower"
-                "balanced";
-            default = "balanced";
-            description = "Performance vs thoroughness trade-off";
-          };
-
-          # Git-specific options
-          gitOptions = lib.mkOption {
-            type = lib.types.submodule {
-              options = {
-                sinceCommit = lib.mkOption {
-                  type = lib.types.nullOr lib.types.str;
-                  default = null;
-                  description = "Format files changed since this commit";
-                };
-
-                stagedOnly = lib.mkEnableOption "Format only staged files";
-
-                branch = lib.mkOption {
-                  type = lib.types.str;
-                  default = "main";
-                  description = "Compare against this branch for change detection";
-                };
-              };
-            };
-            default = { };
-            description = "Git-based formatting options";
-          };
-        };
-      };
+      type = configSchema.types.projectConfig;
       default = { };
-      description = "Configuration for treefmt-flake";
+      description = "Configuration for treefmt-flake using unified schema";
+    };
+
+    # Legacy compatibility layer - will be deprecated in future versions
+    # These options are automatically migrated to the new unified schema
+    _legacyCompatMode = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      internal = true;
+      description = "Internal flag for legacy compatibility mode";
     };
   };
 
@@ -253,29 +114,33 @@ in
     let
       cfg = config.treefmtFlake;
 
+      # Validate the unified configuration
+      validationResult = configSchema.validation.validateConfig cfg;
+
       # Auto-detect project types and merge with user configuration
-      autoDetectedConfig = if cfg.autoDetect then projectDetection.generateAutoConfig ./. else { };
+      autoDetectedConfig = if cfg.autoDetection.enable then projectDetection.generateAutoConfig ./. else { };
+
+      # Extract formatter enable states from the unified schema
+      formatterStates = {
+        nix = cfg.formatters.nix.enable;
+        web = cfg.formatters.web.enable;
+        python = cfg.formatters.python.enable;
+        shell = cfg.formatters.shell.enable;
+        rust = cfg.formatters.rust.enable;
+        yaml = cfg.formatters.yaml.enable;
+        markdown = cfg.formatters.markdown.enable;
+        json = cfg.formatters.json.enable;
+        misc = cfg.formatters.misc.enable;
+      };
 
       # Merge auto-detected settings with user-specified settings
       # User settings take precedence over auto-detection
-      finalFormatterConfig = projectDetection.mergeWithUserConfig autoDetectedConfig {
-        inherit (cfg)
-          nix
-          web
-          python
-          shell
-          rust
-          yaml
-          markdown
-          json
-          misc
-          ;
-      };
+      finalFormatterConfig = projectDetection.mergeWithUserConfig autoDetectedConfig formatterStates;
 
       # Import formatter modules conditionally based on final enabled options
       formatterConfigs = lib.mkMerge (
         lib.optional (finalFormatterConfig.nix or false) (
-          if cfg.nixFormatter == "nixfmt-rfc-style" then
+          if cfg.formatters.nix.formatter == "nixfmt-rfc-style" then
             import ./formatters/nix-nixfmt.nix
           else
             import ./formatters/nix.nix
@@ -303,7 +168,7 @@ in
               balanced = [ ];
               thorough = [ "--walk" ];
             }
-            .${cfg.performance};
+            .${cfg.behavior.performance};
 
           # Incremental flags
           incrementalArgs = lib.optionals cfg.incremental.enable (
@@ -336,8 +201,8 @@ in
             TREEFMT_CMD="${baseWrapper}/bin/treefmt"
             CACHE_DIR="${cfg.incremental.cache}"
 
-            STAGED_ONLY="${if cfg.gitOptions.stagedOnly then "1" else ""}"
-            SINCE_COMMIT="${if cfg.gitOptions.sinceCommit != null then cfg.gitOptions.sinceCommit else ""}"
+            STAGED_ONLY="${if cfg.git.stagedOnly then "1" else ""}"
+            SINCE_COMMIT="${if cfg.git.sinceCommit != null then cfg.git.sinceCommit else ""}"
 
             # Ensure cache directory exists
             mkdir -p "$CACHE_DIR"
@@ -347,15 +212,15 @@ in
               if [[ -n "$STAGED_ONLY" ]]; then
                 # Only staged files
                 git diff --cached --name-only --diff-filter=ACMR
-              ${lib.optionalString (cfg.gitOptions.sinceCommit != null) ''
+              ${lib.optionalString (cfg.git.sinceCommit != null) ''
                 elif [[ -n "$SINCE_COMMIT" ]]; then
                   # Files changed since specific commit
                   git diff --name-only --diff-filter=ACMR "$SINCE_COMMIT"
               ''}
               else
                 # Files changed compared to main branch
-                git diff --name-only --diff-filter=ACMR "origin/${cfg.gitOptions.branch}...HEAD" 2>/dev/null || \
-                git diff --name-only --diff-filter=ACMR "${cfg.gitOptions.branch}...HEAD" 2>/dev/null || \
+                git diff --name-only --diff-filter=ACMR "origin/${cfg.git.branch}...HEAD" 2>/dev/null || \
+                git diff --name-only --diff-filter=ACMR "${cfg.git.branch}...HEAD" 2>/dev/null || \
                 git diff --name-only --diff-filter=ACMR HEAD~1
               fi
             }
@@ -371,7 +236,7 @@ in
               local files_array=()  # Initialize files_array for all code paths
 
               # Set performance environment variables
-              export PERFORMANCE_PROFILE="${cfg.behavior.performance or cfg.performance}"
+              export PERFORMANCE_PROFILE="${cfg.behavior.performance}"
               export CACHE_DIR="${cfg.incremental.cache}"
               export INCREMENTAL_MODE="${
                 if cfg.incremental.enable then
@@ -470,12 +335,12 @@ in
             inherit (cfg) projectRootFile;
 
             # Enable default excludes if requested
-            inherit (cfg) enableDefaultExcludes;
+            enableDefaultExcludes = cfg.behavior.enableDefaultExcludes;
 
             # Allow missing formatters if requested
             settings =
               {
-                allowMissingTools = cfg.allowMissingFormatter;
+                allowMissingTools = cfg.behavior.allowMissingFormatter;
               }
               // lib.optionalAttrs (cfg.incremental.enable && cfg.incremental.cache != "~/.cache/treefmt") {
                 # Configure cache directory if specified
