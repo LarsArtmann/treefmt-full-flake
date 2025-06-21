@@ -136,10 +136,10 @@ Adopt main's cleaner import pattern in flake-module.nix:
 ## Benefits of This Approach
 
 1. **Best of Both Worlds**: Power features + smart defaults
-2. **Beginner Friendly**: Works great out of the box
-3. **Power User Ready**: Full customization available
-4. **Migration Path**: Easy for both main and master users
-5. **Future Proof**: Extensible architecture for new formatters
+1. **Beginner Friendly**: Works great out of the box
+1. **Power User Ready**: Full customization available
+1. **Migration Path**: Easy for both main and master users
+1. **Future Proof**: Extensible architecture for new formatters
 
 ## Migration Guide
 
@@ -174,10 +174,10 @@ treefmtFlake = {
 ## Timeline
 
 1. Create unified branch (immediate)
-2. Port formatter configurations (1 hour)
-3. Add configuration options (2 hours)
-4. Update templates and docs (1 hour)
-5. Test thoroughly (1 hour)
-6. Create PR for review (immediate after)
+1. Port formatter configurations (1 hour)
+1. Add configuration options (2 hours)
+1. Update templates and docs (1 hour)
+1. Test thoroughly (1 hour)
+1. Create PR for review (immediate after)
 
 Total estimated time: ~5 hours of focused work

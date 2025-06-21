@@ -54,8 +54,8 @@ Run individual test directly:
 The tests automatically adapt for CI environments. The GitHub Actions workflow:
 
 1. Runs `setup-ci.sh` to create mock repositories
-2. Patches templates to use local file:// URLs instead of SSH
-3. Executes tests with CI-specific configurations
+1. Patches templates to use local file:// URLs instead of SSH
+1. Executes tests with CI-specific configurations
 
 ## Test Coverage
 
@@ -79,15 +79,15 @@ The tests automatically adapt for CI environments. The GitHub Actions workflow:
 Each test follows this sequence:
 
 1. **Template Initialization** - Creates template in temporary directory
-2. **Git Repository Setup** - Initializes git for version control features
-3. **File Verification** - Ensures template files exist
-4. **Flake Metadata Check** - Validates flake configuration
-5. **Test File Creation** - Creates files with formatting issues
-6. **Flake Check** - Runs `nix flake check`
-7. **Formatter Execution** - Runs `nix fmt`
-8. **Format Verification** - Checks files were correctly formatted
-9. **Format Check Mode** - Tests `--fail-on-change` flag
-10. **Development Shell** - Validates shell environment
+1. **Git Repository Setup** - Initializes git for version control features
+1. **File Verification** - Ensures template files exist
+1. **Flake Metadata Check** - Validates flake configuration
+1. **Test File Creation** - Creates files with formatting issues
+1. **Flake Check** - Runs `nix flake check`
+1. **Formatter Execution** - Runs `nix fmt`
+1. **Format Verification** - Checks files were correctly formatted
+1. **Format Check Mode** - Tests `--fail-on-change` flag
+1. **Development Shell** - Validates shell environment
 
 ## CI Configuration
 
@@ -96,8 +96,8 @@ Each test follows this sequence:
 Since the repository is private, CI environments need special handling:
 
 1. **Mock Repository**: `setup-ci.sh` creates a local bare git repository
-2. **Template Patching**: Creates `-ci` variants with `file://` URLs
-3. **Dynamic Path Resolution**: `test-wrapper.sh` provides path selection logic
+1. **Template Patching**: Creates `-ci` variants with `file://` URLs
+1. **Dynamic Path Resolution**: `test-wrapper.sh` provides path selection logic
 
 ### Environment Variables
 
@@ -138,9 +138,9 @@ Check test output in temporary directory (path shown in test output).
 To add tests for new formatters:
 
 1. Add test files in appropriate test script
-2. Create files with known formatting issues
-3. Add verification checks after formatting
-4. Update this documentation
+1. Create files with known formatting issues
+1. Add verification checks after formatting
+1. Update this documentation
 
 Example:
 

@@ -20,15 +20,15 @@ curl -sSL https://raw.githubusercontent.com/LarsArtmann/treefmt-full-flake/maste
 ## Manual Setup
 
 1. Copy the desired XML configuration to your project's `.idea` directory
-2. Adjust paths if necessary
-3. Restart your JetBrains IDE
+1. Adjust paths if necessary
+1. Restart your JetBrains IDE
 
 ## Import File Watcher
 
 1. Go to **Settings → Tools → File Watchers**
-2. Click the **Import** button
-3. Select `treefmt.xml` from this directory
-4. Enable the watchers you want to use
+1. Click the **Import** button
+1. Select `treefmt.xml` from this directory
+1. Enable the watchers you want to use
 
 ## Customization
 
@@ -44,6 +44,6 @@ Edit the XML files to:
 If File Watchers don't work:
 
 1. Ensure `nix build` has been run in your project
-2. Check that `./result/bin/treefmt` exists
-3. Verify file permissions
-4. Check IDE Event Log for errors
+1. Check that `./result/bin/treefmt` exists
+1. Verify file permissions
+1. Check IDE Event Log for errors

@@ -139,10 +139,10 @@ git push origin unified:master
 Rationale:
 
 1. The master branch contains all features from main plus significant improvements
-2. The option naming in master (`nix` vs `enableNix`) is cleaner
-3. Only one commit would be lost from main, which is just an initial commit
-4. Master has active development with 6 meaningful commits
-5. The incremental formatting and IDE integration are valuable features
+1. The option naming in master (`nix` vs `enableNix`) is cleaner
+1. Only one commit would be lost from main, which is just an initial commit
+1. Master has active development with 6 meaningful commits
+1. The incremental formatting and IDE integration are valuable features
 
 ## Implementation Steps
 
@@ -153,25 +153,26 @@ Rationale:
    git branch main-backup
    ```
 
-2. Replace main with master:
+1. Replace main with master:
 
    ```bash
    git checkout main
    git reset --hard origin/master
    ```
 
-3. Push to remote:
+1. Push to remote:
 
    ```bash
    git push --force-with-lease origin main
    ```
 
-4. Update default branch on GitHub:
+1. Update default branch on GitHub:
 
    - Go to Settings → Branches
    - Change default branch from main to master (or vice versa)
 
-5. Clean up:
+1. Clean up:
+
    ```bash
    # After verification, can delete the other branch
    git push origin --delete main  # or master, depending on choice

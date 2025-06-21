@@ -117,12 +117,12 @@
 ## Implementation Order
 
 1. **Immediate**: Fix test failures (1.1)
-2. **Next**: Push work (1.2)
-3. **Then**: Switch formatter default (1.3)
-4. **Then**: Create Nix shell (1.4)
-5. **After**: Refactor test library (2.1)
-6. **Finally**: Fix parallel runner (2.2)
-7. **Bonus**: Implement Cachix (2.3)
+1. **Next**: Push work (1.2)
+1. **Then**: Switch formatter default (1.3)
+1. **Then**: Create Nix shell (1.4)
+1. **After**: Refactor test library (2.1)
+1. **Finally**: Fix parallel runner (2.2)
+1. **Bonus**: Implement Cachix (2.3)
 
 ## Success Metrics
 

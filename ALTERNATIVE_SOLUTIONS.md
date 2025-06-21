@@ -73,7 +73,7 @@ Instead of a complex merge, take the pragmatic approach:
    extraOptions = ["--number"];
    ```
 
-2. **Create CREDITS.md** (10 mins):
+1. **Create CREDITS.md** (10 mins):
 
    ```markdown
    # Credits
@@ -84,12 +84,13 @@ Instead of a complex merge, take the pragmatic approach:
    developed in the main branch by Lars Artmann.
    ```
 
-3. **Update README.md** (20 mins):
+1. **Update README.md** (20 mins):
 
    - Add section explaining the formatter defaults
    - Show how to override them if needed
 
-4. **Archive main branch** (5 mins):
+1. **Archive main branch** (5 mins):
+
    ```bash
    git tag archive/main origin/main
    git push origin :main  # Delete remote main
@@ -100,10 +101,10 @@ Instead of a complex merge, take the pragmatic approach:
 ## Why This Is Better
 
 1. **Pragmatic**: Gets the value without the complexity
-2. **Fast**: Can be done immediately
-3. **Safe**: Minimal risk of breaking existing users
-4. **Clean**: No complex git history to maintain
-5. **Forward-looking**: Focus on future development
+1. **Fast**: Can be done immediately
+1. **Safe**: Minimal risk of breaking existing users
+1. **Clean**: No complex git history to maintain
+1. **Forward-looking**: Focus on future development
 
 ## Implementation Commands
 

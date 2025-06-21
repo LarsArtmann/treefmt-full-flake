@@ -5,17 +5,17 @@ Thank you for your interest in contributing to treefmt-full-flake! This document
 ## Quick Start
 
 1. **Fork the repository** on GitHub
-2. **Clone your fork** locally:
+1. **Clone your fork** locally:
    ```bash
    git clone https://github.com/your-username/treefmt-full-flake.git
    cd treefmt-full-flake
    ```
-3. **Enter the development environment**:
+1. **Enter the development environment**:
    ```bash
    nix develop
    ```
-4. **Make your changes** and test them
-5. **Submit a pull request**
+1. **Make your changes** and test them
+1. **Submit a pull request**
 
 ## Development Environment
 
@@ -65,10 +65,10 @@ treefmt-full-flake/
 ### Adding New Formatters
 
 1. **Create or extend** the appropriate file in `formatters/`
-2. **Follow the priority-based execution pattern** to prevent conflicts
-3. **Add configuration option** to `flake-module.nix`
-4. **Test with** `nix flake check`
-5. **Update templates** if the formatter is commonly needed
+1. **Follow the priority-based execution pattern** to prevent conflicts
+1. **Add configuration option** to `flake-module.nix`
+1. **Test with** `nix flake check`
+1. **Update templates** if the formatter is commonly needed
 
 Example formatter module structure:
 
@@ -129,9 +129,9 @@ nix fmt
 Test your changes with a real project:
 
 1. Create a test directory with sample files
-2. Initialize with your modified template
-3. Run formatting and verify results
-4. Check that all enabled formatters work correctly
+1. Initialize with your modified template
+1. Run formatting and verify results
+1. Check that all enabled formatters work correctly
 
 ## Submitting Changes
 
@@ -143,9 +143,9 @@ Test your changes with a real project:
    git checkout -b feature/my-improvement
    ```
 
-2. **Make your changes** following the guidelines above
+1. **Make your changes** following the guidelines above
 
-3. **Test thoroughly**:
+1. **Test thoroughly**:
 
    ```bash
    nix flake check
@@ -153,20 +153,20 @@ Test your changes with a real project:
    # Test with sample projects
    ```
 
-4. **Commit with clear messages**:
+1. **Commit with clear messages**:
 
    ```bash
    git add .
    git commit -m "feat: add support for new language formatter"
    ```
 
-5. **Push to your fork**:
+1. **Push to your fork**:
 
    ```bash
    git push origin feature/my-improvement
    ```
 
-6. **Create a pull request** on GitHub
+1. **Create a pull request** on GitHub
 
 ### Pull Request Guidelines
 

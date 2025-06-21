@@ -1,11 +1,13 @@
 # Integration test suite for validation systems
 # Tests security validation, config validation, and migration systems
-{ lib, pkgs, treefmt-flake }:
-
-let
+{
+  lib,
+  pkgs,
+  treefmt-flake,
+}: let
   # Import our library for testing
-  treefmtLib = import ../../lib { inherit lib; };
-  
+  treefmtLib = import ../../lib {inherit lib;};
+
   # Test configurations
   testConfigs = {
     # Valid unified schema configuration
@@ -13,15 +15,22 @@ let
       projectRootFile = "flake.nix";
       autoDetection.enable = true;
       formatters = {
-        nix = { 
-          enable = true; 
+        nix = {
+          enable = true;
           formatter = "nixfmt-rfc-style";
-          linting = { deadnix = true; statix = true; };
+          linting = {
+            deadnix = true;
+            statix = true;
+          };
         };
-        web = { 
-          enable = true; 
+        web = {
+          enable = true;
           formatter = "biome";
-          languages = { javascript = true; typescript = true; css = true; };
+          languages = {
+            javascript = true;
+            typescript = true;
+            css = true;
+          };
         };
       };
       behavior = {
@@ -65,7 +74,7 @@ let
 
     # Invalid configuration (security violations)
     invalidSecurity = {
-      projectRootFile = "../../../etc/passwd";  # Path traversal
+      projectRootFile = "../../../etc/passwd"; # Path traversal
       autoDetection.enable = false;
       formatters.nix.enable = false;
       behavior = {
@@ -76,12 +85,12 @@ let
       incremental = {
         enable = true;
         mode = "auto";
-        cache = "/tmp/../etc/shadow";  # Suspicious path
+        cache = "/tmp/../etc/shadow"; # Suspicious path
         gitBased = false;
       };
       git = {
-        sinceCommit = "$(rm -rf /)";  # Command injection
-        branch = "main; rm -rf /";     # Command injection
+        sinceCommit = "$(rm -rf /)"; # Command injection
+        branch = "main; rm -rf /"; # Command injection
         stagedOnly = false;
       };
     };
@@ -92,13 +101,16 @@ let
       autoDetection.enable = true;
       formatters = {
         nix = {
-          enable = "not-a-boolean";  # Type error
-          formatter = "unknown-formatter";  # Invalid enum
-          linting = { deadnix = true; statix = true; };
+          enable = "not-a-boolean"; # Type error
+          formatter = "unknown-formatter"; # Invalid enum
+          linting = {
+            deadnix = true;
+            statix = true;
+          };
         };
       };
       behavior = {
-        performance = "invalid-performance";  # Invalid enum
+        performance = "invalid-performance"; # Invalid enum
         allowMissingFormatter = false;
         enableDefaultExcludes = true;
       };
@@ -123,7 +135,10 @@ let
         nix = {
           enable = true;
           formatter = "nixfmt-rfc-style";
-          linting = { deadnix = true; statix = true; };
+          linting = {
+            deadnix = true;
+            statix = true;
+          };
         };
       };
       behavior = {
@@ -148,7 +163,7 @@ let
     empty = {
       projectRootFile = "flake.nix";
       autoDetection.enable = true;
-      formatters = { };
+      formatters = {};
       behavior = {
         performance = "balanced";
         allowMissingFormatter = false;
@@ -170,23 +185,21 @@ let
 
   # Test helper functions (runtime evaluation to avoid build-time failures)
   runValidationTest = name: config: expected:
-    # Defer validation to runtime to avoid build-time failures with invalid configs
-    {
-      inherit name config expected;
-      testType = "validation";
-    };
+  # Defer validation to runtime to avoid build-time failures with invalid configs
+  {
+    inherit name config expected;
+    testType = "validation";
+  };
 
-  runMigrationTest = name: legacyConfig: expected:
-    {
-      inherit name legacyConfig expected;
-      testType = "migration";
-    };
+  runMigrationTest = name: legacyConfig: expected: {
+    inherit name legacyConfig expected;
+    testType = "migration";
+  };
 
-  runSecurityTest = name: config: expected:
-    {
-      inherit name config expected;
-      testType = "security";
-    };
+  runSecurityTest = name: config: expected: {
+    inherit name config expected;
+    testType = "security";
+  };
 
   # Test suite definitions
   validationTests = [
@@ -195,17 +208,17 @@ let
       errorCount = 0;
       warningCount = 0;
     })
-    
+
     (runValidationTest "invalid-schema-config" testConfigs.invalidSchema {
       isValid = false;
-      errorCount = 3;  # Expecting multiple errors
+      errorCount = 3; # Expecting multiple errors
     })
-    
+
     (runValidationTest "minimal-config" testConfigs.minimal {
       isValid = true;
       errorCount = 0;
     })
-    
+
     (runValidationTest "empty-config" testConfigs.empty {
       isValid = true;
       errorCount = 0;
@@ -223,31 +236,29 @@ let
       isValid = true;
       minErrors = 0;
     })
-    
+
     (runSecurityTest "invalid-security-config" testConfigs.invalidSecurity {
       isValid = false;
-      minErrors = 3;  # Expecting multiple security violations
+      minErrors = 3; # Expecting multiple security violations
     })
   ];
 
   # Project detection tests
-  projectDetectionTests = 
-    let
-      testProjectDetection = name: projectPath: expected:
-        {
-          inherit name expected;
-          projectPath = projectPath;
-          testType = "projectDetection";
-        };
-    in [
-      (testProjectDetection "basic-project-detection" ./. {
-        nix = true;
-        markdown = true;
-        yaml = true;
-        misc = true;
-        # Others should be false for basic detection
-      })
-    ];
+  projectDetectionTests = let
+    testProjectDetection = name: projectPath: expected: {
+      inherit name expected;
+      projectPath = projectPath;
+      testType = "projectDetection";
+    };
+  in [
+    (testProjectDetection "basic-project-detection" ./. {
+      nix = true;
+      markdown = true;
+      yaml = true;
+      misc = true;
+      # Others should be false for basic detection
+    })
+  ];
 
   # Combine all tests
   allTests = validationTests ++ migrationTests ++ securityTests ++ projectDetectionTests;
@@ -269,7 +280,7 @@ let
     echo "🧪 treefmt-flake Validation Test Suite"
     echo "======================================"
     echo ""
-    
+
     # Test infrastructure summary
     echo "📊 Test Infrastructure:"
     echo "  Total Tests Defined: ${toString testResults.total}"
@@ -278,27 +289,28 @@ let
     echo "  Security Tests: ${toString testResults.categories.security}"
     echo "  Project Detection Tests: ${toString testResults.categories.projectDetection}"
     echo ""
-    
+
     # Test configuration validation
     echo "🔧 Testing Core Validation Functions:"
-    
+
     # Test the treefmt library is accessible
     echo "  ✅ treefmt-lib import: OK"
-    
+
     # Test basic validation function
     echo "  ✅ validateConfig function: OK"
     echo "  ✅ migrateConfig function: OK"
     echo "  ✅ securityValidation function: OK"
     echo "  ✅ projectDetection function: OK"
     echo ""
-    
+
     # Show test definitions
     echo "📋 Test Definitions:"
     ${lib.concatMapStringsSep "\n" (test: ''
-      echo "  • ${test.name} (${test.testType})"
-    '') allTests}
+        echo "  • ${test.name} (${test.testType})"
+      '')
+      allTests}
     echo ""
-    
+
     echo "🎉 Test infrastructure validation complete!"
     echo ""
     echo "💡 The validation functions are working correctly."
@@ -308,10 +320,8 @@ let
     echo ""
     echo "ℹ️  For detailed runtime testing, use the debug and validate CLI tools."
   '';
-
-in
-{
-  inherit 
+in {
+  inherit
     testConfigs
     testResults
     allTests
@@ -322,15 +332,15 @@ in
   tests = {
     inherit validationTests migrationTests securityTests projectDetectionTests;
   };
-  
+
   # Test utilities
   utils = {
     inherit runValidationTest runMigrationTest runSecurityTest;
   };
-  
+
   # Quick test runner for CI
-  quickTest = true;  # Infrastructure test - validates test framework is working
-  
+  quickTest = true; # Infrastructure test - validates test framework is working
+
   # Metadata
   meta = {
     description = "Integration test suite for treefmt-flake validation systems";

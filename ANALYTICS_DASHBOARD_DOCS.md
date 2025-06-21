@@ -257,13 +257,14 @@ bun run dashboard my-project              # Launch dashboard
    - Anonymized file paths
    - No personal information
 
-2. **Enhanced Analytics**
+1. **Enhanced Analytics**
 
    - Full file paths
    - Git branch/commit info
    - User identification
 
-3. **Team Analytics**
+1. **Team Analytics**
+
    - Multi-user data correlation
    - Team performance comparisons
    - Collaborative insights
@@ -311,7 +312,7 @@ bun run dashboard my-project              # Launch dashboard
 - **Benchmarks**:
   - Fast: >50 files/sec
   - Good: 20-50 files/sec
-  - Slow: <20 files/sec
+  - Slow: \<20 files/sec
 
 ### Quality Metrics
 
@@ -638,18 +639,18 @@ fi
 ### Performance Optimization Tips
 
 1. **Enable Parallel Processing**: 40-60% speed improvement
-2. **Use Incremental Formatting**: 10-100x speed on large repos
-3. **Optimize Formatter Configs**: Remove unnecessary rules
-4. **Monitor Resource Usage**: Prevent memory leaks
-5. **Regular Config Reviews**: Quarterly optimization audits
+1. **Use Incremental Formatting**: 10-100x speed on large repos
+1. **Optimize Formatter Configs**: Remove unnecessary rules
+1. **Monitor Resource Usage**: Prevent memory leaks
+1. **Regular Config Reviews**: Quarterly optimization audits
 
 ### Team Collaboration Guidelines
 
 1. **Share Aggregated Metrics**: Preserve individual privacy
-2. **Weekly Performance Reviews**: Track team improvements
-3. **Standardize Configurations**: Reduce setup friction
-4. **Document Best Practices**: Share optimization discoveries
-5. **Celebrate Improvements**: Recognize performance gains
+1. **Weekly Performance Reviews**: Track team improvements
+1. **Standardize Configurations**: Reduce setup friction
+1. **Document Best Practices**: Share optimization discoveries
+1. **Celebrate Improvements**: Recognize performance gains
 
 ---
 

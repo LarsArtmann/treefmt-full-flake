@@ -11,22 +11,22 @@ Cachix is a binary cache service for Nix that dramatically speeds up builds by s
 ### 1. Create a Cachix Account
 
 1. Go to [cachix.org](https://cachix.org) and sign up
-2. Create a new cache named `treefmt-full-flake`
+1. Create a new cache named `treefmt-full-flake`
 
 ### 2. Generate an Auth Token
 
 1. Go to your Cachix account settings
-2. Generate a new auth token with write access
-3. Copy the token (you'll need it for the next step)
+1. Generate a new auth token with write access
+1. Copy the token (you'll need it for the next step)
 
 ### 3. Add GitHub Secret
 
 1. Go to the GitHub repository settings
-2. Navigate to Settings → Secrets and variables → Actions
-3. Click "New repository secret"
-4. Name: `CACHIX_AUTH_TOKEN`
-5. Value: Paste your Cachix auth token
-6. Click "Add secret"
+1. Navigate to Settings → Secrets and variables → Actions
+1. Click "New repository secret"
+1. Name: `CACHIX_AUTH_TOKEN`
+1. Value: Paste your Cachix auth token
+1. Click "Add secret"
 
 ### 4. Enable Cachix in CI
 
@@ -73,8 +73,8 @@ Visit `https://app.cachix.org/cache/treefmt-full-flake` to see:
 Check that:
 
 1. `CACHIX_AUTH_TOKEN` secret is set correctly
-2. The cache name matches in workflows (`treefmt-full-flake`)
-3. The Cachix action version is up to date
+1. The cache name matches in workflows (`treefmt-full-flake`)
+1. The Cachix action version is up to date
 
 ### Local builds not using cache
 

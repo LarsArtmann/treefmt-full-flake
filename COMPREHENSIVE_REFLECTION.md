@@ -3,26 +3,26 @@
 ## What I Forgot
 
 1. **Incomplete Implementation**: Created timeout wrapper but only applied to 1/7 test files
-2. **No Verification**: Never tested that the timeout wrapper actually solves the macOS issue
-3. **Work Not Saved**: 5 commits sitting locally, not pushed to remote
-4. **Lost Focus**: Created documentation instead of finishing core fixes
-5. **No Test Run**: Haven't run a complete test to verify anything works
+1. **No Verification**: Never tested that the timeout wrapper actually solves the macOS issue
+1. **Work Not Saved**: 5 commits sitting locally, not pushed to remote
+1. **Lost Focus**: Created documentation instead of finishing core fixes
+1. **No Test Run**: Haven't run a complete test to verify anything works
 
 ## What Could Be Done Better
 
 ### Process Issues
 
 1. **One Task Completion**: Should finish applying timeout wrapper to ALL files before moving on
-2. **Immediate Testing**: Should test each change immediately after making it
-3. **Smaller Commits**: Should commit each file update separately for better tracking
-4. **Systematic Approach**: Follow the execution plan step-by-step instead of jumping around
+1. **Immediate Testing**: Should test each change immediately after making it
+1. **Smaller Commits**: Should commit each file update separately for better tracking
+1. **Systematic Approach**: Follow the execution plan step-by-step instead of jumping around
 
 ### Technical Issues
 
 1. **Platform Abstraction**: Should have provided tools via Nix instead of OS detection
-2. **Code Duplication**: Repeated timeout logic across multiple files
-3. **No Integration Testing**: Testing formatters in isolation misses real-world issues
-4. **Bash Complexity**: Growing shell script complexity, should consider better tools
+1. **Code Duplication**: Repeated timeout logic across multiple files
+1. **No Integration Testing**: Testing formatters in isolation misses real-world issues
+1. **Bash Complexity**: Growing shell script complexity, should consider better tools
 
 ## Architectural Problems Causing Issues
 
@@ -158,22 +158,22 @@
 ### Phase 1: Critical Path (Now)
 
 1. Apply timeout wrapper to remaining 6 files in parallel
-2. Test minimal template works
-3. Push everything
-4. Switch default formatter
+1. Test minimal template works
+1. Push everything
+1. Switch default formatter
 
 ### Phase 2: Infrastructure (This Week)
 
 1. Fix parallel runner
-2. Create test shell.nix
-3. Apply flake lock strategy
-4. Refactor test library
+1. Create test shell.nix
+1. Apply flake lock strategy
+1. Refactor test library
 
 ### Phase 3: Optimization (Next Week)
 
 1. Set up Cachix
-2. Create performance benchmarks
-3. GitHub issues for future work
+1. Create performance benchmarks
+1. GitHub issues for future work
 
 ## Success Metrics
 

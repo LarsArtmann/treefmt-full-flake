@@ -11,8 +11,8 @@ Research confirms that Alejandra has a known non-determinism issue where formatt
 Alejandra can produce different formatting results when run multiple times on the same file. The issue manifests as follows:
 
 1. **First run**: Applies initial formatting based on the input structure
-2. **Second run**: May apply slightly different formatting, particularly around function arguments and indentation
-3. **Subsequent runs**: Usually stabilizes after the second pass
+1. **Second run**: May apply slightly different formatting, particularly around function arguments and indentation
+1. **Subsequent runs**: Usually stabilizes after the second pass
 
 ### Example Case
 
@@ -71,9 +71,9 @@ The non-determinism stems from Alejandra allowing the input formatting to influe
 ### Key Advantages
 
 1. **Official Standard**: Implements RFC 166, making it the community-approved formatting standard
-2. **Active Development**: Actively maintained by the NixOS team
-3. **Deterministic Output**: Designed to produce consistent output on repeated runs
-4. **Future-proof**: Will become the default formatter for Nixpkgs
+1. **Active Development**: Actively maintained by the NixOS team
+1. **Deterministic Output**: Designed to produce consistent output on repeated runs
+1. **Future-proof**: Will become the default formatter for Nixpkgs
 
 ### Comparison with Alejandra
 
@@ -175,13 +175,14 @@ Then configure treefmt to use this wrapper script.
    - Avoids non-determinism issues
    - Future-proof for Nixpkgs contributions
 
-2. **Migration Path**:
+1. **Migration Path**:
 
    - Update `formatters/nix.nix` to use nixfmt-rfc-style
    - Update documentation to explain the change
    - Consider providing both options during a transition period
 
-3. **For Existing Alejandra Users**:
+1. **For Existing Alejandra Users**:
+
    - Document the non-determinism issue
    - Provide the double-format workaround
    - Encourage migration to nixfmt-rfc-style

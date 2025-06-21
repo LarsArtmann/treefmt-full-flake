@@ -106,7 +106,7 @@ nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/abc123def
    git commit -m "chore: Update flake.lock"
    ```
 
-2. **Document why updates were needed**
+1. **Document why updates were needed**
 
    ```bash
    git commit -m "chore: Update nixpkgs for nixfmt-rfc-style support
@@ -114,7 +114,8 @@ nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/abc123def
    Required for deterministic Nix formatting"
    ```
 
-3. **Test after updates**
+1. **Test after updates**
+
    ```bash
    nix flake update
    ./tests/run-all-tests.sh
@@ -128,11 +129,12 @@ nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/abc123def
 
    - Keep lock updates in separate commits
 
-2. **Don't update in CI unless testing updates**
+1. **Don't update in CI unless testing updates**
 
    - CI should use committed lock files
 
-3. **Don't ignore lock file conflicts**
+1. **Don't ignore lock file conflicts**
+
    - Resolve conflicts carefully, test thoroughly
 
 ## Troubleshooting
@@ -176,9 +178,9 @@ nix flake metadata --json | jq '.locks.nodes.nixpkgs.locked.rev'
 ## Update Schedule
 
 1. **Weekly**: Automated PR with dependency updates
-2. **Before Release**: Manual update and full test
-3. **Security**: Immediate update for security fixes
-4. **On-demand**: When new features are needed
+1. **Before Release**: Manual update and full test
+1. **Security**: Immediate update for security fixes
+1. **On-demand**: When new features are needed
 
 ## Implementation in Tests
 
@@ -216,6 +218,6 @@ nix fmt --no-update-lock-file
 The key to flake lock management is consistency:
 
 1. Main repo: Keep updated, commit changes
-2. Tests: Start fresh or copy from main
-3. CI: Use committed locks, no updates
-4. Always use `--no-update-lock-file` in automated contexts
+1. Tests: Start fresh or copy from main
+1. CI: Use committed locks, no updates
+1. Always use `--no-update-lock-file` in automated contexts
