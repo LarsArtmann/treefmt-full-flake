@@ -3,6 +3,9 @@
   lib,
   ...
 }: let
+  # Import security validation
+  securityValidation = import ./lib/security-validation.nix {inherit lib;};
+
   # Inline validation helpers for now
   betterEnum = values: description: exampleValue:
     lib.types.enum values
@@ -25,13 +28,28 @@
         else throw "projectRootFile must be a filename (not a path) that exists in your project root. Got: '${toString x}'";
     };
 
-  # Runtime validation warnings
-  generateRuntimeValidation = cfg: ''
-    # Check for common project files and provide helpful info
-    if [[ ! -e "${cfg.projectRootFile}" ]]; then
-      echo "⚠️  Warning: projectRootFile '${cfg.projectRootFile}' not found"
-      echo "   Consider verifying the path or updating projectRootFile option"
-    fi
+  # Runtime validation warnings with security checks
+  generateRuntimeValidation = cfg: let
+    securityReport = securityValidation.validateSecurity cfg;
+  in ''
+    # Security validation first
+    ${lib.optionalString (!securityReport.isValid) ''
+      echo "🔒 Security validation failed:"
+      ${lib.concatMapStringsSep "\n" (error: "echo \"❌ ${error}\"") securityReport.errors}
+      exit 1
+    ''}
+
+    # Security warnings and recommendations
+    ${lib.optionalString (securityReport.warnings != []) ''
+      ${lib.concatMapStringsSep "\n" (warning: "echo \"⚠️  ${warning}\"") securityReport.warnings}
+    ''}
+
+    ${lib.optionalString (securityReport.recommendations != []) ''
+      ${lib.concatMapStringsSep "\n" (recommendation: "echo \"🔒 ${recommendation}\"") securityReport.recommendations}
+    ''}
+
+    # Secure file existence checks
+    ${securityValidation.secureFileCheck cfg.projectRootFile "projectRootFile"}
 
     ${lib.optionalString cfg.nix ''
       if [[ ! -f "flake.nix" && ! -f "default.nix" && ! -f "shell.nix" ]]; then
@@ -207,10 +225,7 @@ in {
 
     # Create git-aware wrapper script for incremental formatting
     createIncrementalWrapper = pkgs: baseWrapper:
-      pkgs.writeShellScriptBin "treefmt-incremental" ''
-        #!/usr/bin/env bash
-        set -euo pipefail
-
+      pkgs.writeShellScriptBin "treefmt-incremental" (securityValidation.createSecureWrapper ''
         # Runtime configuration validation
         ${generateRuntimeValidation cfg}
 
@@ -316,7 +331,7 @@ in {
 
         # Main execution
         run_treefmt "$@"
-      '';
+      '');
   in {
     perSystem = {
       config,
