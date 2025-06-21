@@ -149,7 +149,7 @@
     // {
       check = x:
         if lib.isString x && validator x
-        then x
+        then true
         else throw "Invalid string value '${toString x}': ${description}";
     };
 
