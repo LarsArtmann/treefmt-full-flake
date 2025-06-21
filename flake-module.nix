@@ -5,57 +5,20 @@
   ...
 }:
 let
-  # Import security validation
-  securityValidation = import ./lib/security-validation.nix { inherit lib; };
-
-  # Import config validation
-  configValidation = import ./lib/config-validation.nix { inherit lib; };
-
-  # Import unified config schema
-  configSchema = import ./lib/config-schema.nix { inherit lib; };
-
-  # Import performance tracking
-  performanceTracking = import ./lib/performance-tracking.nix { inherit lib; };
-
-  # Import project detection - inline for now due to flake evaluation context
-  # TODO: Extract to separate module once import path issues are resolved
-  projectDetection = {
-    # Simplified auto-detection for initial implementation
-    generateAutoConfig = _projectPath: {
-      # Enable commonly needed formatters by default
-      nix = true; # Most Nix projects need this
-      markdown = true; # Most projects have README.md
-      yaml = true; # Common in CI/config files
-      misc = true; # Enable misc formatters for testing TypeSpec
-
-      # Enable others based on simple heuristics
-      # In a real implementation, we'd check for specific files
-      # For now, provide sensible defaults
-    };
-
-    mergeWithUserConfig =
-      autoDetected: userConfig:
-      # Smart merge: user explicit settings override auto-detection, null values use auto-detection
-      lib.mapAttrs (
-        name: userValue:
-        if userValue != null then
-          userValue # User explicitly set this
-        else
-          autoDetected.${name} or false # Use auto-detected value or false if not present
-      ) userConfig;
-  };
+  # Import centralized library system
+  treefmtLib = import ./lib { inherit lib; };
 
   # Use imported validation helpers
-  inherit (configValidation) betterEnum;
+  inherit (treefmtLib) betterEnum;
 
   # Use proper filename validation
-  validatedFileName = configValidation.validatedString configValidation.stringValidators.isFileName "projectRootFile must be a filename (not a path) that exists in your project root";
+  validatedFileName = treefmtLib.configValidation.validatedString treefmtLib.configValidation.stringValidators.isFileName "projectRootFile must be a filename (not a path) that exists in your project root";
 
   # Runtime validation warnings with security checks
   generateRuntimeValidation =
     cfg:
     let
-      securityReport = securityValidation.validateSecurity cfg;
+      securityReport = treefmtLib.securityValidation.validateSecurity cfg;
     in
     ''
       # Security validation first
@@ -77,7 +40,7 @@ let
       ''}
 
       # Secure file existence checks
-      ${securityValidation.secureFileCheck cfg.projectRootFile "projectRootFile"}
+      ${treefmtLib.securityValidation.secureFileCheck cfg.projectRootFile "projectRootFile"}
 
       ${lib.optionalString cfg.formatters.nix.enable ''
         if [[ ! -f "flake.nix" && ! -f "default.nix" && ! -f "shell.nix" ]]; then
@@ -95,7 +58,7 @@ in
 {
   options = {
     treefmtFlake = lib.mkOption {
-      type = configSchema.types.projectConfig;
+      type = treefmtLib.configSchema.types.projectConfig;
       default = { };
       description = "Configuration for treefmt-flake using unified schema";
     };
@@ -115,10 +78,10 @@ in
       cfg = config.treefmtFlake;
 
       # Validate the unified configuration
-      validationResult = configSchema.validation.validateConfig cfg;
+      validationResult = treefmtLib.validateConfig cfg;
 
       # Auto-detect project types and merge with user configuration
-      autoDetectedConfig = if cfg.autoDetection.enable then projectDetection.generateAutoConfig ./. else { };
+      autoDetectedConfig = if cfg.autoDetection.enable then treefmtLib.projectDetection.generateAutoConfig ./. else { };
 
       # Extract formatter enable states from the unified schema
       formatterStates = {
@@ -135,9 +98,9 @@ in
 
       # Merge auto-detected settings with user-specified settings
       # User settings take precedence over auto-detection
-      finalFormatterConfig = projectDetection.mergeWithUserConfig autoDetectedConfig formatterStates;
+      finalFormatterConfig = treefmtLib.projectDetection.mergeWithUserConfig autoDetectedConfig formatterStates;
 
-      # Import formatter modules conditionally based on final enabled options
+      # Load formatter modules - temporarily using direct imports during transition
       formatterConfigs = lib.mkMerge (
         lib.optional (finalFormatterConfig.nix or false) (
           if cfg.formatters.nix.formatter == "nixfmt-rfc-style" then
@@ -193,7 +156,7 @@ in
       createIncrementalWrapper =
         pkgs: baseWrapper:
         pkgs.writeShellScriptBin "treefmt-incremental" (
-          securityValidation.createSecureWrapper ''
+          treefmtLib.securityValidation.createSecureWrapper ''
             # Runtime configuration validation
             ${generateRuntimeValidation cfg}
 
@@ -228,7 +191,7 @@ in
             # Function to run treefmt with comprehensive performance tracking
             run_treefmt() {
               # Import performance tracking functions
-              ${performanceTracking.shellHelpers.exportAll}
+              ${treefmtLib.performanceTracking.shellHelpers.exportAll}
 
               # Initialize performance tracking
               local start_time=$(date +%s.%N)
