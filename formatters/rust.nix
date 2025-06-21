@@ -2,7 +2,7 @@
   # Rust formatter
   rustfmt = {
     enable = true;
-    includes = ["**/*.rs"];
+    includes = ["*.rs"];
     priority = 1;
   };
 }
