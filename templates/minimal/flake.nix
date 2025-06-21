@@ -21,9 +21,15 @@
     };
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
-      systems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
 
       imports = [
         # Import treefmt-nix and treefmt-flake modules
@@ -31,39 +37,54 @@
         inputs.treefmt-flake.flakeModule
       ];
 
-      # Configure minimal formatter set
+      # Configure minimal formatter set using unified schema
       treefmtFlake = {
-        nix = true;
-        markdown = true;
-        yaml = true;
-
-        # Configure project root
+        # Project configuration
         projectRootFile = "flake.nix";
-      };
-
-      perSystem = {
-        config,
-        pkgs,
-        ...
-      }: {
-        # Create a development shell with all tools
-        devShells.default = pkgs.mkShell {
-          buildInputs = [
-            # Formatters
-            config.treefmt.build.wrapper
-          ];
-
-          shellHook = ''
-            echo "Welcome to the minimal treefmt environment!"
-            echo ""
-            echo "Commands:"
-            echo "  nix fmt                     - Format all files"
-            echo "  nix fmt -- --fail-on-change  - Check formatting"
-            echo ""
-            echo "📖 Quick Start: https://github.com/LarsArtmann/treefmt-full-flake/blob/master/QUICKSTART.md"
-            echo ""
-          '';
+        
+        # Auto-detection settings
+        autoDetection.enable = true;
+        
+        # Essential formatters for most projects
+        formatters = {
+          nix.enable = true;          # Nix code formatting
+          markdown.enable = true;     # README and documentation
+          yaml.enable = true;         # Configuration files
+        };
+        
+        # Performance and behavior settings
+        behavior = {
+          performance = "balanced";
+          allowMissingFormatter = false;
+          enableDefaultExcludes = true;
         };
       };
+
+      perSystem =
+        {
+          config,
+          pkgs,
+          ...
+        }:
+        {
+          # Create a development shell with all tools
+          devShells.default = pkgs.mkShell {
+            buildInputs = [
+              # Formatters
+              config.treefmt.build.wrapper
+            ];
+
+            shellHook = ''
+              echo "Welcome to the minimal treefmt environment!"
+              echo ""
+              echo "Commands:"
+              echo "  nix fmt                     - Format all files"
+              echo "  nix fmt -- --fail-on-change  - Check formatting"
+              echo ""
+              echo "📖 Quick Start: https://github.com/LarsArtmann/treefmt-full-flake/blob/master/QUICKSTART.md"
+              echo ""
+            '';
+          };
+        };
     };
 }

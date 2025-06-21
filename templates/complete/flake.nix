@@ -21,9 +21,15 @@
     };
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
-      systems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
 
       imports = [
         # Import treefmt-nix and treefmt-flake modules
@@ -31,82 +37,175 @@
         inputs.treefmt-flake.flakeModule
       ];
 
-      # Enable all formatter groups
+      # Complete configuration using unified schema with all features enabled
       treefmtFlake = {
-        nix = true;
-        web = true;
-        python = true;
-        shell = true;
-        rust = true;
-        yaml = true;
-        markdown = true;
-        misc = true;
-
-        # Configure project root
+        # Project configuration
         projectRootFile = "flake.nix";
-
-        # Enable default excludes
-        enableDefaultExcludes = true;
-
-        # Don't allow missing formatters
-        allowMissingFormatter = false;
-
-        # Enable incremental formatting for 10-100x faster formatting
+        
+        # Auto-detection settings with aggressive detection
+        autoDetection = {
+          enable = true;
+          aggressive = false;  # Set to true for more formatters
+          override = "merge";  # How to handle auto-detection vs user settings
+        };
+        
+        # All available formatters enabled
+        formatters = {
+          nix = {
+            enable = true;
+            formatter = "nixfmt-rfc-style";  # Deterministic Nix formatting
+            linting = {
+              deadnix = true;   # Dead code detection
+              statix = true;    # Nix linting
+            };
+          };
+          
+          web = {
+            enable = true;
+            formatter = "biome";  # Fast JS/TS/CSS formatter
+            languages = {
+              javascript = true;
+              typescript = true;
+              css = true;
+              scss = true;
+              json = true;
+              html = false;  # Optional, enable if needed
+            };
+          };
+          
+          python = {
+            enable = true;
+            formatters = {
+              black = true;      # Code formatting
+              isort = true;      # Import sorting  
+              ruff = true;       # Fast linting and formatting
+            };
+          };
+          
+          shell = {
+            enable = true;
+            formatters = {
+              shfmt = true;      # Shell script formatting
+              shellcheck = true; # Shell script linting
+            };
+          };
+          
+          rust = {
+            enable = true;
+            formatters = {
+              rustfmt = true;    # Rust code formatting
+            };
+          };
+          
+          yaml = {
+            enable = true;
+            formatters = {
+              yamlfmt = true;    # YAML formatting
+            };
+          };
+          
+          markdown = {
+            enable = true;
+            formatters = {
+              mdformat = true;   # Markdown formatting
+            };
+          };
+          
+          json = {
+            enable = true;
+            formatters = {
+              jsonfmt = true;    # JSON formatting
+            };
+          };
+          
+          misc = {
+            enable = true;
+            tools = {
+              buf = true;        # Protocol Buffer formatting
+              taplo = true;      # TOML formatting
+              just = true;       # Justfile formatting
+              actionlint = true; # GitHub Actions linting
+            };
+          };
+        };
+        
+        # Performance and behavior settings
+        behavior = {
+          performance = "balanced";  # fast/balanced/thorough
+          allowMissingFormatter = false;
+          enableDefaultExcludes = true;
+        };
+        
+        # Advanced incremental formatting (10-100x faster for large projects)
         incremental = {
           enable = true;
-          mode = "git"; # Use git for change detection
+          mode = "git";  # git/cache/auto
+          cache = "./.cache/treefmt";
           gitBased = true;
-          cache = "./.cache/treefmt"; # Project-local cache
+          performance = {
+            parallel = true;   # Enable parallel processing
+            maxJobs = 4;       # Maximum parallel jobs
+          };
         };
-
-        # Use balanced performance profile (fast/balanced/thorough)
-        performance = "balanced";
-
-        # Git-specific options for incremental formatting
-        gitOptions = {
-          branch = "main"; # Compare against main branch
-          stagedOnly = false; # Format all changed files, not just staged
-        };
-      };
-
-      perSystem = {
-        config,
-        pkgs,
-        ...
-      }: {
-        # Create a development shell with all tools
-        devShells.default = pkgs.mkShell {
-          buildInputs = [
-            # Formatters
-            config.treefmt.build.wrapper
-          ];
-
-          shellHook = ''
-            echo "Welcome to the project development environment!"
-            echo ""
-            echo "Available formatting commands:"
-            echo "  nix fmt                     - Format all files (incremental when enabled)"
-            echo "  nix fmt -- --fail-on-change  - Check formatting without changes"
-            echo ""
-            echo "Incremental formatting commands (10-100x faster):"
-            echo "  nix run .#treefmt-fast     - Ultra-fast formatting (no cache)"
-            echo "  nix run .#treefmt-staged   - Format only staged files"
-            echo "  nix run .#treefmt-since    - Format files changed since commit"
-            echo ""
-            echo "Performance profiles:"
-            echo "  fast      - Skip expensive operations, no cache"
-            echo "  balanced  - Default performance with smart caching"
-            echo "  thorough  - Comprehensive checking with full walk"
-            echo ""
-            echo "📖 Quick Start Guide: https://github.com/LarsArtmann/treefmt-full-flake/blob/master/QUICKSTART.md"
-            echo ""
-          '';
-        };
-
-        # Example of extending the configuration with custom formatters
-        treefmt.programs = {
-          # Add any project-specific formatter configurations here
+        
+        # Git integration settings
+        git = {
+          branch = "main";       # Compare against main branch
+          stagedOnly = false;    # Format all changed files
+          sinceCommit = null;    # Optional: format since specific commit
+          hooks = {
+            preCommit = false;   # Set to true to install pre-commit hook
+            prePush = false;     # Set to true to install pre-push hook
+          };
         };
       };
+
+      perSystem =
+        {
+          config,
+          pkgs,
+          ...
+        }:
+        {
+          # Create a development shell with all tools
+          devShells.default = pkgs.mkShell {
+            buildInputs = [
+              # Formatters
+              config.treefmt.build.wrapper
+            ];
+
+            shellHook = ''
+              echo "🚀 Welcome to the complete treefmt development environment!"
+              echo ""
+              echo "📝 Formatting Commands:"
+              echo "  nix fmt                     - Format all files (incremental)"
+              echo "  nix fmt -- --check         - Check formatting without changes"
+              echo ""
+              echo "⚡ Incremental Commands (10-100x faster):"
+              echo "  nix run .#treefmt-fast     - Ultra-fast formatting (no cache)"
+              echo "  nix run .#treefmt-staged   - Format only staged files"
+              echo "  nix run .#treefmt-since    - Format files changed since commit"
+              echo ""
+              echo "🔧 Debug & Validation:"
+              echo "  nix run .#treefmt-debug    - Show detailed configuration analysis"
+              echo "  nix run .#treefmt-validate - Validate configuration and formatters"
+              echo "  nix run .#test-validation   - Run integration test suite"
+              echo ""
+              echo "🎯 Performance Profiles (behavior.performance):"
+              echo "  fast      - Skip expensive operations, no cache"
+              echo "  balanced  - Default performance with smart caching"
+              echo "  thorough  - Comprehensive checking with full walk"
+              echo ""
+              echo "💡 All formatters enabled: Nix, Web, Python, Shell, Rust, YAML, Markdown, JSON, Misc"
+              echo "📖 Documentation: https://github.com/LarsArtmann/treefmt-full-flake"
+              echo ""
+            '';
+          };
+
+          # Example of extending the configuration with custom formatters
+          treefmt.programs = {
+            # Add any project-specific formatter configurations here
+          };
+        };
     };
 }
