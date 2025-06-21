@@ -12,6 +12,9 @@
   # Import unified config schema
   configSchema = import ./lib/config-schema.nix {inherit lib;};
 
+  # Import performance tracking
+  performanceTracking = import ./lib/performance-tracking.nix {inherit lib;};
+
   # Import project detection - inline for now due to flake evaluation context
   # TODO: Extract to separate module once import path issues are resolved
   projectDetection = {
@@ -297,10 +300,36 @@ in {
           fi
         }
 
-        # Function to run treefmt with performance profiling
+        # Function to run treefmt with comprehensive performance tracking
         run_treefmt() {
+          # Import performance tracking functions
+          ${performanceTracking.shellHelpers.exportAll}
+
+          # Initialize performance tracking
           local start_time=$(date +%s.%N)
           local file_count=0
+
+          # Set performance environment variables
+          export PERFORMANCE_PROFILE="${cfg.behavior.performance or cfg.performance}"
+          export CACHE_DIR="${cfg.incremental.cache}"
+          export INCREMENTAL_MODE="${
+          if cfg.incremental.enable
+          then
+            if cfg.incremental.gitBased
+            then "git"
+            else cfg.incremental.mode
+          else "full"
+        }"
+          export CACHE_ENABLED="${
+          if cfg.incremental.enable
+          then "enabled"
+          else "disabled"
+        }"
+          export PARALLEL_ENABLED="${
+          if cfg.incremental.performance.parallel or false
+          then "enabled"
+          else "disabled"
+        }"
 
           INCREMENTAL_ENABLE="${
           if cfg.incremental.enable
@@ -358,7 +387,14 @@ in {
           local end_time=$(date +%s.%N)
           local duration=$(echo "$end_time - $start_time" | bc 2>/dev/null || echo "0")
 
-          echo "Formatting completed in ''${duration}s (''${file_count} files, ${cfg.performance} profile)"
+          # Generate comprehensive performance report
+          if [[ "''${TREEFMT_VERBOSE:-}" == "1" || "$file_count" -gt 20 ]]; then
+            # Full detailed report for verbose mode or large file counts
+            generate_performance_report "$start_time" "$end_time" "$file_count" "''${files_array[@]}"
+          else
+            # Quick summary for normal operations
+            generate_quick_report "$duration" "$file_count" "''${PERFORMANCE_PROFILE}"
+          fi
         }
 
         # Main execution
