@@ -21,28 +21,31 @@ let
       securityReport = treefmtLib.securityValidation.validateSecurity cfg;
     in
     ''
-      # Security validation first
+      # Enhanced validation output with colors and structure
       ${lib.optionalString (!securityReport.isValid) ''
-        echo "🔒 Security validation failed:"
-        ${lib.concatMapStringsSep "\n" (error: "echo \"❌ ${error}\"") securityReport.errors}
+        # Format security errors with enhanced styling
+        cat << 'EOF'
+${treefmtLib.errorFormatting.prebuilt.securityValidation securityReport}
+EOF
         exit 1
       ''}
 
-      # Deprecation warnings for legacy configuration
+      # Enhanced deprecation warnings
       ${lib.optionalString (deprecationWarnings != [ ]) ''
-        ${lib.concatMapStringsSep "\n" (warning: "echo \"⚠️  ${warning}\"") deprecationWarnings}
+        cat << 'EOF'
+${treefmtLib.errorFormatting.formatDeprecationWarnings deprecationWarnings}
+EOF
         echo ""
       ''}
 
-      # Security warnings and recommendations
-      ${lib.optionalString (securityReport.warnings != [ ]) ''
-        ${lib.concatMapStringsSep "\n" (warning: "echo \"⚠️  ${warning}\"") securityReport.warnings}
-      ''}
-
-      ${lib.optionalString (securityReport.recommendations != [ ]) ''
-        ${lib.concatMapStringsSep "\n" (
-          recommendation: "echo \"🔒 ${recommendation}\""
-        ) securityReport.recommendations}
+      # Enhanced security warnings and recommendations (non-fatal)
+      ${lib.optionalString (securityReport.warnings != [ ] || securityReport.recommendations != [ ]) ''
+        cat << 'EOF'
+${treefmtLib.errorFormatting.generateShellOutput [
+  (treefmtLib.errorFormatting.formatWarnings securityReport.warnings)
+  (treefmtLib.errorFormatting.formatRecommendations securityReport.recommendations)
+]}
+EOF
       ''}
 
       # Secure file existence checks
@@ -262,23 +265,10 @@ in
       # User settings take precedence over auto-detection
       finalFormatterConfig = treefmtLib.projectDetection.mergeWithUserConfig autoDetectedConfig formatterStates;
 
-      # Load formatter modules - temporarily using direct imports during transition
-      formatterConfigs = lib.mkMerge (
-        lib.optional (finalFormatterConfig.nix or false) (
-          if cfg.formatters.nix.formatter == "nixfmt-rfc-style" then
-            import ./formatters/nix-nixfmt.nix
-          else
-            import ./formatters/nix.nix
-        )
-        ++ lib.optional (finalFormatterConfig.web or false) (import ./formatters/web.nix)
-        ++ lib.optional (finalFormatterConfig.python or false) (import ./formatters/python.nix)
-        ++ lib.optional (finalFormatterConfig.shell or false) (import ./formatters/shell.nix)
-        ++ lib.optional (finalFormatterConfig.rust or false) (import ./formatters/rust.nix)
-        ++ lib.optional (finalFormatterConfig.yaml or false) (import ./formatters/yaml.nix)
-        ++ lib.optional (finalFormatterConfig.markdown or false) (import ./formatters/markdown.nix)
-        ++ lib.optional (finalFormatterConfig.json or false) (import ./formatters/json.nix)
-        ++ lib.optional (finalFormatterConfig.misc or false) (import ./formatters/misc.nix)
-      );
+      # Load formatter modules using the centralized formatter registry
+      formatterConfigs = treefmtLib.loadFormatterModules 
+        finalFormatterConfig 
+        cfg.formatters.nix.formatter;
 
       # Generate treefmt CLI arguments based on configuration
       generateTreefmtArgs =
