@@ -2,7 +2,50 @@
   config,
   lib,
   ...
-}: {
+}: let
+  # Inline validation helpers for now
+  betterEnum = values: description: exampleValue:
+    lib.types.enum values
+    // {
+      name = "enum";
+      description = "${description}\nAllowed values: ${lib.concatStringsSep ", " values}\nExample: ${exampleValue}";
+      check = x:
+        if lib.elem x values
+        then true
+        else throw "Invalid value '${toString x}'. Must be one of: ${lib.concatStringsSep ", " values}";
+    };
+
+  # Simple filename validation
+  validatedFileName =
+    lib.types.str
+    // {
+      check = x:
+        if lib.isString x && !lib.hasInfix "/" x && x != ""
+        then true
+        else throw "projectRootFile must be a filename (not a path) that exists in your project root. Got: '${toString x}'";
+    };
+
+  # Runtime validation warnings
+  generateRuntimeValidation = cfg: ''
+    # Check for common project files and provide helpful info
+    if [[ ! -e "${cfg.projectRootFile}" ]]; then
+      echo "⚠️  Warning: projectRootFile '${cfg.projectRootFile}' not found"
+      echo "   Consider verifying the path or updating projectRootFile option"
+    fi
+
+    ${lib.optionalString cfg.nix ''
+      if [[ ! -f "flake.nix" && ! -f "default.nix" && ! -f "shell.nix" ]]; then
+        echo "💡 Info: Nix formatters enabled - will format *.nix files if found"
+      fi
+    ''}
+
+    ${lib.optionalString cfg.rust ''
+      if [[ ! -f "Cargo.toml" ]]; then
+        echo "💡 Info: Rust formatters enabled - will format *.rs files if found"
+      fi
+    ''}
+  '';
+in {
   options = {
     treefmtFlake = lib.mkOption {
       type = lib.types.submodule {
@@ -13,9 +56,13 @@
 
           # Nix formatter choice
           nixFormatter = lib.mkOption {
-            type = lib.types.enum ["alejandra" "nixfmt-rfc-style"];
+            type =
+              betterEnum
+              ["alejandra" "nixfmt-rfc-style"]
+              "Which Nix formatter to use. nixfmt-rfc-style is deterministic and recommended for consistent formatting across environments"
+              "nixfmt-rfc-style";
             default = "nixfmt-rfc-style";
-            description = "Which Nix formatter to use. nixfmt-rfc-style is deterministic and recommended.";
+            description = "Nix code formatter selection";
           };
           python = lib.mkEnableOption "Enable Python formatters (black, isort, ruff)";
           shell = lib.mkEnableOption "Enable Shell formatters (shfmt, shellcheck)";
@@ -27,9 +74,10 @@
 
           # Configuration options
           projectRootFile = lib.mkOption {
-            type = lib.types.str;
+            type = validatedFileName;
             default = "flake.nix";
-            description = "File that marks the project root";
+            description = "File that marks the project root. Common choices: flake.nix, package.json, Cargo.toml, pyproject.toml";
+            example = "package.json";
           };
 
           enableDefaultExcludes = lib.mkOption {
@@ -71,9 +119,13 @@
 
           # Performance profiles
           performance = lib.mkOption {
-            type = lib.types.enum ["fast" "balanced" "thorough"];
+            type =
+              betterEnum
+              ["fast" "balanced" "thorough"]
+              "Performance profile that balances speed vs thoroughness. 'fast' skips caching for speed, 'balanced' is recommended for most use cases, 'thorough' enables comprehensive checking but may be slower"
+              "balanced";
             default = "balanced";
-            description = "Performance profile: fast (skip expensive operations), balanced (default), thorough (comprehensive checking)";
+            description = "Performance vs thoroughness trade-off";
           };
 
           # Git-specific options
@@ -158,6 +210,9 @@
       pkgs.writeShellScriptBin "treefmt-incremental" ''
         #!/usr/bin/env bash
         set -euo pipefail
+
+        # Runtime configuration validation
+        ${generateRuntimeValidation cfg}
 
         # Default treefmt wrapper
         TREEFMT_CMD="${baseWrapper}/bin/treefmt"
