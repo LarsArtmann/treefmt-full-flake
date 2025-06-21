@@ -21,9 +21,15 @@
     };
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
-      systems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
 
       imports = [
         # Import treefmt-nix and treefmt-flake modules
@@ -31,49 +37,65 @@
         inputs.treefmt-flake.flakeModule
       ];
 
-      # Configure which formatter groups to enable
+      # Configure common formatter set using unified schema
       treefmtFlake = {
-        nix = true;
-        web = true;
-        python = true;
-        shell = true;
-        yaml = true;
-        markdown = true;
-        json = true;
-
-        # Configure project root
+        # Project configuration
         projectRootFile = "flake.nix";
-
-        # Enable default excludes
-        enableDefaultExcludes = true;
-
-        # Don't allow missing formatters
-        allowMissingFormatter = false;
-      };
-
-      perSystem = {
-        config,
-        pkgs,
-        ...
-      }: {
-        # Create a development shell with all tools
-        devShells.default = pkgs.mkShell {
-          buildInputs = [
-            # Formatters
-            config.treefmt.build.wrapper
-          ];
-
-          shellHook = ''
-            echo "Welcome to the project development environment!"
-            echo ""
-            echo "Available commands:"
-            echo "  nix fmt                - Format all files"
-            echo "  nix fmt -- --fail-on-change  - Check formatting without changing files"
-            echo ""
-            echo "📖 Quick Start Guide: https://github.com/LarsArtmann/treefmt-full-flake/blob/master/QUICKSTART.md"
-            echo ""
-          '';
+        
+        # Auto-detection settings
+        autoDetection.enable = true;
+        
+        # Common formatters for multi-language projects
+        formatters = {
+          nix.enable = true;          # Nix code formatting
+          web.enable = true;          # JavaScript/TypeScript/CSS
+          python.enable = true;       # Python code formatting
+          shell.enable = true;        # Shell script formatting
+          yaml.enable = true;         # YAML configuration files
+          markdown.enable = true;     # Documentation formatting
+          json.enable = true;         # JSON file formatting
+        };
+        
+        # Performance and behavior settings
+        behavior = {
+          performance = "balanced";
+          allowMissingFormatter = false;
+          enableDefaultExcludes = true;
+        };
+        
+        # Optional: Enable incremental formatting for better performance
+        incremental = {
+          enable = false;  # Set to true for large projects
+          mode = "auto";
+          cache = "./.cache/treefmt";
         };
       };
+
+      perSystem =
+        {
+          config,
+          pkgs,
+          ...
+        }:
+        {
+          # Create a development shell with all tools
+          devShells.default = pkgs.mkShell {
+            buildInputs = [
+              # Formatters
+              config.treefmt.build.wrapper
+            ];
+
+            shellHook = ''
+              echo "Welcome to the project development environment!"
+              echo ""
+              echo "Available commands:"
+              echo "  nix fmt                - Format all files"
+              echo "  nix fmt -- --fail-on-change  - Check formatting without changing files"
+              echo ""
+              echo "📖 Quick Start Guide: https://github.com/LarsArtmann/treefmt-full-flake/blob/master/QUICKSTART.md"
+              echo ""
+            '';
+          };
+        };
     };
 }
