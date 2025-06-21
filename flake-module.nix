@@ -9,6 +9,9 @@
   # Import config validation
   configValidation = import ./lib/config-validation.nix {inherit lib;};
 
+  # Import unified config schema
+  configSchema = import ./lib/config-schema.nix {inherit lib;};
+
   # Import project detection - inline for now due to flake evaluation context
   # TODO: Extract to separate module once import path issues are resolved
   projectDetection = {
