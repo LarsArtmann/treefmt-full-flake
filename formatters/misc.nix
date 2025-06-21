@@ -23,7 +23,7 @@
   # Justfile formatter
   just = {
     enable = true;
-    includes = ["justfile" "Justfile"];
+    includes = ["justfile" "Justfile" "*.just"];
     priority = 1;
   };
 }
