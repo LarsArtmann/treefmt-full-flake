@@ -14,14 +14,15 @@ The Performance Analytics Dashboard has been successfully migrated from **blesse
    - Lower memory overhead
    - Faster rendering for real-time updates
 
-2. **Richer Features**
+1. **Richer Features**
 
    - Built-in table rendering
    - Native progress bars
    - Better color support
    - Mouse interaction support
 
-3. **Simpler API**
+1. **Simpler API**
+
    - More intuitive positioning with `moveTo()`
    - Direct styling with chainable methods
    - Built-in chart primitives

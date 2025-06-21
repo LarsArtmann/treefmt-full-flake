@@ -11,9 +11,9 @@ This is **treefmt-full-flake**, a comprehensive Nix flake that provides modular,
 ### Core Components
 
 1. **Main Flake** (`flake.nix`): Exports the flakeModule, individual formatterModules, and project templates
-2. **Flake Module** (`flake-module.nix`): Provides boolean options to enable/disable formatter groups with configuration settings
-3. **Formatter Modules** (`formatters/`): Language-specific formatter configurations organized by domain
-4. **Templates** (`templates/`): Three pre-configured project templates (minimal, default, complete)
+1. **Flake Module** (`flake-module.nix`): Provides boolean options to enable/disable formatter groups with configuration settings
+1. **Formatter Modules** (`formatters/`): Language-specific formatter configurations organized by domain
+1. **Templates** (`templates/`): Three pre-configured project templates (minimal, default, complete)
 
 ### Formatter Organization
 
@@ -75,9 +75,9 @@ nix build .#formatterModules.web
 Projects integrate this flake by:
 
 1. Adding to flake inputs with nixpkgs following
-2. Importing the flakeModule
-3. Configuring `treefmtFlake.*` boolean options to enable desired formatter groups
-4. Optionally setting `projectRootFile`, `enableDefaultExcludes`, and `allowMissingFormatter`
+1. Importing the flakeModule
+1. Configuring `treefmtFlake.*` boolean options to enable desired formatter groups
+1. Optionally setting `projectRootFile`, `enableDefaultExcludes`, and `allowMissingFormatter`
 
 ## Key Design Principles
 
@@ -91,10 +91,10 @@ Projects integrate this flake by:
 When adding new formatters:
 
 1. Create or extend appropriate file in `formatters/`
-2. Follow priority-based execution pattern
-3. Add option to `flake-module.nix`
-4. Test with `nix flake check`
-5. Update templates if formatter is commonly needed
+1. Follow priority-based execution pattern
+1. Add option to `flake-module.nix`
+1. Test with `nix flake check`
+1. Update templates if formatter is commonly needed
 
 When updating templates:
 

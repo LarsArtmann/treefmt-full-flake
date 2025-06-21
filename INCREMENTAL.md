@@ -66,9 +66,9 @@ nix run .#treefmt-since HEAD~5  # Format files changed since 5 commits ago
 ## How It Works
 
 1. **Git Detection**: Uses `git diff` to identify changed files
-2. **File Filtering**: Only processes files that exist and match formatter patterns
-3. **Smart Fallback**: Falls back to full formatting if git detection fails
-4. **Performance Reporting**: Shows execution time, file count, and profile used
+1. **File Filtering**: Only processes files that exist and match formatter patterns
+1. **Smart Fallback**: Falls back to full formatting if git detection fails
+1. **Performance Reporting**: Shows execution time, file count, and profile used
 
 ## Example Output
 

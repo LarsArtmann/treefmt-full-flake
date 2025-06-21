@@ -26,7 +26,7 @@
       enableDefaultExcludes = true;
     };
 
-    perSystem = {...}: {
+    perSystem = _: {
       treefmt.settings.excludes = [
         "legacy/**/*.nix" # Old code not yet migrated
         "vendor/**/*.nix" # Third-party code

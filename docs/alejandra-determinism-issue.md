@@ -60,9 +60,9 @@ The issue stems from Alejandra allowing the input formatting to influence output
 ### Key Advantages
 
 1. **Deterministic Output**: Same input always produces same output
-2. **Community Standard**: Follows RFC 166 guidelines
-3. **Better Error Recovery**: More robust parsing and formatting
-4. **Active Development**: Regular updates and bug fixes
+1. **Community Standard**: Follows RFC 166 guidelines
+1. **Better Error Recovery**: More robust parsing and formatting
+1. **Active Development**: Regular updates and bug fixes
 
 ## Migration Guide
 
@@ -172,11 +172,11 @@ x + y
 ### Migration Steps
 
 1. **Backup Your Code**: Commit all changes before migrating
-2. **Update Configuration**: Set `nixFormatter = "nixfmt-rfc-style"`
-3. **Format Once**: Run `nix fmt` to reformat all files
-4. **Review Changes**: Check the diff to ensure formatting is acceptable
-5. **Commit**: Create a single "formatting migration" commit
-6. **Update CI**: Ensure CI uses the same formatter configuration
+1. **Update Configuration**: Set `nixFormatter = "nixfmt-rfc-style"`
+1. **Format Once**: Run `nix fmt` to reformat all files
+1. **Review Changes**: Check the diff to ensure formatting is acceptable
+1. **Commit**: Create a single "formatting migration" commit
+1. **Update CI**: Ensure CI uses the same formatter configuration
 
 ### Handling Large Codebases
 
@@ -208,10 +208,10 @@ Then gradually include directories as you migrate them.
 
    Solution: Update your nixpkgs input to a recent version
 
-2. **Formatting Conflicts**
+1. **Formatting Conflicts**
    If you have custom formatting rules, they may conflict. Review and adjust as needed.
 
-3. **CI Pipeline Failures**
+1. **CI Pipeline Failures**
    Ensure all developers and CI systems use the same formatter version.
 
 ### Verifying Determinism
@@ -233,14 +233,14 @@ With nixfmt-rfc-style, there should be no differences.
 ### Immediate Actions
 
 1. **New Projects**: Use nixfmt-rfc-style from the start
-2. **Existing Projects**: Plan migration during a low-activity period
-3. **CI/CD**: Add determinism checks to prevent regression
+1. **Existing Projects**: Plan migration during a low-activity period
+1. **CI/CD**: Add determinism checks to prevent regression
 
 ### Long-term Strategy
 
 1. **Monitor RFC 166**: Stay updated with official formatting standards
-2. **Community Alignment**: Follow Nixpkgs formatting decisions
-3. **Tooling Updates**: Keep formatters and treefmt updated
+1. **Community Alignment**: Follow Nixpkgs formatting decisions
+1. **Tooling Updates**: Keep formatters and treefmt updated
 
 ## Additional Resources
 

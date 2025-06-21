@@ -1,18 +1,15 @@
 name: Basic CI
-
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-
 jobs:
   flake-check:
     name: Basic Flake Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Nix
         uses: cachix/install-nix-action@v27
         with:
@@ -20,24 +17,20 @@ jobs:
           extra_nix_config: |
             accept-flake-config = true
             experimental-features = nix-command flakes
-
       - name: Check flake outputs
         run: |
           nix flake show
           nix flake metadata
-
       - name: Build formatter modules
         run: |
           nix build .#formatterModules.nix --no-link
           nix build .#formatterModules.web --no-link
           nix build .#formatterModules.python --no-link
-
   test-local:
     name: Test with Local Path
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Nix
         uses: cachix/install-nix-action@v27
         with:
@@ -45,18 +38,15 @@ jobs:
           extra_nix_config: |
             accept-flake-config = true
             experimental-features = nix-command flakes
-
       - name: Test local template
         run: |
           chmod +x ./tests/test-local-template.sh
           ./tests/test-local-template.sh || true  # Allow failure for now
-
   format-check:
     name: Format Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Nix
         uses: cachix/install-nix-action@v27
         with:
@@ -64,7 +54,6 @@ jobs:
           extra_nix_config: |
             accept-flake-config = true
             experimental-features = nix-command flakes
-
       - name: Check formatting
         run: |
           nix fmt -- --check || echo "::warning::Some files need formatting"

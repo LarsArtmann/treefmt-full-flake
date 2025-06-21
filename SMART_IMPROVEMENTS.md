@@ -88,12 +88,12 @@
 ## Priority Order (by Impact × Feasibility)
 
 1. **Command Discovery Caching** - Quick win, high impact
-2. **Configuration Generation Wizard** - Solves major pain point
-3. **Auto-Fix Capabilities** - Dramatically improves UX
-4. **Tool Manager Integration** - Easy to add, high value
-5. **Interactive Mode** - Great for new users
-6. **Real-time Progress Indicators** - Better perceived performance
-7. **Self-Update Mechanism** - Keeps script current
-8. **Format History Tracking** - Useful for power users
-9. **Remote Configuration Support** - Enterprise feature
-10. **Parallel Formatting Support** - Already handled by treefmt
+1. **Configuration Generation Wizard** - Solves major pain point
+1. **Auto-Fix Capabilities** - Dramatically improves UX
+1. **Tool Manager Integration** - Easy to add, high value
+1. **Interactive Mode** - Great for new users
+1. **Real-time Progress Indicators** - Better perceived performance
+1. **Self-Update Mechanism** - Keeps script current
+1. **Format History Tracking** - Useful for power users
+1. **Remote Configuration Support** - Enterprise feature
+1. **Parallel Formatting Support** - Already handled by treefmt

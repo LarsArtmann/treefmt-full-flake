@@ -1,5 +1,40 @@
 {lib}: let
   # Configuration validation with helpful error messages and suggestions
+  # Enhanced with lib.debug, lib.generators, and lib.trivial for better functionality
+  # Debug utilities for validation tracing
+  debug = {
+    traceValidation = name: result:
+      lib.debug.traceVal "VALIDATION[${name}]: ${
+        if result.isValid
+        then "✅ PASS"
+        else "❌ FAIL"
+      }";
+    traceErrors = errors: lib.debug.traceVal "ERRORS: ${lib.generators.toJSON {} errors}";
+    traceWarnings = warnings: lib.debug.traceVal "WARNINGS: ${lib.generators.toJSON {} warnings}";
+  };
+
+  # Functional utilities for validation pipelines
+  functional = {
+    inherit (lib.trivial) pipe const id;
+
+    # Compose multiple validators
+    composeValidators = validators: input:
+      lib.trivial.pipe input [
+        (lib.foldl (acc: validator: acc // validator input) {
+            isValid = true;
+            errors = [];
+            warnings = [];
+          }
+          validators)
+      ];
+
+    # Apply validator with debug tracing
+    validateWithTrace = name: validator: input:
+      lib.trivial.pipe input [
+        validator
+        (debug.traceValidation name)
+      ];
+  };
   # Common validation patterns
   validators = {
     # Check if user enabled formatters but project has no matching files
@@ -9,18 +44,31 @@
 
       # Check for common misconfigurations
       nixWarning =
-        if cfg.nix && !lib.pathExists (projectPath + "/flake.nix") && !lib.pathExists (projectPath + "/default.nix")
-        then ["Warning: Nix formatters enabled but no Nix files detected. Consider disabling 'nix = true' if not needed."]
+        if
+          cfg.nix
+          && !lib.pathExists (projectPath + "/flake.nix")
+          && !lib.pathExists (projectPath + "/default.nix")
+        then [
+          "Warning: Nix formatters enabled but no Nix files detected. Consider disabling 'nix = true' if not needed."
+        ]
         else [];
 
       rustWarning =
         if cfg.rust && !lib.pathExists (projectPath + "/Cargo.toml")
-        then ["Warning: Rust formatters enabled but no Cargo.toml found. Consider disabling 'rust = true' if this isn't a Rust project."]
+        then [
+          "Warning: Rust formatters enabled but no Cargo.toml found. Consider disabling 'rust = true' if this isn't a Rust project."
+        ]
         else [];
 
       pythonWarning =
-        if cfg.python && !lib.pathExists (projectPath + "/requirements.txt") && !lib.pathExists (projectPath + "/pyproject.toml") && !lib.pathExists (projectPath + "/setup.py")
-        then ["Warning: Python formatters enabled but no Python project files detected. Consider disabling 'python = true' if not needed."]
+        if
+          cfg.python
+          && !lib.pathExists (projectPath + "/requirements.txt")
+          && !lib.pathExists (projectPath + "/pyproject.toml")
+          && !lib.pathExists (projectPath + "/setup.py")
+        then [
+          "Warning: Python formatters enabled but no Python project files detected. Consider disabling 'python = true' if not needed."
+        ]
         else [];
     in
       warnings ++ nixWarning ++ rustWarning ++ pythonWarning;
@@ -41,7 +89,9 @@
 
       conflictError =
         if incremental.enable && incremental.mode == "cache" && incremental.gitBased
-        then ["Warning: incremental.mode='cache' with gitBased=true may cause conflicts. Consider mode='auto' instead."]
+        then [
+          "Warning: incremental.mode='cache' with gitBased=true may cause conflicts. Consider mode='auto' instead."
+        ]
         else [];
     in
       errors ++ cacheDirError ++ modeError ++ conflictError;
@@ -57,7 +107,9 @@
 
       thoroughWarning =
         if performance == "thorough" && incremental.enable
-        then ["Warning: 'thorough' performance profile may slow down incremental formatting. Consider 'balanced' for better performance."]
+        then [
+          "Warning: 'thorough' performance profile may slow down incremental formatting. Consider 'balanced' for better performance."
+        ]
         else [];
     in
       warnings ++ perfIncrementalWarning ++ thoroughWarning;
@@ -67,22 +119,42 @@
       errors = [];
 
       # Check if any formatters are enabled
-      anyEnabled = cfg.nix || cfg.web || cfg.python || cfg.shell || cfg.rust || cfg.yaml || cfg.markdown || cfg.json || cfg.misc;
+      anyEnabled =
+        cfg.nix
+        || cfg.web
+        || cfg.python
+        || cfg.shell
+        || cfg.rust
+        || cfg.yaml
+        || cfg.markdown
+        || cfg.json
+        || cfg.misc;
       noFormattersError =
         if !anyEnabled
-        then ["Error: No formatters enabled. Enable at least one formatter group (nix, web, python, etc.) or this configuration will have no effect."]
+        then [
+          "Error: No formatters enabled. Enable at least one formatter group (nix, web, python, etc.) or this configuration will have no effect."
+        ]
         else [];
 
       # Check projectRootFile exists (this would need to be done at evaluation time)
       rootFileWarning =
-        if cfg.projectRootFile != "flake.nix" && cfg.projectRootFile != "package.json" && cfg.projectRootFile != "Cargo.toml" && cfg.projectRootFile != "pyproject.toml"
-        then ["Warning: projectRootFile '${cfg.projectRootFile}' is not a common project root marker. Ensure this file exists in your project root."]
+        if
+          cfg.projectRootFile
+          != "flake.nix"
+          && cfg.projectRootFile != "package.json"
+          && cfg.projectRootFile != "Cargo.toml"
+          && cfg.projectRootFile != "pyproject.toml"
+        then [
+          "Warning: projectRootFile '${cfg.projectRootFile}' is not a common project root marker. Ensure this file exists in your project root."
+        ]
         else [];
 
       # Warn about deprecated patterns
       missingFormatterWarning =
         if cfg.allowMissingFormatter
-        then ["Warning: allowMissingFormatter=true can hide configuration issues. Consider using allowMissingFormatter=false and installing required formatters."]
+        then [
+          "Warning: allowMissingFormatter=true can hide configuration issues. Consider using allowMissingFormatter=false and installing required formatters."
+        ]
         else [];
     in
       errors ++ noFormattersError ++ rootFileWarning ++ missingFormatterWarning;
@@ -101,9 +173,9 @@
     info = lib.filter (msg: lib.hasPrefix "Info:" msg) allMessages;
   in {
     valid = errors == [];
-    errors = errors;
-    warnings = warnings;
-    info = info;
+    inherit errors;
+    inherit warnings;
+    inherit info;
 
     # Helper to format all messages nicely
     formatMessages = let
@@ -112,9 +184,7 @@
         then ""
         else "\n${title}:\n${lib.concatMapStringsSep "\n" (msg: "  - ${msg}") messages}";
     in
-      (formatSection "ERRORS" errors)
-      + (formatSection "WARNINGS" warnings)
-      + (formatSection "INFO" info);
+      (formatSection "ERRORS" errors) + (formatSection "WARNINGS" warnings) + (formatSection "INFO" info);
   };
 
   # Enhanced option types with validation
@@ -132,6 +202,7 @@
     };
 
   # Helper to create better error messages for enum options
+  # Enhanced with lib.generators for structured error output
   betterEnum = values: description: exampleValue:
     lib.types.enum values
     // {
@@ -140,7 +211,17 @@
       check = x:
         if lib.elem x values
         then true
-        else throw "Invalid value '${toString x}'. Must be one of: ${lib.concatStringsSep ", " values}";
+        else let
+          # Generate structured error message using lib.generators
+          errorDetails = {
+            invalid_value = toString x;
+            allowed_values = values;
+            suggestion = "Use one of: ${lib.concatStringsSep " | " values}";
+            example = exampleValue;
+          };
+          formattedError = lib.generators.toPretty {allowPrettyValues = true;} errorDetails;
+        in
+          throw "❌ Invalid enum value!\n${formattedError}";
     };
 
   # Helper for string options with validation
@@ -176,7 +257,9 @@
 
     ${createFileExistenceCheck cfg.projectRootFile "projectRootFile"}
 
-    ${lib.optionalString cfg.incremental.enable (createFileExistenceCheck cfg.incremental.cache "incremental cache directory")}
+    ${lib.optionalString cfg.incremental.enable (
+      createFileExistenceCheck cfg.incremental.cache "incremental cache directory"
+    )}
 
     ${lib.optionalString (cfg.incremental.enable && cfg.incremental.gitBased) ''
       if ! git rev-parse --git-dir >/dev/null 2>&1; then
@@ -216,12 +299,14 @@ in {
     validatedString
     stringValidators
     generateRuntimeValidation
+    debug
+    functional
     ;
 
   # Export enhanced types
   types = {
-    validatedSubmodule = validatedSubmodule;
-    betterEnum = betterEnum;
-    validatedString = validatedString;
+    inherit validatedSubmodule;
+    inherit betterEnum;
+    inherit validatedString;
   };
 }

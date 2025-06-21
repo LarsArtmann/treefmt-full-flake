@@ -14,17 +14,17 @@ Alejandra has a confirmed non-determinism issue ([GitHub Issue #250](https://git
 ### Why nixfmt-rfc-style?
 
 1. **Deterministic**: Designed to produce consistent output on every run
-2. **Official Standard**: Implements RFC 166, the community-approved Nix formatting standard
-3. **Future-proof**: Will become the default formatter for Nixpkgs
-4. **Well-maintained**: Actively developed by the NixOS team
-5. **treefmt-nix support**: Native support in treefmt-nix with easy configuration
+1. **Official Standard**: Implements RFC 166, the community-approved Nix formatting standard
+1. **Future-proof**: Will become the default formatter for Nixpkgs
+1. **Well-maintained**: Actively developed by the NixOS team
+1. **treefmt-nix support**: Native support in treefmt-nix with easy configuration
 
 ### Implementation Strategy
 
 #### Phase 1: Add nixfmt-rfc-style as an Alternative (Immediate)
 
 1. Create a new formatter module `formatters/nix-nixfmt.nix` (already created)
-2. Update `flake-module.nix` to support formatter selection:
+1. Update `flake-module.nix` to support formatter selection:
 
 ```nix
 # In flake-module.nix, add:
@@ -53,7 +53,7 @@ options.treefmtFlake = {
    - Instructions for using nixfmt-rfc-style
    - Migration guide for existing users
 
-2. Add to template configurations showing nixfmt-rfc-style usage
+1. Add to template configurations showing nixfmt-rfc-style usage
 
 #### Phase 3: Change Default (Week 4)
 
@@ -63,7 +63,7 @@ options.treefmtFlake = {
    default = "nixfmt-rfc-style";
    ```
 
-2. Update all templates to use nixfmt-rfc-style by default
+1. Update all templates to use nixfmt-rfc-style by default
 
 ### For Users Who Must Use Alejandra
 

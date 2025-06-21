@@ -160,7 +160,7 @@ curl -sSL https://raw.githubusercontent.com/LarsArtmann/treefmt-full-flake/maste
 Or manually configure:
 
 1. Install the **File Watchers** plugin
-2. Add a new watcher with:
+1. Add a new watcher with:
    - Program: `$ProjectFileDir$/result/bin/treefmt`
    - Arguments: `$FilePath$`
    - Trigger: On file save
@@ -317,8 +317,8 @@ nix-collect-garbage -d
 For dramatically faster CI builds (5-10x improvement), set up Cachix:
 
 1. Create account at [cachix.org](https://cachix.org)
-2. Add `CACHIX_AUTH_TOKEN` to GitHub secrets
-3. CI will automatically use the cache
+1. Add `CACHIX_AUTH_TOKEN` to GitHub secrets
+1. CI will automatically use the cache
 
 See [Cachix Setup Guide](./docs/cachix-setup.md) for detailed instructions.
 

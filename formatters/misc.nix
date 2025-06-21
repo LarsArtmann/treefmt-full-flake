@@ -2,14 +2,14 @@
   # Protocol Buffers formatter
   buf = {
     enable = true;
-    includes = [ "*.proto" ];
+    includes = ["*.proto"];
     priority = 1;
   };
 
   # TOML formatter
   taplo = {
     enable = true;
-    includes = [ "*.toml" ];
+    includes = ["*.toml"];
     priority = 1;
   };
 

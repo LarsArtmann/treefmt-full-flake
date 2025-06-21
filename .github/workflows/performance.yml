@@ -1,5 +1,4 @@
 name: Performance Tests
-
 on:
   pull_request:
     branches: [main, master]
@@ -7,7 +6,6 @@ on:
     # Run weekly on Sundays at 00:00 UTC
     - cron: "0 0 * * 0"
   workflow_dispatch:
-
 jobs:
   performance:
     name: Performance Metrics
@@ -15,10 +13,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Nix
         uses: cachix/install-nix-action@v27
         with:
@@ -26,14 +22,12 @@ jobs:
           extra_nix_config: |
             accept-flake-config = true
             experimental-features = nix-command flakes
-
       - name: Setup Cachix
         uses: cachix/cachix-action@v15
         with:
           name: treefmt-full-flake
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
           skipPush: true
-
       - name: Install dependencies
         run: |
           if [[ "$RUNNER_OS" == "Linux" ]]; then
@@ -42,12 +36,10 @@ jobs:
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
             brew install bc jq
           fi
-
       - name: Run performance tests
         run: |
           chmod +x ./tests/performance/measure-performance.sh
           ./tests/performance/measure-performance.sh 5
-
       - name: Upload performance results
         uses: actions/upload-artifact@v4
         with:
@@ -55,41 +47,8 @@ jobs:
           path: |
             tests/performance/performance-results.json
             tests/performance/performance-report.md
-
       - name: Comment on PR with performance results
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
-          script: |
-            const fs = require('fs');
-            const report = fs.readFileSync('tests/performance/performance-report.md', 'utf8');
-
-            // Find existing comment
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-
-            const botComment = comments.find(comment => 
-              comment.user.type === 'Bot' && 
-              comment.body.includes('## Performance Report')
-            );
-
-            const commentBody = `## Performance Report - ${{ matrix.os }}\n\n${report}`;
-
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body: commentBody,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: commentBody,
-              });
-            }
+          script: "const fs = require('fs');\nconst report = fs.readFileSync('tests/performance/performance-report.md', 'utf8');\n\n// Find existing comment\nconst { data: comments } = await github.rest.issues.listComments({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  issue_number: context.issue.number,\n});\n\nconst botComment = comments.find(comment => \n  comment.user.type === 'Bot' && \n  comment.body.includes('## Performance Report')\n);\n\nconst commentBody = `## Performance Report - ${{ matrix.os }}\\n\\n${report}`;\n\nif (botComment) {\n  await github.rest.issues.updateComment({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    comment_id: botComment.id,\n    body: commentBody,\n  });\n} else {\n  await github.rest.issues.createComment({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    issue_number: context.issue.number,\n    body: commentBody,\n  });\n}\n"

@@ -5,7 +5,8 @@
 After thorough investigation, we discovered:
 
 1. **Two separate git histories** created 17 minutes apart
-2. **Main branch has valuable formatter defaults** that improve code quality:
+
+1. **Main branch has valuable formatter defaults** that improve code quality:
 
    - Shell: 2-space indentation, code simplification
    - Markdown: Numbered headings for better navigation
@@ -14,7 +15,8 @@ After thorough investigation, we discovered:
    - Python: mypy type checking
    - TOML: Proper formatting command
 
-3. **Master branch has advanced features**:
+1. **Master branch has advanced features**:
+
    - Incremental formatting (10-100x performance)
    - JetBrains IDE integration
    - Performance profiles
@@ -94,10 +96,10 @@ git push origin archive/main
 ## Why This Is the Best Solution
 
 1. **Immediate Value**: Get the formatter improvements today
-2. **Low Risk**: Simple changes, easy to test
-3. **Preserves Progress**: No disruption to master branch momentum
-4. **Clear Attribution**: Credits original work
-5. **User-Friendly**: No breaking changes
+1. **Low Risk**: Simple changes, easy to test
+1. **Preserves Progress**: No disruption to master branch momentum
+1. **Clear Attribution**: Credits original work
+1. **User-Friendly**: No breaking changes
 
 ## What We Lose vs Full Merge
 
@@ -115,10 +117,10 @@ git push origin archive/main
 ## Next Actions
 
 1. Implement the cherry-pick approach
-2. Test all formatters work correctly
-3. Push changes
-4. Archive main branch
-5. Update GitHub repository settings
+1. Test all formatters work correctly
+1. Push changes
+1. Archive main branch
+1. Update GitHub repository settings
 
 ## Conclusion
 

@@ -715,9 +715,9 @@ Sprint 6 (Week 11-12): Integration & Polish
 
 ### Technical KPIs
 
-- **Data Collection**: 99.9% uptime, <1ms overhead
-- **Dashboard Performance**: <100ms load time, 60fps updates
-- **Storage Efficiency**: <10MB per month per developer
+- **Data Collection**: 99.9% uptime, \<1ms overhead
+- **Dashboard Performance**: \<100ms load time, 60fps updates
+- **Storage Efficiency**: \<10MB per month per developer
 - **Analytics Accuracy**: ±2% error rate on performance metrics
 
 ### User Experience KPIs

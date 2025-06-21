@@ -15,16 +15,16 @@ File Watchers automatically run treefmt when you save files.
 ### Step 1: Install File Watchers Plugin
 
 1. Open **Settings/Preferences** (⌘, on macOS, Ctrl+Alt+S on Windows/Linux)
-2. Go to **Plugins**
-3. Search for "File Watchers"
-4. Install the plugin and restart IDE
+1. Go to **Plugins**
+1. Search for "File Watchers"
+1. Install the plugin and restart IDE
 
 ### Step 2: Create File Watcher for treefmt
 
 1. Open **Settings/Preferences**
-2. Go to **Tools → File Watchers**
-3. Click **+** to add a new watcher
-4. Configure as follows:
+1. Go to **Tools → File Watchers**
+1. Click **+** to add a new watcher
+1. Configure as follows:
 
 ```
 Name: treefmt
@@ -82,9 +82,9 @@ External Tools provide more control and can be bound to keyboard shortcuts.
 ### Step 1: Create External Tool
 
 1. Open **Settings/Preferences**
-2. Go to **Tools → External Tools**
-3. Click **+** to add a new tool
-4. Configure as follows:
+1. Go to **Tools → External Tools**
+1. Click **+** to add a new tool
+1. Configure as follows:
 
 ```
 Name: Format with treefmt
@@ -98,20 +98,20 @@ Working directory: $ProjectFileDir$
 ### Step 2: Create Keyboard Shortcut
 
 1. Go to **Settings → Keymap**
-2. Search for "Format with treefmt"
-3. Right-click and choose **Add Keyboard Shortcut**
-4. Press your desired key combination (e.g., ⌥⌘L or Ctrl+Alt+L)
+1. Search for "Format with treefmt"
+1. Right-click and choose **Add Keyboard Shortcut**
+1. Press your desired key combination (e.g., ⌥⌘L or Ctrl+Alt+L)
 
 ### Step 3: Format on Save Macro
 
 Create a macro to format on every save:
 
 1. **Edit → Macros → Start Macro Recording**
-2. Press your format shortcut (from Step 2)
-3. Press ⌘S (Ctrl+S) to save
-4. **Edit → Macros → Stop Macro Recording**
-5. Name it "Format and Save"
-6. In **Settings → Keymap**, bind ⌘S to "Format and Save"
+1. Press your format shortcut (from Step 2)
+1. Press ⌘S (Ctrl+S) to save
+1. **Edit → Macros → Stop Macro Recording**
+1. Name it "Format and Save"
+1. In **Settings → Keymap**, bind ⌘S to "Format and Save"
 
 ## Method 3: Save Actions Plugin
 
@@ -120,14 +120,14 @@ For automatic formatting without manual configuration:
 ### Step 1: Install Save Actions Plugin
 
 1. Go to **Settings → Plugins**
-2. Search for "Save Actions"
-3. Install the plugin
+1. Search for "Save Actions"
+1. Install the plugin
 
 ### Step 2: Configure Save Actions
 
 1. Go to **Settings → Save Actions**
-2. Enable "Activate save actions on save"
-3. Add custom command:
+1. Enable "Activate save actions on save"
+1. Add custom command:
 
 ```
 Command: $ProjectFileDir$/result/bin/treefmt $FilePath$
@@ -141,7 +141,7 @@ For projects using nix develop:
 ### Step 1: Configure Shell Path
 
 1. Go to **Settings → Build, Execution, Deployment → Build Tools**
-2. Set shell path to: `/usr/bin/env nix develop -c $SHELL`
+1. Set shell path to: `/usr/bin/env nix develop -c $SHELL`
 
 ### Step 2: Create Nix-Aware External Tool
 
@@ -175,7 +175,7 @@ treefmtFlake = {
 Exclude directories to improve performance:
 
 1. In File Watcher settings, click **Advanced Options**
-2. Add to "Do not watch" field:
+1. Add to "Do not watch" field:
    ```
    node_modules/**
    .git/**
@@ -200,8 +200,8 @@ Auto-save edited files: false
 ### Watcher Not Triggering
 
 1. Check File Watcher is enabled (checkbox in File Watchers list)
-2. Verify file type matches your configuration
-3. Check console output: **View → Tool Windows → Event Log**
+1. Verify file type matches your configuration
+1. Check console output: **View → Tool Windows → Event Log**
 
 ### Permission Errors
 
@@ -222,9 +222,9 @@ Arguments: nix fmt -- $FilePath$
 ### Performance Issues
 
 1. Enable incremental formatting
-2. Use `treefmt-fast` command
-3. Limit file types in watcher scope
-4. Increase IDE memory: **Help → Change Memory Settings**
+1. Use `treefmt-fast` command
+1. Limit file types in watcher scope
+1. Increase IDE memory: **Help → Change Memory Settings**
 
 ## Project-Specific Configuration
 
@@ -261,17 +261,17 @@ Add to your project's `.idea/watcherTasks.xml`:
 ## Tips and Best Practices
 
 1. **Build treefmt first**: Run `nix build` to create the `result` symlink
-2. **Use incremental mode**: Much faster for large projects
-3. **Exclude generated files**: Don't watch build outputs
-4. **Test with single file**: Verify configuration before enabling globally
-5. **Monitor performance**: Use IDE's Activity Monitor
+1. **Use incremental mode**: Much faster for large projects
+1. **Exclude generated files**: Don't watch build outputs
+1. **Test with single file**: Verify configuration before enabling globally
+1. **Monitor performance**: Use IDE's Activity Monitor
 
 ## Alternative: Command Line Integration
 
 For terminal users within JetBrains:
 
 1. Open integrated terminal
-2. Use shell aliases:
+1. Use shell aliases:
    ```bash
    alias fmt='nix fmt'
    alias fmts='nix run .#treefmt-staged'

@@ -12,14 +12,20 @@
         type = lib.types.listOf lib.types.str;
         default = [];
         description = "File patterns to include for this formatter";
-        example = ["*.nix" "*.js"];
+        example = [
+          "*.nix"
+          "*.js"
+        ];
       };
 
       excludes = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [];
         description = "File patterns to exclude from this formatter";
-        example = ["node_modules/**" "dist/**"];
+        example = [
+          "node_modules/**"
+          "dist/**"
+        ];
       };
 
       priority = lib.mkOption {
@@ -38,7 +44,10 @@
         type = lib.types.listOf lib.types.str;
         default = [];
         description = "Additional command-line options";
-        example = ["--indent=2" "--line-length=100"];
+        example = [
+          "--indent=2"
+          "--line-length=100"
+        ];
       };
     };
   };
@@ -102,25 +111,24 @@
             # Check if formatters have overlapping includes and same priority
             hasOverlap =
               lib.any (
-                patternA:
-                  lib.any (patternB: patternA == patternB) fmtB.includes
+                patternA: lib.any (patternB: patternA == patternB) fmtB.includes
               )
               fmtA.includes;
           in
-            pair.a
-            != pair.b
-            && fmtA.priority == fmtB.priority
-            && hasOverlap
+            pair.a != pair.b && fmtA.priority == fmtB.priority && hasOverlap
         )
         formatterPairs;
     in
       map (
-        conflict: "Priority conflict in group '${groupName}': formatters '${conflict.a}' and '${conflict.b}' have same priority ${toString formatters.${conflict.a}.priority} for overlapping patterns"
+        conflict: "Priority conflict in group '${groupName}': formatters '${conflict.a}' and '${conflict.b}' have same priority ${
+          toString formatters.${conflict.a}.priority
+        } for overlapping patterns"
       )
       conflicts;
 
     # Validate individual formatters
-    individualErrors = lib.flatten (lib.mapAttrsToList (
+    individualErrors = lib.flatten (
+      lib.mapAttrsToList (
         name: config: let
           result = validateFormatterConfig name config;
         in
@@ -128,7 +136,8 @@
           then []
           else result.errors
       )
-      formatters);
+      formatters
+    );
 
     allErrors = priorityConflicts ++ individualErrors;
   in
@@ -183,7 +192,15 @@
     # Web development formatters
     webFormatters = mkFormatterGroup "web" {
       biome = {
-        includes = ["*.js" "*.jsx" "*.ts" "*.tsx" "*.css" "*.scss" "*.json"];
+        includes = [
+          "*.js"
+          "*.jsx"
+          "*.ts"
+          "*.tsx"
+          "*.css"
+          "*.scss"
+          "*.json"
+        ];
         priority = 1;
       };
     };
@@ -199,7 +216,11 @@
         priority = 1;
       };
       just = {
-        includes = ["justfile" "Justfile" "*.just"];
+        includes = [
+          "justfile"
+          "Justfile"
+          "*.just"
+        ];
         priority = 1;
       };
     };

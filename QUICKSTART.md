@@ -4,9 +4,9 @@
 
 ## 🎯 What You'll Get
 
-✨ **15+ formatters** for Nix, JavaScript, Python, Rust, YAML, Markdown, and more  
-⚡ **10-100x faster** formatting with incremental mode  
-🔧 **Zero configuration** - smart defaults that just work  
+✨ **15+ formatters** for Nix, JavaScript, Python, Rust, YAML, Markdown, and more\
+⚡ **10-100x faster** formatting with incremental mode\
+🔧 **Zero configuration** - smart defaults that just work\
 🎨 **IDE integration** - format-on-save for JetBrains, VS Code, Neovim
 
 ---
@@ -104,7 +104,7 @@ nix fmt
 cat test.js test.nix
 ```
 
-**Before**: Unreadable mess  
+**Before**: Unreadable mess\
 **After**: Perfectly formatted, consistent code
 
 ---
@@ -248,9 +248,9 @@ nix build && chmod +x result/bin/treefmt
 
 **Congratulations!** You now have:
 
-✅ Professional code formatting across 8+ languages  
-✅ Lightning-fast incremental formatting  
-✅ IDE integration ready to go  
+✅ Professional code formatting across 8+ languages\
+✅ Lightning-fast incremental formatting\
+✅ IDE integration ready to go\
 ✅ Enterprise-grade tooling for any project size
 
 **Ready to format the world?** 🌍✨

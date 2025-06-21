@@ -38,7 +38,7 @@ This document shows which file types are handled by which formatters to identify
 ## Potential Issues Identified
 
 1. **JSON Conflict (RESOLVED)**: Previously jsonfmt and biome could both handle JSON files. Now only biome handles JSON.
-2. **No conflicts**: All file types have clear formatter ownership with proper priority ordering.
+1. **No conflicts**: All file types have clear formatter ownership with proper priority ordering.
 
 ## File Types Without Coverage
 
@@ -65,6 +65,6 @@ This is expected as the flake focuses on the most common languages used in Nix e
 ## Testing Strategy
 
 1. Each formatter should be tested in isolation to ensure it works correctly
-2. Templates should be tested with realistic file examples
-3. Formatter conflicts should be prevented by careful priority ordering
-4. All formatters should handle empty files gracefully
+1. Templates should be tested with realistic file examples
+1. Formatter conflicts should be prevented by careful priority ordering
+1. All formatters should handle empty files gracefully

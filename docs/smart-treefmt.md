@@ -9,10 +9,10 @@
 The script intelligently searches for treefmt in multiple locations:
 
 1. **Nix shell environment** - Checks if you're in a nix develop shell
-2. **Nix fmt command** - Preferred for flake-based projects
-3. **Nix build result** - `./result/bin/treefmt`
-4. **System PATH** - Standard installation
-5. **Common locations** - `/usr/local/bin`, Homebrew, Nix profile, etc.
+1. **Nix fmt command** - Preferred for flake-based projects
+1. **Nix build result** - `./result/bin/treefmt`
+1. **System PATH** - Standard installation
+1. **Common locations** - `/usr/local/bin`, Homebrew, Nix profile, etc.
 
 ### 🎯 Smart Configuration Detection
 
@@ -142,7 +142,7 @@ To fix this:
    chmod +x smart-treefmt.sh
    ```
 
-2. **Optionally, add to your PATH:**
+1. **Optionally, add to your PATH:**
 
    ```bash
    # Copy to a directory in your PATH
@@ -152,7 +152,8 @@ To fix this:
    alias smart-treefmt='./smart-treefmt.sh'
    ```
 
-3. **Use in your projects:**
+1. **Use in your projects:**
+
    - Copy the script to your project
    - Or reference it from a shared location
    - Or include it in your Nix flake
@@ -172,11 +173,11 @@ The script is perfect for CI/CD pipelines with its clear exit codes and error me
 This script follows the smart-config principles:
 
 1. **Multi-source resolution** - Checks multiple locations in priority order
-2. **Intelligent fallbacks** - Automatically tries alternatives
-3. **Detailed error messages** - Shows exactly what was attempted
-4. **Actionable solutions** - Provides specific steps to fix issues
-5. **Auto-discovery** - Detects installed tools and project types
-6. **User-friendly** - Clear, helpful output at every step
+1. **Intelligent fallbacks** - Automatically tries alternatives
+1. **Detailed error messages** - Shows exactly what was attempted
+1. **Actionable solutions** - Provides specific steps to fix issues
+1. **Auto-discovery** - Detects installed tools and project types
+1. **User-friendly** - Clear, helpful output at every step
 
 ## Extending
 
