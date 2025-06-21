@@ -388,7 +388,7 @@ fi
 
 # Step 9: Test format check (should pass now)
 echo -e "\n${YELLOW}Step 9: Testing format check...${NC}"
-if ! run_with_timeout 120 "nix fmt --no-update-lock-file -- --fail-on-change"; then
+if ! run_with_timeout 120 "nix fmt --no-update-lock-file -- --ci --no-cache"; then
   echo -e "${RED}Format check failed after formatting${NC}"
   exit 1
 fi
