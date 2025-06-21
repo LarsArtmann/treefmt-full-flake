@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -367,6 +368,7 @@ in
               # Initialize performance tracking
               local start_time=$(date +%s.%N)
               local file_count=0
+              local files_array=()  # Initialize files_array for all code paths
 
               # Set performance environment variables
               export PERFORMANCE_PROFILE="${cfg.behavior.performance or cfg.performance}"
@@ -391,8 +393,14 @@ in
                 local changed_files
                 if ! changed_files=$(get_changed_files); then
                   echo "Warning: Could not determine changed files, falling back to full formatting"
+                  # For fallback case, estimate file count from current directory
+                  file_count=$(find . -type f \( -name "*.nix" -o -name "*.js" -o -name "*.ts" -o -name "*.css" -o -name "*.md" -o -name "*.yml" -o -name "*.yaml" \) 2>/dev/null | wc -l || echo "0")
                   "$TREEFMT_CMD" "$@"
-                  return $?
+                  local exit_code=$?
+                  local end_time=$(date +%s.%N)
+                  local duration=$(echo "$end_time - $start_time" | bc 2>/dev/null || echo "0")
+                  generate_quick_report "$duration" "$file_count" "''${PERFORMANCE_PROFILE}"
+                  return $exit_code
                 fi
 
                 if [[ -z "$changed_files" ]]; then
@@ -401,7 +409,6 @@ in
                 fi
 
                 # Convert to array and filter existing files
-                local files_array=()
                 while IFS= read -r file; do
                   if [[ -f "$file" ]]; then
                     files_array+=("$file")
@@ -422,8 +429,9 @@ in
                 # Run treefmt on specific files
                 "$TREEFMT_CMD" ${lib.concatStringsSep " " (generateTreefmtArgs pkgs)} "$@" -- "''${files_array[@]}"
               else
-                # Standard treefmt execution
+                # Standard treefmt execution - estimate file count for performance tracking
                 echo "Running full formatting..."
+                file_count=$(find . -type f \( -name "*.nix" -o -name "*.js" -o -name "*.ts" -o -name "*.css" -o -name "*.md" -o -name "*.yml" -o -name "*.yaml" -o -name "*.py" -o -name "*.rs" -o -name "*.sh" -o -name "*.json" -o -name "*.toml" \) 2>/dev/null | wc -l || echo "0")
                 "$TREEFMT_CMD" ${lib.concatStringsSep " " (generateTreefmtArgs pkgs)} "$@"
               fi
 
@@ -433,7 +441,12 @@ in
               # Generate comprehensive performance report
               if [[ "''${TREEFMT_VERBOSE:-}" == "1" || "$file_count" -gt 20 ]]; then
                 # Full detailed report for verbose mode or large file counts
-                generate_performance_report "$start_time" "$end_time" "$file_count" "''${files_array[@]}"
+                # Only pass files_array if it's actually populated (incremental mode)
+                if [[ ''${#files_array[@]} -gt 0 ]]; then
+                  generate_performance_report "$start_time" "$end_time" "$file_count" "''${files_array[@]}"
+                else
+                  generate_performance_report "$start_time" "$end_time" "$file_count"
+                fi
               else
                 # Quick summary for normal operations
                 generate_quick_report "$duration" "$file_count" "''${PERFORMANCE_PROFILE}"
@@ -472,7 +485,7 @@ in
                 # Add custom formatters that aren't built into treefmt-nix
                 formatter = lib.optionalAttrs (finalFormatterConfig.misc or false) {
                   typespec = {
-                    command = "tsp"; # Use system tsp command
+                    command = "${pkgs.typespec}/bin/tsp"; # Use flake-provided TypeSpec
                     options = [ "format" ];
                     includes = [ "*.tsp" ];
                   };
