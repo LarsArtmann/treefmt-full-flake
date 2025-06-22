@@ -16,10 +16,17 @@
 **Copy, paste, done!** Use our pre-built template:
 
 ```bash
-# Create new project with treefmt already configured
-nix flake init -t github:LarsArtmann/treefmt-full-flake
-or
-nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake (works for private repos)
+# CURRENTLY PRIVATE REPO - Choose your access method:
+
+# Option 1: If you have access to the private repo
+nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake
+
+# Option 2: For local development (clone repo first)
+git clone git@github.com:LarsArtmann/treefmt-full-flake.git
+nix flake init -t ./treefmt-full-flake
+
+# Option 3: When public release is available (future)
+# nix flake init -t github:LarsArtmann/treefmt-full-flake
 
 # Test it works (formats this file!)
 nix fmt
