@@ -286,6 +286,29 @@ in {
       (lib.attrValues colors)
       (lib.genList (_: "") (lib.length (lib.attrValues colors)))
       text;
+
+    # Enhanced string utilities using lib.strings
+    stringUtils = {
+      # Normalize whitespace using lib.strings functions
+      normalizeWhitespace = text: 
+        lib.strings.trim (builtins.replaceStrings ["\t" "\n" "\r"] [" " " " " "] text);
+      
+      # Capitalize first letter
+      capitalize = text:
+        if lib.stringLength text > 0
+        then lib.toUpper (lib.substring 0 1 text) + lib.substring 1 (-1) text
+        else text;
+      
+      # Convert to kebab-case
+      toKebabCase = text:
+        lib.toLower (builtins.replaceStrings [" " "_"] ["-" "-"] text);
+      
+      # Truncate text with ellipsis
+      truncate = maxLength: text:
+        if lib.stringLength text <= maxLength
+        then text
+        else lib.substring 0 (maxLength - 3) text + "...";
+    };
   };
 
   # Generators using lib.generators for complex formatting
@@ -322,6 +345,39 @@ in {
     # Generate formatted list with bullets
     toBulletList = items: prefix:
       lib.concatMapStringsSep "\n" (item: "${prefix}${item}") items;
+
+    # Generate markdown table from structured data  
+    toMarkdownTable = headers: rows:
+      let
+        headerRow = "| ${lib.concatStringsSep " | " headers} |";
+        separatorRow = "| ${lib.concatStringsSep " | " (lib.map (_: "---") headers)} |";
+        dataRows = lib.map (row: 
+          "| ${lib.concatStringsSep " | " (lib.map (h: toString (row.${h} or "")) headers)} |"
+        ) rows;
+      in
+        lib.concatStringsSep "\n" ([headerRow separatorRow] ++ dataRows);
+
+    # Generate configuration diff using lib.generators  
+    toConfigDiff = oldConfig: newConfig:
+      lib.generators.toPretty {
+        allowPrettyValues = true;
+        multiline = true;
+        indent = "  ";
+      } {
+        before = oldConfig;
+        after = newConfig;
+        changes = lib.filterAttrs (k: v: (oldConfig.${k} or null) != v) newConfig;
+      };
+
+    # Generate structured logs using lib.generators
+    toStructuredLog = level: component: message: data:
+      lib.generators.toJSON {} {
+        timestamp = "\${$(date -u +\"%Y-%m-%dT%H:%M:%S.%3NZ\")}";
+        level = level;
+        component = component;
+        message = message;
+        data = data;
+      };
   };
 
   # Pre-built formatting functions for common use cases
