@@ -37,14 +37,13 @@
     assertionFailures = lib.filter (assertion: !assertion.assertion) criticalAssertions;
     hasAssertionFailures = assertionFailures != [];
   in ''
-    # Critical assertion checks
+    # Critical assertion checks using enhanced error formatting
     ${lib.optionalString hasAssertionFailures ''
-              echo "❌ CRITICAL CONFIGURATION ERRORS:"
-              ${lib.concatMapStringsSep "\n" (assertion: ''
-                echo "  • ${assertion.message}"
-              '') assertionFailures}
+              cat << 'EOF'
+      ${treefmtLib.errorFormatting.formatErrors (lib.map (assertion: assertion.message) assertionFailures)}
+      EOF
               echo ""
-              echo "Fix these errors before proceeding."
+              echo "${treefmtLib.errorFormatting.error "Fix these critical errors before proceeding."}"
               exit 1
     ''}
     
@@ -809,6 +808,29 @@ in {
             } "$@"
           '';
         };
+
+      # Enhanced user experience with comprehensive formatting
+      packages.treefmt-status = pkgs.writeShellScriptBin "treefmt-status" ''
+        ${generateRuntimeValidation cfg deprecationWarnings}
+        
+        # Configuration summary using enhanced formatting
+        cat << 'EOF'
+        ${treefmtLib.errorFormatting.formatConfigSummary {
+          projectRootFile = cfg.projectRootFile;
+          autoDetection = cfg.autoDetection;
+          behavior = cfg.behavior;
+          incremental = cfg.incremental;
+        }}
+        EOF
+        
+        # Formatter status using enhanced formatting  
+        cat << 'EOF'
+        ${treefmtLib.errorFormatting.formatFormatterStatus (lib.mapAttrs (name: fcfg: fcfg.enable) cfg.formatters)}
+        EOF
+        
+        echo ""
+        echo "${treefmtLib.errorFormatting.success "Configuration validation complete!"}"
+      '';
     };
   };
 }
