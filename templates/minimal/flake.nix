@@ -20,7 +20,7 @@
     # For local clone: url = "path:/path/to/your/treefmt-full-flake";
     # For future public: url = "github:LarsArtmann/treefmt-full-flake";
     treefmt-flake = {
-      url = "git+ssh://git@github.com:LarsArtmann/treefmt-full-flake.git"; # CHANGE THIS
+      url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git"; # CHANGE THIS
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
