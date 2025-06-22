@@ -61,6 +61,10 @@
             path = ./templates/complete;
             description = "Complete treefmt configuration with all formatters";
           };
+          local-development = {
+            path = ./templates/local-development;
+            description = "Self-contained template that works immediately without external dependencies";
+          };
         };
       };
 

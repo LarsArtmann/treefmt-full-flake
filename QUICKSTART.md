@@ -18,15 +18,17 @@
 ```bash
 # CURRENTLY PRIVATE REPO - Choose your access method:
 
-# Option 1: If you have access to the private repo
-nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake
-
-# Option 2: For local development (clone repo first)
+# ⭐ RECOMMENDED: Self-contained template (works immediately!)
 git clone git@github.com:LarsArtmann/treefmt-full-flake.git
-nix flake init -t ./treefmt-full-flake
+nix flake init -t ./treefmt-full-flake#local-development
 
-# Option 3: When public release is available (future)
-# nix flake init -t github:LarsArtmann/treefmt-full-flake
+# Alternative: Full featured templates (require configuration)
+nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake
+# or
+nix flake init -t ./treefmt-full-flake#default  # (after cloning)
+
+# Future: When public release is available
+# nix flake init -t github:LarsArtmann/treefmt-full-flake#local-development
 
 # Test it works (formats this file!)
 nix fmt
