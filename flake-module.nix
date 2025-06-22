@@ -15,8 +15,39 @@
 
   # Runtime validation warnings with security checks
   generateRuntimeValidation = cfg: deprecationWarnings: let
+    # Critical assertions for core functionality
+    criticalAssertions = [
+      {
+        assertion = cfg.projectRootFile != "";
+        message = "projectRootFile cannot be empty - specify a file that exists in your project root";
+      }
+      {
+        assertion = !(cfg.incremental.enable && cfg.incremental.cache == "");
+        message = "incremental.cache cannot be empty when incremental formatting is enabled";
+      }
+      {
+        assertion = !(lib.hasInfix ".." cfg.projectRootFile);
+        message = "projectRootFile cannot contain '..' - use a filename only, not a path";
+      }
+    ];
+    
     securityReport = treefmtLib.securityValidation.validateSecurity cfg;
+    
+    # Process critical assertions
+    assertionFailures = lib.filter (assertion: !assertion.assertion) criticalAssertions;
+    hasAssertionFailures = assertionFailures != [];
   in ''
+    # Critical assertion checks
+    ${lib.optionalString hasAssertionFailures ''
+              echo "❌ CRITICAL CONFIGURATION ERRORS:"
+              ${lib.concatMapStringsSep "\n" (assertion: ''
+                echo "  • ${assertion.message}"
+              '') assertionFailures}
+              echo ""
+              echo "Fix these errors before proceeding."
+              exit 1
+    ''}
+    
     # Enhanced validation output with colors and structure
     ${lib.optionalString (!securityReport.isValid) ''
               # Format security errors with enhanced styling
