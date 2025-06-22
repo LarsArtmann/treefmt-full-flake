@@ -212,12 +212,17 @@
         if lib.elem x values
         then true
         else let
+          # Find the closest match for better user guidance
+          closestMatch = lib.findFirst (v: lib.hasPrefix (lib.substring 0 1 (toString x)) v) (lib.head values) values;
+          
           # Generate structured error message using lib.generators
           errorDetails = {
             invalid_value = toString x;
             allowed_values = values;
             suggestion = "Use one of: ${lib.concatStringsSep " | " values}";
-            example = exampleValue;
+            closest_match = "Did you mean '${closestMatch}'?";
+            example = "Example: ${exampleValue}";
+            documentation = "See documentation for more details";
           };
           formattedError = lib.generators.toPretty {allowPrettyValues = true;} errorDetails;
         in
@@ -231,7 +236,61 @@
       check = x:
         if lib.isString x && validator x
         then true
-        else throw "Invalid string value '${toString x}': ${description}";
+        else let
+          errorDetails = {
+            invalid_value = toString x;
+            requirement = description;
+            value_type = builtins.typeOf x;
+            suggestion = if !lib.isString x then "Provide a string value" else "Check the format requirements";
+          };
+          formattedError = lib.generators.toPretty {allowPrettyValues = true;} errorDetails;
+        in
+          throw "❌ Invalid string value!\n${formattedError}";
+    };
+
+  # User-friendly path type with helpful error messages
+  userFriendlyPath = description:
+    lib.types.path
+    // {
+      name = "user-friendly-path";
+      description = "${description}\nMust be a valid file system path";
+      check = x:
+        if lib.types.path.check x
+        then true
+        else let
+          errorDetails = {
+            invalid_value = toString x;
+            requirement = description;
+            suggestion = if lib.isString x then "Use a path type: ./your/path or /absolute/path" else "Provide a valid path";
+            examples = ["./relative/path" "/absolute/path" "~/home/path"];
+          };
+        in
+          throw "❌ Invalid path!\n${lib.generators.toPretty {allowPrettyValues = true;} errorDetails}";
+    };
+
+  # Enhanced port type with range validation
+  userFriendlyPort = description:
+    lib.types.ints.between 1 65535
+    // {
+      name = "user-friendly-port";
+      description = "${description}\nMust be a port number between 1 and 65535";
+      check = x:
+        if lib.isInt x && x >= 1 && x <= 65535
+        then true
+        else let
+          errorDetails = {
+            invalid_value = toString x;
+            requirement = "Port number between 1 and 65535";
+            suggestion = if lib.isInt x then "Use a port in valid range" else "Provide an integer";
+            common_ports = {
+              http = 80;
+              https = 443;
+              ssh = 22;
+              development = 3000;
+            };
+          };
+        in
+          throw "❌ Invalid port!\n${lib.generators.toPretty {allowPrettyValues = true;} errorDetails}";
     };
 
   # Common validators for string options
@@ -301,6 +360,8 @@ in {
     generateRuntimeValidation
     debug
     functional
+    userFriendlyPath
+    userFriendlyPort
     ;
 
   # Export enhanced types
@@ -308,5 +369,7 @@ in {
     inherit validatedSubmodule;
     inherit betterEnum;
     inherit validatedString;
+    inherit userFriendlyPath;
+    inherit userFriendlyPort;
   };
 }
