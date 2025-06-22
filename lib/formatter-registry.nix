@@ -183,9 +183,11 @@ in {
   attrsetUtils = {
     # Merge configurations with conflict resolution
     mergeConfigurations = configs:
-      lib.foldl' (acc: config: 
-        lib.recursiveUpdate acc config
-      ) {} configs;
+      lib.foldl' (
+        acc: config:
+          lib.recursiveUpdate acc config
+      ) {}
+      configs;
 
     # Extract nested values safely using lib.attrByPath
     safeGetNested = path: default: attrs:
@@ -193,18 +195,21 @@ in {
 
     # Group attribute set by a key function
     groupBy = keyFn: attrs:
-      lib.foldl' (acc: item:
-        let key = keyFn item;
-        in acc // {
-          ${key} = (acc.${key} or []) ++ [item];
-        }
+      lib.foldl' (
+        acc: item: let
+          key = keyFn item;
+        in
+          acc
+          // {
+            ${key} = (acc.${key} or []) ++ [item];
+          }
       ) {} (lib.attrValues attrs);
 
     # Transform attribute set keys and values using lib.mapAttrsToList
     mapAttrsPairs = f: attrs:
       lib.listToAttrs (lib.mapAttrsToList f attrs);
 
-    # Filter and map in one operation  
+    # Filter and map in one operation
     filterMapAttrs = filterFn: mapFn: attrs:
       lib.mapAttrs mapFn (lib.filterAttrs filterFn attrs);
   };

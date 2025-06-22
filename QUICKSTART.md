@@ -3,6 +3,7 @@
 > **🎯 Get production-ready formatting with 15+ formatters in under 2 minutes**
 
 ## 🚨 Current Status: Private Beta
+
 This project is currently **private**. Choose the access method that works for you:
 
 ---
@@ -63,11 +64,12 @@ git clone git@github.com:LarsArtmann/treefmt-full-flake.git ~/tools/treefmt-full
 ```
 
 Add to your `flake.nix` inputs:
+
 ```nix
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    
+
     # Add treefmt-flake
     treefmt-flake = {
       url = "path:/home/user/tools/treefmt-full-flake";  # Use your actual path
@@ -85,7 +87,7 @@ Add to your `flake.nix` inputs:
       projectRootFile = "flake.nix";
       formatters = {
         nix.enable = true;        # Nix files
-        web.enable = true;        # JS/TS/CSS  
+        web.enable = true;        # JS/TS/CSS
         python.enable = true;     # Python files
         yaml.enable = true;       # YAML files
         markdown.enable = true;   # Markdown files
@@ -105,7 +107,7 @@ Create test files to verify everything works:
 # Test Nix formatting
 echo "{ foo = 1; }" > test.nix
 
-# Test JavaScript formatting  
+# Test JavaScript formatting
 echo "const x='hello';" > test.js
 
 # Test Markdown formatting
@@ -122,9 +124,10 @@ git diff  # Should show formatting changes
 ```
 
 **Note**: The self-contained template includes these formatters:
-- ✅ **Nix**: alejandra  
+
+- ✅ **Nix**: alejandra
 - ✅ **Web**: prettier (JS, TS, JSON, CSS, HTML, MD)
-- ✅ **Shell**: shfmt 
+- ✅ **Shell**: shfmt
 - ✅ **YAML**: yamlfmt
 
 For more formatters (Python, Rust, etc.), use the full templates or configure manually.
@@ -136,12 +139,14 @@ For more formatters (Python, Rust, etc.), use the full templates or configure ma
 ### 📋 **Formatters Available**
 
 **Self-Contained Template** (works immediately):
+
 - **Nix**: `alejandra`
 - **Web**: `prettier` (JavaScript, TypeScript, CSS, JSON, HTML, Markdown)
 - **Shell**: `shfmt`
 - **YAML**: `yamlfmt`
 
 **Full Templates** (require configuration, 15+ formatters):
+
 - **Nix**: `alejandra` (or `nixfmt-rfc-style`)
 - **Web**: `biome` (JavaScript, TypeScript, CSS, JSON)
 - **Python**: `black`, `isort`, `ruff`
@@ -154,6 +159,7 @@ For more formatters (Python, Rust, etc.), use the full templates or configure ma
 - **Shell**: `shfmt`, `shellcheck`
 
 ### 🛠️ **Built-in Tools**
+
 ```bash
 nix fmt                    # Format all files
 nix fmt -- --check         # Check formatting without changes
@@ -162,8 +168,9 @@ treefmt-status            # Show configuration summary (if available)
 ```
 
 ### ⚡ **Performance Features**
+
 - **Incremental formatting**: Only format changed files
-- **Parallel processing**: Format multiple files simultaneously  
+- **Parallel processing**: Format multiple files simultaneously
 - **Smart caching**: Skip files that haven't changed
 - **Performance tracking**: See timing and file statistics
 
@@ -172,6 +179,7 @@ treefmt-status            # Show configuration summary (if available)
 ## 🚀 Advanced Usage
 
 ### Enable All Formatters
+
 ```nix
 treefmtFlake = {
   formatters = {
@@ -189,6 +197,7 @@ treefmtFlake = {
 ```
 
 ### Performance Optimization
+
 ```nix
 treefmtFlake = {
   # Enable incremental formatting for large projects
@@ -196,7 +205,7 @@ treefmtFlake = {
     enable = true;
     mode = "auto";  # or "git" or "cache"
   };
-  
+
   # Performance tuning
   behavior = {
     performance = "balanced";  # or "fast" or "thorough"
@@ -209,26 +218,33 @@ treefmtFlake = {
 ## 🐛 Troubleshooting
 
 ### ❌ "error: cannot find template"
+
 **Solution**: Make sure you've cloned the repository and are using the correct path:
+
 ```bash
 ls ./treefmt-full-flake/templates/  # Should show template directories
 ```
 
-### ❌ "error: access denied"  
+### ❌ "error: access denied"
+
 **Solution**: Use local clone method instead of SSH:
+
 ```bash
 git clone git@github.com:LarsArtmann/treefmt-full-flake.git
 nix flake init -t ./treefmt-full-flake#local-development
 ```
 
 ### ❌ Formatting not working
+
 **Solution**: Check your configuration and test with a simple file:
+
 ```bash
 echo "def test():pass" > test.py && nix fmt && cat test.py
 # Should show formatted Python code
 ```
 
 ### 🔍 Get Help
+
 ```bash
 nix flake show                    # See all available templates
 nix develop                       # Enter dev shell
@@ -247,8 +263,9 @@ nix flake init -t github:LarsArtmann/treefmt-full-flake#local-development
 ```
 
 **Want to help with the public release?**
+
 - Test the current access methods and report issues
-- Provide feedback on the user experience  
+- Provide feedback on the user experience
 - Check out the [open issues](https://github.com/LarsArtmann/treefmt-full-flake/issues)
 
 ---

@@ -33,25 +33,25 @@
         pkgs,
         ...
       }: {
-        # Self-contained treefmt configuration 
+        # Self-contained treefmt configuration
         # This works immediately without external dependencies
         treefmt = {
           projectRootFile = "flake.nix";
-          
+
           # Enable common formatters that work out of the box
           programs = {
             # Nix formatting
             alejandra.enable = true;
-            
+
             # Web development (if needed)
             prettier = {
               enable = true;
               includes = ["*.js" "*.ts" "*.json" "*.css" "*.html" "*.md"];
             };
-            
+
             # Shell scripts
             shfmt.enable = true;
-            
+
             # YAML files
             yamlfmt.enable = true;
           };
@@ -62,7 +62,7 @@
           buildInputs = [
             # Formatters are provided by treefmt-nix
             config.treefmt.build.wrapper
-            
+
             # Add any additional development tools here
             pkgs.git
           ];
