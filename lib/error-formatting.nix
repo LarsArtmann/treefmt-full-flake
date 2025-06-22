@@ -290,19 +290,19 @@ in {
     # Enhanced string utilities using lib.strings
     stringUtils = {
       # Normalize whitespace using lib.strings functions
-      normalizeWhitespace = text: 
+      normalizeWhitespace = text:
         lib.strings.trim (builtins.replaceStrings ["\t" "\n" "\r"] [" " " " " "] text);
-      
+
       # Capitalize first letter
       capitalize = text:
         if lib.stringLength text > 0
         then lib.toUpper (lib.substring 0 1 text) + lib.substring 1 (-1) text
         else text;
-      
+
       # Convert to kebab-case
       toKebabCase = text:
         lib.toLower (builtins.replaceStrings [" " "_"] ["-" "-"] text);
-      
+
       # Truncate text with ellipsis
       truncate = maxLength: text:
         if lib.stringLength text <= maxLength
@@ -346,18 +346,19 @@ in {
     toBulletList = items: prefix:
       lib.concatMapStringsSep "\n" (item: "${prefix}${item}") items;
 
-    # Generate markdown table from structured data  
-    toMarkdownTable = headers: rows:
-      let
-        headerRow = "| ${lib.concatStringsSep " | " headers} |";
-        separatorRow = "| ${lib.concatStringsSep " | " (lib.map (_: "---") headers)} |";
-        dataRows = lib.map (row: 
-          "| ${lib.concatStringsSep " | " (lib.map (h: toString (row.${h} or "")) headers)} |"
-        ) rows;
-      in
-        lib.concatStringsSep "\n" ([headerRow separatorRow] ++ dataRows);
+    # Generate markdown table from structured data
+    toMarkdownTable = headers: rows: let
+      headerRow = "| ${lib.concatStringsSep " | " headers} |";
+      separatorRow = "| ${lib.concatStringsSep " | " (lib.map (_: "---") headers)} |";
+      dataRows =
+        lib.map (
+          row: "| ${lib.concatStringsSep " | " (lib.map (h: toString (row.${h} or "")) headers)} |"
+        )
+        rows;
+    in
+      lib.concatStringsSep "\n" ([headerRow separatorRow] ++ dataRows);
 
-    # Generate configuration diff using lib.generators  
+    # Generate configuration diff using lib.generators
     toConfigDiff = oldConfig: newConfig:
       lib.generators.toPretty {
         allowPrettyValues = true;

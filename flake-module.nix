@@ -30,9 +30,9 @@
         message = "projectRootFile cannot contain '..' - use a filename only, not a path";
       }
     ];
-    
+
     securityReport = treefmtLib.securityValidation.validateSecurity cfg;
-    
+
     # Process critical assertions
     assertionFailures = lib.filter (assertion: !assertion.assertion) criticalAssertions;
     hasAssertionFailures = assertionFailures != [];
@@ -46,7 +46,7 @@
               echo "${treefmtLib.errorFormatting.error "Fix these critical errors before proceeding."}"
               exit 1
     ''}
-    
+
     # Enhanced validation output with colors and structure
     ${lib.optionalString (!securityReport.isValid) ''
               # Format security errors with enhanced styling
@@ -811,7 +811,7 @@ in {
           # Enhanced user experience with comprehensive formatting
           treefmt-status = pkgs.writeShellScriptBin "treefmt-status" ''
             ${generateRuntimeValidation cfg deprecationWarnings}
-            
+
             # Configuration summary using enhanced formatting
             cat << 'EOF'
             ${treefmtLib.errorFormatting.formatConfigSummary {
@@ -821,12 +821,12 @@ in {
               incremental = cfg.incremental;
             }}
             EOF
-            
-            # Formatter status using enhanced formatting  
+
+            # Formatter status using enhanced formatting
             cat << 'EOF'
             ${treefmtLib.errorFormatting.formatFormatterStatus (lib.mapAttrs (name: fcfg: fcfg.enable) cfg.formatters)}
             EOF
-            
+
             echo ""
             echo "${treefmtLib.errorFormatting.success "Configuration validation complete!"}"
           '';

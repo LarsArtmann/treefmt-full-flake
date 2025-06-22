@@ -214,7 +214,7 @@
         else let
           # Find the closest match for better user guidance
           closestMatch = lib.findFirst (v: lib.hasPrefix (lib.substring 0 1 (toString x)) v) (lib.head values) values;
-          
+
           # Generate structured error message using lib.generators
           errorDetails = {
             invalid_value = toString x;
@@ -241,7 +241,10 @@
             invalid_value = toString x;
             requirement = description;
             value_type = builtins.typeOf x;
-            suggestion = if !lib.isString x then "Provide a string value" else "Check the format requirements";
+            suggestion =
+              if !lib.isString x
+              then "Provide a string value"
+              else "Check the format requirements";
           };
           formattedError = lib.generators.toPretty {allowPrettyValues = true;} errorDetails;
         in
@@ -261,7 +264,10 @@
           errorDetails = {
             invalid_value = toString x;
             requirement = description;
-            suggestion = if lib.isString x then "Use a path type: ./your/path or /absolute/path" else "Provide a valid path";
+            suggestion =
+              if lib.isString x
+              then "Use a path type: ./your/path or /absolute/path"
+              else "Provide a valid path";
             examples = ["./relative/path" "/absolute/path" "~/home/path"];
           };
         in
@@ -281,7 +287,10 @@
           errorDetails = {
             invalid_value = toString x;
             requirement = "Port number between 1 and 65535";
-            suggestion = if lib.isInt x then "Use a port in valid range" else "Provide an integer";
+            suggestion =
+              if lib.isInt x
+              then "Use a port in valid range"
+              else "Provide an integer";
             common_ports = {
               http = 80;
               https = 443;

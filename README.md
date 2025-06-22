@@ -16,6 +16,7 @@
 **Choose the method that works for your situation:**
 
 ### 🔑 Method 1: SSH Access (If you have repository access)
+
 ```bash
 # Use templates directly
 nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake
@@ -25,6 +26,7 @@ inputs.treefmt-flake.url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-fl
 ```
 
 ### 📁 Method 2: Local Development (Clone first)
+
 ```bash
 # Clone the repository
 git clone git@github.com:LarsArtmann/treefmt-full-flake.git
@@ -37,13 +39,16 @@ inputs.treefmt-flake.url = "path:./path/to/treefmt-full-flake";
 ```
 
 ### 🌍 Method 3: Future Public Access
+
 ```bash
 # When repository becomes public (roadmap item)
 nix flake init -t github:LarsArtmann/treefmt-full-flake#local-development
 ```
 
 ### 🎯 Recommended: Self-Contained Template
+
 The `local-development` template works immediately without external dependencies:
+
 ```bash
 git clone git@github.com:LarsArtmann/treefmt-full-flake.git
 nix flake init -t ./treefmt-full-flake#local-development
@@ -401,6 +406,7 @@ git commit --no-verify
 ## 🗺️ Roadmap
 
 ### Current Status: Private Beta
+
 - ✅ **Production-Ready**: Comprehensive testing, error handling, performance tracking
 - ✅ **15+ Formatters**: All major languages and file types supported
 - ✅ **Multiple Access Methods**: SSH, local clone, self-contained templates
@@ -408,9 +414,11 @@ git commit --no-verify
 - ✅ **Cross-Platform**: Linux, macOS, x86_64, aarch64 support
 
 ### Planned: Public Release
+
 **Target**: Q3 2025
 
 **Prerequisites for Public Release:**
+
 - [ ] Security audit and sensitive data review
 - [ ] Public CI/CD infrastructure setup
 - [ ] Comprehensive end-to-end testing with external users
@@ -418,12 +426,14 @@ git commit --no-verify
 - [ ] Documentation review and user experience testing
 
 **Benefits of Public Release:**
+
 - 🌍 **Universal Access**: `nix flake init -t github:LarsArtmann/treefmt-full-flake`
 - 📦 **Flake Registry**: Listed in official Nix flake registry
 - 🔄 **Community Contributions**: Open source collaboration
 - 📈 **Wider Adoption**: Available to the entire Nix community
 
 ### Future Enhancements (See [Issues](https://github.com/LarsArtmann/treefmt-full-flake/issues))
+
 - 💻 IDE Extensions (VS Code, JetBrains plugins)
 - 🚀 Enhanced CI/CD integrations
 - 🔍 Advanced debugging and observability tools
@@ -432,9 +442,10 @@ git commit --no-verify
 
 ---
 
-**Want to help with the public release?** 
+**Want to help with the public release?**
+
 - Try the current access methods and report issues
-- Test the self-contained template in your projects  
+- Test the self-contained template in your projects
 - Provide feedback on the user experience
 - Contribute to the [open issues](https://github.com/LarsArtmann/treefmt-full-flake/issues)
 
