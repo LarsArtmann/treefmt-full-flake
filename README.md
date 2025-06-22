@@ -32,8 +32,12 @@ Add the flake to your inputs:
     };
 
     # Import the treefmt-flake
+    # CURRENTLY PRIVATE REPO - Replace with appropriate access method:
+    # For private repo access: url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git";
+    # For local development: url = "path:./path/to/treefmt-full-flake";
+    # For future public release: url = "github:LarsArtmann/treefmt-full-flake";
     treefmt-flake = {
-      url = "github:LarsArtmann/treefmt-full-flake";
+      url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
