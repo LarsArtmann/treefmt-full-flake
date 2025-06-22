@@ -15,12 +15,12 @@
     };
 
     # Import the treefmt-flake
-    # REPLACE THIS with your actual treefmt-flake source:
-    # For public release: url = "github:LarsArtmann/treefmt-full-flake";
-    # For local development: url = "path:../path/to/treefmt-full-flake";
-    # For private repo: url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git";
+    # REQUIRED: Replace this URL with your treefmt-flake access method:
+    # For SSH access: url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git";
+    # For local clone: url = "path:/path/to/your/treefmt-full-flake";
+    # For future public: url = "github:LarsArtmann/treefmt-full-flake";
     treefmt-flake = {
-      url = "path:../.."; # Reference the treefmt-full-flake repo
+      url = "git+ssh://git@github.com:LarsArtmann/treefmt-full-flake.git"; # CHANGE THIS
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
