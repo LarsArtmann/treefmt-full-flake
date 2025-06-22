@@ -243,13 +243,13 @@ in {
         };
 
         fileCount = lib.mkOption {
-          type = lib.types.int;
-          description = "Number of files processed";
+          type = lib.types.ints.unsigned;
+          description = "Number of files processed (non-negative integer)";
         };
 
         totalSize = lib.mkOption {
-          type = lib.types.int;
-          description = "Total size of files processed (bytes)";
+          type = lib.types.ints.unsigned;
+          description = "Total size of files processed in bytes (non-negative integer)";
         };
 
         formatterTimes = lib.mkOption {
