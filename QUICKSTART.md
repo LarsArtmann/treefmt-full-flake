@@ -1,271 +1,263 @@
 # ⚡ Quick Start: Format ANY codebase in 2 minutes
 
-> **🚀 Get enterprise-grade code formatting with 15+ formatters in under 2 minutes**
+> **🎯 Get production-ready formatting with 15+ formatters in under 2 minutes**
 
-## 🎯 What You'll Get
-
-✨ **15+ formatters** for Nix, JavaScript, Python, Rust, YAML, Markdown, and more\
-⚡ **10-100x faster** formatting with incremental mode\
-🔧 **Zero configuration** - smart defaults that just work\
-🎨 **IDE integration** - format-on-save for JetBrains, VS Code, Neovim
+## 🚨 Current Status: Private Beta
+This project is currently **private**. Choose the access method that works for you:
 
 ---
 
-## 🚀 Method 1: Template Magic (30 seconds)
+## 🚀 Method 1: Self-Contained Template (RECOMMENDED)
 
-**Copy, paste, done!** Use our pre-built template:
+**✅ Works immediately • ✅ No external dependencies • ✅ Perfect for testing**
 
 ```bash
-# CURRENTLY PRIVATE REPO - Choose your access method:
+# Step 1: Clone the repository
+git clone git@github.com:LarsArtmann/treefmt-full-flake.git
+cd treefmt-full-flake
 
-# ⭐ RECOMMENDED: Self-contained template (works immediately!)
+# Step 2: Create a test project
+mkdir ../test-treefmt && cd ../test-treefmt
+
+# Step 3: Initialize with self-contained template
+nix flake init -t ../treefmt-full-flake#local-development
+
+# Step 4: Test it works immediately!
+echo "console.log('hello world');" > test.js
+nix fmt  # Formats your test.js file!
+
+# Step 5: See what you got
+nix flake show  # Shows all available formatters
+```
+
+**🎉 That's it! You now have a working formatter setup.**
+
+---
+
+## 🔧 Method 2: SSH Access (If you have repository access)
+
+```bash
+# Step 1: Create new project directory
+mkdir my-project && cd my-project
+
+# Step 2: Initialize with template
+nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake
+
+# Step 3: Edit the template to set your source
+# Edit flake.nix and replace the url with your preferred access method
+
+# Step 4: Test it works
+echo "def hello(): pass" > test.py
+nix fmt  # Formats your test.py file!
+```
+
+---
+
+## 📁 Method 3: Local Integration (For existing projects)
+
+```bash
+# Step 1: Clone treefmt-flake somewhere accessible
+git clone git@github.com:LarsArtmann/treefmt-full-flake.git ~/tools/treefmt-full-flake
+
+# Step 2: Add to your existing project's flake.nix
+```
+
+Add to your `flake.nix` inputs:
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    
+    # Add treefmt-flake
+    treefmt-flake = {
+      url = "path:/home/user/tools/treefmt-full-flake";  # Use your actual path
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+    imports = [
+      inputs.treefmt-flake.flakeModule
+    ];
+
+    # Enable formatters you need
+    treefmtFlake = {
+      projectRootFile = "flake.nix";
+      formatters = {
+        nix.enable = true;        # Nix files
+        web.enable = true;        # JS/TS/CSS  
+        python.enable = true;     # Python files
+        yaml.enable = true;       # YAML files
+        markdown.enable = true;   # Markdown files
+      };
+    };
+  };
+}
+```
+
+---
+
+## 🧪 Test Your Setup
+
+Create test files to verify everything works:
+
+```bash
+# Test Nix formatting
+echo "{ foo = 1; }" > test.nix
+
+# Test JavaScript formatting  
+echo "const x='hello';" > test.js
+
+# Test Markdown formatting
+echo "# Test\n\nSome  spaced    text" > test.md
+
+# Test YAML formatting
+echo "key:value" > test.yml
+
+# Format all files
+nix fmt
+
+# Check that files were formatted
+git diff  # Should show formatting changes
+```
+
+**Note**: The self-contained template includes these formatters:
+- ✅ **Nix**: alejandra  
+- ✅ **Web**: prettier (JS, TS, JSON, CSS, HTML, MD)
+- ✅ **Shell**: shfmt 
+- ✅ **YAML**: yamlfmt
+
+For more formatters (Python, Rust, etc.), use the full templates or configure manually.
+
+---
+
+## 🎯 What You Get Out of the Box
+
+### 📋 **Formatters Available**
+
+**Self-Contained Template** (works immediately):
+- **Nix**: `alejandra`
+- **Web**: `prettier` (JavaScript, TypeScript, CSS, JSON, HTML, Markdown)
+- **Shell**: `shfmt`
+- **YAML**: `yamlfmt`
+
+**Full Templates** (require configuration, 15+ formatters):
+- **Nix**: `alejandra` (or `nixfmt-rfc-style`)
+- **Web**: `biome` (JavaScript, TypeScript, CSS, JSON)
+- **Python**: `black`, `isort`, `ruff`
+- **Rust**: `rustfmt`
+- **YAML**: `yamlfmt`
+- **Markdown**: `mdformat`
+- **JSON**: `jq`, custom formatters
+- **TOML**: `taplo`
+- **Protocol Buffers**: `buf`
+- **Shell**: `shfmt`, `shellcheck`
+
+### 🛠️ **Built-in Tools**
+```bash
+nix fmt                    # Format all files
+nix fmt -- --check         # Check formatting without changes
+nix develop                # Enter dev shell with all tools
+treefmt-status            # Show configuration summary (if available)
+```
+
+### ⚡ **Performance Features**
+- **Incremental formatting**: Only format changed files
+- **Parallel processing**: Format multiple files simultaneously  
+- **Smart caching**: Skip files that haven't changed
+- **Performance tracking**: See timing and file statistics
+
+---
+
+## 🚀 Advanced Usage
+
+### Enable All Formatters
+```nix
+treefmtFlake = {
+  formatters = {
+    nix.enable = true;
+    web.enable = true;
+    python.enable = true;
+    shell.enable = true;
+    rust.enable = true;
+    yaml.enable = true;
+    markdown.enable = true;
+    json.enable = true;
+    misc.enable = true;  # Includes TOML, Protocol Buffers, etc.
+  };
+};
+```
+
+### Performance Optimization
+```nix
+treefmtFlake = {
+  # Enable incremental formatting for large projects
+  incremental = {
+    enable = true;
+    mode = "auto";  # or "git" or "cache"
+  };
+  
+  # Performance tuning
+  behavior = {
+    performance = "balanced";  # or "fast" or "thorough"
+  };
+};
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### ❌ "error: cannot find template"
+**Solution**: Make sure you've cloned the repository and are using the correct path:
+```bash
+ls ./treefmt-full-flake/templates/  # Should show template directories
+```
+
+### ❌ "error: access denied"  
+**Solution**: Use local clone method instead of SSH:
+```bash
 git clone git@github.com:LarsArtmann/treefmt-full-flake.git
 nix flake init -t ./treefmt-full-flake#local-development
-
-# Alternative: Full featured templates (require configuration)
-nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake
-# or
-nix flake init -t ./treefmt-full-flake#default  # (after cloning)
-
-# Future: When public release is available
-# nix flake init -t github:LarsArtmann/treefmt-full-flake#local-development
-
-# Test it works (formats this file!)
-nix fmt
-
-# See what formatters you got
-nix flake show
 ```
 
-**✅ You're done!** Your project now has professional formatting.
-
----
-
-## 🛠️ Method 2: Add to Existing Project (90 seconds)
-
-### Step 1: Add to your `flake.nix` (30 seconds)
-
-Drop this into your `inputs` section:
-
-```nix
-treefmt-flake = {
-  url = "github:LarsArtmann/treefmt-full-flake";
-  inputs.nixpkgs.follows = "nixpkgs";
-};
-```
-
-### Step 2: Import and enable (30 seconds)
-
-Add to your flake:
-
-```nix
-imports = [
-  inputs.treefmt-flake.flakeModule
-];
-
-treefmtFlake = {
-  nix = true;        # Format .nix files
-  web = true;        # Format JS/TS/CSS
-  python = true;     # Format Python
-  shell = true;      # Format shell scripts
-  yaml = true;       # Format YAML
-  markdown = true;   # Format Markdown
-  json = true;       # Format JSON
-
-  # Optional: Use deterministic nixfmt-rfc-style instead of alejandra
-  # nixFormatter = "nixfmt-rfc-style";
-};
-```
-
-### Step 3: Test it works! (30 seconds)
-
+### ❌ Formatting not working
+**Solution**: Check your configuration and test with a simple file:
 ```bash
-# Format everything
-nix fmt
-
-# Just check (fail if changes needed)
-nix fmt -- --fail-on-change
+echo "def test():pass" > test.py && nix fmt && cat test.py
+# Should show formatted Python code
 ```
 
-**🎉 Success!** You now have industrial-strength formatting.
-
----
-
-## 🔥 Instant Demo: See It Work
-
-Create some messy files and watch the magic:
-
+### 🔍 Get Help
 ```bash
-# Create a messy JavaScript file
-cat > test.js << 'EOF'
-const  x={a:1,b:2};if(x.a>0){console.log("hello world");}
-EOF
-
-# Create messy Nix code
-cat > test.nix << 'EOF'
-{pkgs}:{foo=1;bar=pkgs.hello;}
-EOF
-
-# Watch treefmt clean it up
-nix fmt
-
-# Check the results
-cat test.js test.nix
-```
-
-**Before**: Unreadable mess\
-**After**: Perfectly formatted, consistent code
-
----
-
-## ⚡ Supercharge It: Pro Tips
-
-**Want even more power?** Here are some advanced techniques:
-
-```bash
-# Format specific files only
-nix fmt path/to/file.js path/to/other.nix
-
-# Check formatting (fail if changes needed)
-nix fmt -- --fail-on-change
-
-# Use in CI/CD pipelines
-nix fmt -- --fail-on-change
-```
-
-**🚀 Want 10-100x faster incremental formatting?**
-Check out our [Complete Template](./templates/complete/flake.nix) for advanced configurations including git-based incremental formatting!
-
----
-
-## 🎨 IDE Integration: Format-on-Save
-
-### JetBrains (IntelliJ, WebStorm, PyCharm)
-
-```bash
-# One-line setup
-nix build && echo "Add File Watcher: Program: ./result/bin/treefmt, Args: \$FilePath\$"
-```
-
-### VS Code
-
-```bash
-# Coming soon - meanwhile use Command Palette: "Nix Fmt"
-```
-
-### Neovim
-
-```lua
--- Add to your config
-vim.keymap.set('n', '<leader>f', ':!nix fmt<CR>')
+nix flake show                    # See all available templates
+nix develop                       # Enter dev shell
+nix fmt -- --help               # See treefmt options
 ```
 
 ---
 
-## 🎊 What Just Happened?
+## 🌍 Future: Public Release
 
-You now have **enterprise-grade formatting** with:
+**Coming Q3 2025**: When the repository becomes public, usage will be even simpler:
 
-| Language                  | Formatters                 | What It Does                             |
-| ------------------------- | -------------------------- | ---------------------------------------- |
-| **Nix**                   | alejandra, deadnix, statix | Clean syntax, remove dead code, lint     |
-| **JavaScript/TypeScript** | biome                      | Format, lint, organize imports           |
-| **Python**                | black, isort, ruff         | PEP8 formatting, import sorting, linting |
-| **Rust**                  | rustfmt                    | Official Rust formatting                 |
-| **Shell**                 | shfmt, shellcheck          | POSIX formatting, syntax checking        |
-| **YAML**                  | yamlfmt                    | Consistent YAML formatting               |
-| **Markdown**              | mdformat                   | Clean markdown with numbered headings    |
-| **JSON**                  | jsonfmt, jq                | Pretty-print and validate JSON           |
+```bash
+# Future public access (not available yet)
+nix flake init -t github:LarsArtmann/treefmt-full-flake#local-development
+```
+
+**Want to help with the public release?**
+- Test the current access methods and report issues
+- Provide feedback on the user experience  
+- Check out the [open issues](https://github.com/LarsArtmann/treefmt-full-flake/issues)
 
 ---
 
-## 🚀 Next Level: Power Features
+## ✅ Success! What Next?
 
-Ready to level up? Check out these advanced features:
+1. **🎨 Customize your configuration** - Enable only the formatters you need
+2. **⚡ Set up IDE integration** - Format on save in your editor
+3. **🚀 Add to CI/CD** - Ensure consistent formatting in your pipeline
+4. **📖 Read the full [README](./README.md)** - Discover advanced features
 
-### 📁 **Templates & Examples**
-
-```bash
-nix flake init -t github:LarsArtmann/treefmt-full-flake#complete  # Full power
-nix flake init -t github:LarsArtmann/treefmt-full-flake#minimal  # Just basics
-```
-
-### ⚡ **Performance Modes**
-
-- `fast` - Skip expensive checks (development)
-- `balanced` - Smart performance (default)
-- `thorough` - Full validation (CI/CD)
-
-### 🔧 **Custom Configuration**
-
-- Override formatter options
-- Add custom formatters
-- Configure excludes and includes
-- Set up pre-commit hooks
-
-### 🤖 **CI/CD Integration**
-
-```yaml
-# GitHub Actions
-- run: nix fmt -- --fail-on-change # Fail if unformatted
-```
-
----
-
-## 📚 Learn More
-
-- **[Full Documentation](./README.md)** - All features and options
-- **[Incremental Formatting](./INCREMENTAL.md)** - 10-100x performance guide
-- **[JetBrains Integration](./docs/jetbrains-integration.md)** - Detailed IDE setup
-- **[Templates](./templates/)** - Ready-to-use project templates
-
----
-
-## 🆘 Troubleshooting
-
-### "command not found: nix"
-
-```bash
-# Install Nix first
-curl -L https://nixos.org/nix/install | sh
-```
-
-### "error: flake not found"
-
-```bash
-# Enable flakes
-echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-```
-
-### "formatters missing"
-
-```bash
-# Let treefmt download them
-nix develop  # Enters shell with all formatters
-```
-
-### "permission denied"
-
-```bash
-# Make sure treefmt is executable
-nix build && chmod +x result/bin/treefmt
-```
-
----
-
-## 🎉 You Did It!
-
-**Congratulations!** You now have:
-
-✅ Professional code formatting across 8+ languages\
-✅ Lightning-fast incremental formatting\
-✅ IDE integration ready to go\
-✅ Enterprise-grade tooling for any project size
-
-**Ready to format the world?** 🌍✨
-
----
-
-> **💡 Pro Tip**: Star the repo and share with your team - consistent formatting makes everyone's life better!
-
-**[⭐ Star on GitHub](https://github.com/LarsArtmann/treefmt-full-flake)** | **[🐛 Report Issues](https://github.com/LarsArtmann/treefmt-full-flake/issues)** | **[💬 Discussions](https://github.com/LarsArtmann/treefmt-full-flake/discussions)**
+**Happy formatting!** 🎉
