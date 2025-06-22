@@ -807,30 +807,30 @@ in {
               else "${config.treefmt.build.wrapper}/bin/treefmt"
             } "$@"
           '';
-        };
 
-      # Enhanced user experience with comprehensive formatting
-      packages.treefmt-status = pkgs.writeShellScriptBin "treefmt-status" ''
-        ${generateRuntimeValidation cfg deprecationWarnings}
-        
-        # Configuration summary using enhanced formatting
-        cat << 'EOF'
-        ${treefmtLib.errorFormatting.formatConfigSummary {
-          projectRootFile = cfg.projectRootFile;
-          autoDetection = cfg.autoDetection;
-          behavior = cfg.behavior;
-          incremental = cfg.incremental;
-        }}
-        EOF
-        
-        # Formatter status using enhanced formatting  
-        cat << 'EOF'
-        ${treefmtLib.errorFormatting.formatFormatterStatus (lib.mapAttrs (name: fcfg: fcfg.enable) cfg.formatters)}
-        EOF
-        
-        echo ""
-        echo "${treefmtLib.errorFormatting.success "Configuration validation complete!"}"
-      '';
+          # Enhanced user experience with comprehensive formatting
+          treefmt-status = pkgs.writeShellScriptBin "treefmt-status" ''
+            ${generateRuntimeValidation cfg deprecationWarnings}
+            
+            # Configuration summary using enhanced formatting
+            cat << 'EOF'
+            ${treefmtLib.errorFormatting.formatConfigSummary {
+              projectRootFile = cfg.projectRootFile;
+              autoDetection = cfg.autoDetection;
+              behavior = cfg.behavior;
+              incremental = cfg.incremental;
+            }}
+            EOF
+            
+            # Formatter status using enhanced formatting  
+            cat << 'EOF'
+            ${treefmtLib.errorFormatting.formatFormatterStatus (lib.mapAttrs (name: fcfg: fcfg.enable) cfg.formatters)}
+            EOF
+            
+            echo ""
+            echo "${treefmtLib.errorFormatting.success "Configuration validation complete!"}"
+          '';
+        };
     };
   };
 }
