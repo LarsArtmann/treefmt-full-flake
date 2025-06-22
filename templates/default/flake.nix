@@ -20,7 +20,7 @@
     # For local development: url = "path:../path/to/treefmt-full-flake";
     # For private repo: url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git";
     treefmt-flake = {
-      url = "path:./treefmt-flake-source"; # REPLACE with actual source
+      url = "path:../.."; # Reference the treefmt-full-flake repo
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
