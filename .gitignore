@@ -1,0 +1,132 @@
+# Nix
+result
+result-*
+.direnv/
+.envrc
+.nix-*
+shell.nix~
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.npm
+.eslintcache
+.nyc_output
+.grunt
+.lock-wscript
+build/Release
+.node_repl_history
+*.tgz
+.yarn-integrity
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# TypeScript
+*.tsbuildinfo
+dist/
+# Only ignore common lib patterns, not our source lib
+/lib/*.so
+/lib/*.a
+/lib/*.dylib
+out/
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# treefmt cache
+.treefmt-cache/
+.treefmt-analytics/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Archive files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# JetBrains
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# Test files (keep source test files, ignore generated)
+*.test.js.map
+*.spec.js.map
+
+# Test artifact directories
+template-test-*/
+test-comprehensive/
+test-schema-debug/
+test-hook-dir/
+test-treefmt-flags/
+test-user-experience/
+treefmt-template-debug/
+final-test/
+test-*/
