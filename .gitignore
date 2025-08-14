@@ -119,3 +119,14 @@ Thumbs.db
 # Test files (keep source test files, ignore generated)
 *.test.js.map
 *.spec.js.map
+
+# Test artifact directories
+template-test-*/
+test-comprehensive/
+test-schema-debug/
+test-hook-dir/
+test-treefmt-flags/
+test-user-experience/
+treefmt-template-debug/
+final-test/
+test-*/

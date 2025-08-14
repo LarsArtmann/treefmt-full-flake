@@ -22,7 +22,26 @@ echo "Test directory: $TEST_DIR"
 # Cleanup function
 cleanup() {
   echo -e "${YELLOW}Cleaning up test directory...${NC}"
-  rm -rf "$TEST_DIR"
+  # Use trash if available, otherwise rm -rf
+  if command -v trash >/dev/null 2>&1; then
+    trash "$TEST_DIR" 2>/dev/null || rm -rf "$TEST_DIR"
+  else
+    rm -rf "$TEST_DIR"
+  fi
+  
+  # Also clean up any test artifacts in the repo root if test failed
+  if [ $? -ne 0 ]; then
+    echo -e "${YELLOW}Cleaning up any test artifacts in repo root...${NC}"
+    # Clean up common test artifact patterns
+    for pattern in template-test-* test-comprehensive test-schema-debug treefmt-template-debug final-test; do
+      for dir in "${REPO_ROOT}"/$pattern; do
+        if [[ -d "$dir" ]]; then
+          echo "  Removing artifact: $(basename "$dir")"
+          trash "$dir" 2>/dev/null || rm -rf "$dir"
+        fi
+      done
+    done
+  fi
 }
 trap cleanup EXIT
 
