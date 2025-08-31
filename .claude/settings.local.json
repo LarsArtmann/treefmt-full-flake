@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": ["Bash(mkdir:*)", "Bash(git mv:*)"],
+    "deny": [],
+    "ask": []
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "github",
+    "filesystem",
+    "puppeteer",
+    "kubernetes",
+    "memory",
+    "sequential-thinking",
+    "everything"
+  ]
+}
