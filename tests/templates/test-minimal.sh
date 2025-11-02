@@ -28,14 +28,14 @@ cleanup() {
   else
     rm -rf "$TEST_DIR"
   fi
-  
+
   # Also clean up any test artifacts in the repo root if test failed
   if [ $? -ne 0 ]; then
     echo -e "${YELLOW}Cleaning up any test artifacts in repo root...${NC}"
     # Clean up common test artifact patterns
     for pattern in template-test-* test-comprehensive test-schema-debug treefmt-template-debug final-test; do
       for dir in "${REPO_ROOT}"/$pattern; do
-        if [[ -d "$dir" ]]; then
+        if [[ -d $dir ]]; then
           echo "  Removing artifact: $(basename "$dir")"
           trash "$dir" 2>/dev/null || rm -rf "$dir"
         fi

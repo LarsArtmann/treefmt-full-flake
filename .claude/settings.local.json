@@ -1,6 +1,10 @@
 {
   "permissions": {
-    "allow": ["Bash(mkdir:*)", "Bash(git mv:*)"],
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(git mv:*)",
+      "Bash(git push:*)"
+    ],
     "deny": [],
     "ask": []
   },
