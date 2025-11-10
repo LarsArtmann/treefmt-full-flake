@@ -129,4 +129,4 @@ test-treefmt-flags/
 test-user-experience/
 treefmt-template-debug/
 final-test/
-test-*/
+test-*/.claude/settings.local.json
