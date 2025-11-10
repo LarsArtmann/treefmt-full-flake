@@ -36,7 +36,7 @@ jobs:
           NIX_CONFIG: "accept-flake-config = true"
   flake-check:
     name: Flake Check
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
@@ -56,7 +56,7 @@ jobs:
         run: nix flake check
   formatter-isolation:
     name: Test Formatters in Isolation
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
@@ -78,7 +78,7 @@ jobs:
           ./tests/formatters/test-formatter-isolation.sh
   all-tests:
     name: All Tests Suite
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix

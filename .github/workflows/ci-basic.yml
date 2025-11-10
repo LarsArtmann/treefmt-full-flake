@@ -7,7 +7,7 @@ on:
 jobs:
   flake-check:
     name: Basic Flake Check
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
@@ -28,7 +28,7 @@ jobs:
           nix build .#formatterModules.python --no-link
   test-local:
     name: Test with Local Path
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
@@ -44,7 +44,7 @@ jobs:
           ./tests/test-local-template.sh || true  # Allow failure for now
   format-check:
     name: Format Check
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
