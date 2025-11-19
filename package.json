@@ -16,10 +16,10 @@
     "analytics:dashboard": "bun run terminal-dashboard-kit.ts"
   },
   "dependencies": {
-    "terminal-kit": "^3.0.0"
+    "terminal-kit": "^3.1.2"
   },
   "devDependencies": {
-    "@types/terminal-kit": "^2.5.0",
+    "@types/terminal-kit": "^2.5.7",
     "bun-types": "latest"
   },
   "keywords": [
