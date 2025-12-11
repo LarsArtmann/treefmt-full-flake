@@ -252,19 +252,16 @@ bun run dashboard my-project              # Launch dashboard
 #### Data Collection Levels
 
 1. **Essential Only** (Default)
-
    - Performance metrics only
    - Anonymized file paths
    - No personal information
 
 1. **Enhanced Analytics**
-
    - Full file paths
    - Git branch/commit info
    - User identification
 
 1. **Team Analytics**
-
    - Multi-user data correlation
    - Team performance comparisons
    - Collaborative insights

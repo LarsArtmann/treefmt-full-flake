@@ -35,10 +35,7 @@ export class TerminalDashboard {
   private recommendationsBox: blessed.Widgets.BoxElement;
   private statusBar: blessed.Widgets.BoxElement;
 
-  constructor(
-    collector: AnalyticsCollector,
-    config: Partial<DashboardConfig> = {},
-  ) {
+  constructor(collector: AnalyticsCollector, config: Partial<DashboardConfig> = {}) {
     this.collector = collector;
     this.config = {
       updateInterval: 5000,
@@ -280,9 +277,7 @@ export class TerminalDashboard {
     }
   }
 
-  private async updateOverviewDisplay(
-    metrics: AggregatedMetrics,
-  ): Promise<void> {
+  private async updateOverviewDisplay(metrics: AggregatedMetrics): Promise<void> {
     // Performance Overview
     const overviewContent = this.generateOverviewContent(metrics);
     this.overviewBox.setContent(overviewContent);
@@ -434,9 +429,7 @@ ${" ".repeat(maxLabel.length)} │
 ${minLabel} └${"─".repeat(data.length)}`;
   }
 
-  private renderBarChart(
-    data: Array<{ label: string; value: number }>,
-  ): string {
+  private renderBarChart(data: Array<{ label: string; value: number }>): string {
     const maxValue = Math.max(...data.map((d) => d.value));
     const maxLabelLength = Math.max(...data.map((d) => d.label.length));
     const barWidth = 30;
@@ -466,8 +459,7 @@ ${minLabel} └${"─".repeat(data.length)}`;
     if (metrics.avgFormatTime > 2000) {
       recommendations.push({
         title: "Enable Parallel Processing",
-        description:
-          "Format files in parallel to reduce overall time by 40-60%",
+        description: "Format files in parallel to reduce overall time by 40-60%",
         impact: "High (40-60% speed improvement)",
         effort: "Low (configuration change)",
         priority: "high" as const,
@@ -477,17 +469,14 @@ ${minLabel} └${"─".repeat(data.length)}`;
     if (metrics.errorRate > 0.05) {
       recommendations.push({
         title: "Improve Error Handling",
-        description:
-          "High error rate detected. Review formatter configurations",
+        description: "High error rate detected. Review formatter configurations",
         impact: "High (reduce failed operations)",
         effort: "Medium (config review and fixes)",
         priority: "high" as const,
       });
     }
 
-    const slowFormatters = metrics.topFormatters.filter(
-      (f) => f.avgTime > 1000,
-    );
+    const slowFormatters = metrics.topFormatters.filter((f) => f.avgTime > 1000);
     if (slowFormatters.length > 0) {
       recommendations.push({
         title: `Optimize Slow Formatters: ${slowFormatters.map((f) => f.name).join(", ")}`,
@@ -560,9 +549,7 @@ ${minLabel} └${"─".repeat(data.length)}`;
     // Formatter insights
     const topFormatter = metrics.topFormatters[0];
     if (topFormatter) {
-      insights.push(
-        `🔧 Most used formatter: ${topFormatter.name} (${topFormatter.usage} files)`,
-      );
+      insights.push(`🔧 Most used formatter: ${topFormatter.name} (${topFormatter.usage} files)`);
     }
 
     return insights.join("\n• ");
@@ -573,8 +560,7 @@ ${minLabel} └${"─".repeat(data.length)}`;
 
     // Generate issues based on metrics
     metrics.slowestFiles.slice(0, 3).forEach((file) => {
-      const status =
-        file.time > 2000 ? "{red-fg}[Critical]{/}" : "{yellow-fg}[Warning]{/}";
+      const status = file.time > 2000 ? "{red-fg}[Critical]{/}" : "{yellow-fg}[Warning]{/}";
       issues.push(`├─ ${status} ${file.path} (${file.time.toFixed(0)}ms)`);
     });
 
@@ -582,15 +568,10 @@ ${minLabel} └${"─".repeat(data.length)}`;
       issues.push("├─ {green-fg}✅ No performance issues detected{/}");
     }
 
-    return (
-      issues.join("\n") +
-      "\n└─ {cyan-fg}💡 Run detailed analysis for more insights{/}"
-    );
+    return issues.join("\n") + "\n└─ {cyan-fg}💡 Run detailed analysis for more insights{/}";
   }
 
-  private async updateDetailedDisplay(
-    metrics: AggregatedMetrics,
-  ): Promise<void> {
+  private async updateDetailedDisplay(metrics: AggregatedMetrics): Promise<void> {
     this.overviewBox.setLabel(" Formatter Breakdown ");
     this.chartBox.setLabel(" File Type Performance ");
     this.recommendationsBox.setLabel(" Detailed Analysis ");
@@ -605,12 +586,7 @@ ${minLabel} └${"─".repeat(data.length)}`;
 ${metrics.topFormatters
   .map((f) => {
     const trend = "████████████░░░░"; // Simplified trend visualization
-    const status =
-      f.avgTime < 500
-        ? "{green-fg}"
-        : f.avgTime < 1000
-          ? "{yellow-fg}"
-          : "{red-fg}";
+    const status = f.avgTime < 500 ? "{green-fg}" : f.avgTime < 1000 ? "{yellow-fg}" : "{red-fg}";
     return `│ ${f.name.padEnd(11)} │ ${status}${f.avgTime.toFixed(0)}ms{/} ${this.getTrendIndicator(0)} │ ${f.usage.toString().padEnd(9)} │ ${trend} │`;
   })
   .join("\n")}
@@ -629,10 +605,7 @@ ${this.renderFileTypeChart(metrics)}
 
 ${metrics.slowestFiles
   .slice(0, 5)
-  .map(
-    (file, i) =>
-      `${i + 1}. ${file.path.slice(-40)} - ${file.time.toFixed(0)}ms`,
-  )
+  .map((file, i) => `${i + 1}. ${file.path.slice(-40)} - ${file.time.toFixed(0)}ms`)
   .join("\n")}
 `;
 
@@ -691,11 +664,7 @@ ${this.generateOptimizationOpportunities(metrics)}
         const barLength = Math.floor((ft.time / 1000) * 16);
         const bar = "█".repeat(barLength) + "░".repeat(16 - barLength);
         const statusColor =
-          ft.status === "Excellent"
-            ? "green"
-            : ft.status === "Good"
-              ? "yellow"
-              : "red";
+          ft.status === "Excellent" ? "green" : ft.status === "Good" ? "yellow" : "red";
 
         return `${ft.type.padEnd(12)} ${bar} ${ft.time}ms  {${statusColor}-fg}(${ft.status}){/}`;
       })
@@ -708,9 +677,7 @@ ${this.generateOptimizationOpportunities(metrics)}
     return "{yellow-fg}→{/}";
   }
 
-  private generateOptimizationOpportunities(
-    metrics: AggregatedMetrics,
-  ): string {
+  private generateOptimizationOpportunities(metrics: AggregatedMetrics): string {
     const opportunities = [];
 
     if (metrics.avgFormatTime > 1000) {
@@ -723,9 +690,7 @@ ${this.generateOptimizationOpportunities(metrics)}
 
     opportunities.push("• Enable incremental formatting for large codebases");
     opportunities.push("• Use file size limits to skip very large files");
-    opportunities.push(
-      "• Implement smart caching for frequently formatted files",
-    );
+    opportunities.push("• Implement smart caching for frequently formatted files");
 
     return opportunities.join("\n");
   }

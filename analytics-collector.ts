@@ -113,10 +113,7 @@ export class AnalyticsCollector {
   private config: PrivacyConfig;
   private dataDir: string;
 
-  constructor(
-    dataDir: string = "./.treefmt-analytics",
-    config?: Partial<PrivacyConfig>,
-  ) {
+  constructor(dataDir: string = "./.treefmt-analytics", config?: Partial<PrivacyConfig>) {
     this.dataDir = dataDir;
     this.config = {
       collectPersonalData: false,
@@ -212,9 +209,7 @@ export class AnalyticsCollector {
     this.db.exec(
       `CREATE INDEX IF NOT EXISTS idx_formatter_name ON formatter_performance(formatter_name)`,
     );
-    this.db.exec(
-      `CREATE INDEX IF NOT EXISTS idx_file_language ON file_performance(language)`,
-    );
+    this.db.exec(`CREATE INDEX IF NOT EXISTS idx_file_language ON file_performance(language)`);
   }
 
   async collectTelemetry(telemetry: PerformanceTelemetry): Promise<void> {
@@ -360,10 +355,7 @@ export class AnalyticsCollector {
       LIMIT 5
     `);
 
-    const topFormatters = formattersQuery.all(
-      projectId,
-      since.toISOString(),
-    ) as any[];
+    const topFormatters = formattersQuery.all(projectId, since.toISOString()) as any[];
 
     // Get slowest files
     const slowFilesQuery = this.db.prepare(`
@@ -379,10 +371,7 @@ export class AnalyticsCollector {
       LIMIT 10
     `);
 
-    const slowestFiles = slowFilesQuery.all(
-      projectId,
-      since.toISOString(),
-    ) as any[];
+    const slowestFiles = slowFilesQuery.all(projectId, since.toISOString()) as any[];
 
     // Calculate trends (compare with previous period)
     const previousSince = new Date(since);
@@ -400,8 +389,7 @@ export class AnalyticsCollector {
       since.toISOString(),
     ) as any;
     const performanceChange = prevResult?.avg_time
-      ? ((perfResult.avg_time - prevResult.avg_time) / prevResult.avg_time) *
-        100
+      ? ((perfResult.avg_time - prevResult.avg_time) / prevResult.avg_time) * 100
       : 0;
 
     return {
@@ -429,9 +417,7 @@ export class AnalyticsCollector {
     };
   }
 
-  private applyPrivacyControls(
-    telemetry: PerformanceTelemetry,
-  ): PerformanceTelemetry {
+  private applyPrivacyControls(telemetry: PerformanceTelemetry): PerformanceTelemetry {
     const sanitized = { ...telemetry };
 
     if (!this.config.collectPersonalData) {
@@ -476,9 +462,7 @@ export class AnalyticsCollector {
           }
           return `file_${this.hashString(part).substring(0, 8)}`;
         }
-        return index === 0
-          ? part
-          : `dir_${this.hashString(part).substring(0, 4)}`;
+        return index === 0 ? part : `dir_${this.hashString(part).substring(0, 4)}`;
       })
       .join("/");
   }
@@ -495,11 +479,7 @@ export class AnalyticsCollector {
     deleteStmt.run(cutoffDate.toISOString());
   }
 
-  exportData(
-    projectId: string,
-    format: "json" | "csv" = "json",
-    days: number = 30,
-  ): string {
+  exportData(projectId: string, format: "json" | "csv" = "json", days: number = 30): string {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
@@ -526,9 +506,7 @@ export class AnalyticsCollector {
       const headers = Object.keys(data[0]);
       const csvRows = [
         headers.join(","),
-        ...data.map((row) =>
-          headers.map((header) => JSON.stringify(row[header] ?? "")).join(","),
-        ),
+        ...data.map((row) => headers.map((header) => JSON.stringify(row[header] ?? "")).join(",")),
       ];
 
       return csvRows.join("\n");
@@ -612,8 +590,7 @@ export class PerformanceMonitor {
 
     this.telemetry.formatTime = endTime - this.startTime;
     this.telemetry.fileCount = this.telemetry.files?.length || 0;
-    this.telemetry.totalLines =
-      this.telemetry.files?.reduce((sum, f) => sum + f.size / 50, 0) || 0; // Rough estimate
+    this.telemetry.totalLines = this.telemetry.files?.reduce((sum, f) => sum + f.size / 50, 0) || 0; // Rough estimate
 
     // Get system metrics
     this.telemetry.memoryUsage = process.memoryUsage().heapUsed / 1024 / 1024; // MB
@@ -627,9 +604,7 @@ export class PerformanceMonitor {
       treefmtVersion: "1.0.0", // TODO: Get actual version
     };
 
-    await this.collector.collectTelemetry(
-      this.telemetry as PerformanceTelemetry,
-    );
+    await this.collector.collectTelemetry(this.telemetry as PerformanceTelemetry);
   }
 }
 
@@ -648,21 +623,15 @@ export async function runAnalyticsCLI(): Promise<void> {
         const metrics = collector.getAggregatedMetrics(projectId, days);
 
         console.log("📊 Treefmt Performance Summary\n");
-        console.log(
-          `Average Format Time: ${metrics.avgFormatTime.toFixed(0)}ms`,
-        );
+        console.log(`Average Format Time: ${metrics.avgFormatTime.toFixed(0)}ms`);
         console.log(`Success Rate: ${(metrics.successRate * 100).toFixed(1)}%`);
         console.log(`Total Files: ${metrics.totalFiles}`);
-        console.log(
-          `Performance Change: ${metrics.trends.performanceChange.toFixed(1)}%`,
-        );
+        console.log(`Performance Change: ${metrics.trends.performanceChange.toFixed(1)}%`);
 
         if (metrics.topFormatters.length > 0) {
           console.log("\nTop Formatters:");
           metrics.topFormatters.forEach((f) => {
-            console.log(
-              `  ${f.name}: ${f.usage} uses, ${f.avgTime.toFixed(0)}ms avg`,
-            );
+            console.log(`  ${f.name}: ${f.usage} uses, ${f.avgTime.toFixed(0)}ms avg`);
           });
         }
         break;
@@ -672,18 +641,12 @@ export async function runAnalyticsCLI(): Promise<void> {
         const format = (args[2] as "json" | "csv") || "json";
         const exportDays = parseInt(args[3]) || 30;
 
-        const exportData = collector.exportData(
-          exportProjectId,
-          format,
-          exportDays,
-        );
+        const exportData = collector.exportData(exportProjectId, format, exportDays);
         console.log(exportData);
         break;
 
       default:
-        console.log(
-          "Usage: analytics-collector [summary|export] [projectId] [days]",
-        );
+        console.log("Usage: analytics-collector [summary|export] [projectId] [days]");
     }
   } finally {
     collector.close();

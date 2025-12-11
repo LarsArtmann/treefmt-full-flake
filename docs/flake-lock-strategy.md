@@ -126,15 +126,12 @@ nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/abc123def
 ### DON'T:
 
 1. **Don't mix lock updates with code changes**
-
    - Keep lock updates in separate commits
 
 1. **Don't update in CI unless testing updates**
-
    - CI should use committed lock files
 
 1. **Don't ignore lock file conflicts**
-
    - Resolve conflicts carefully, test thoroughly
 
 ## Troubleshooting

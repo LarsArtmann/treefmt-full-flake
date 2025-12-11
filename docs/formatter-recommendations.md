@@ -48,7 +48,6 @@ options.treefmtFlake = {
 #### Phase 2: Document and Communicate (Week 1-2)
 
 1. Update README.md with:
-
    - Warning about Alejandra's non-determinism
    - Instructions for using nixfmt-rfc-style
    - Migration guide for existing users

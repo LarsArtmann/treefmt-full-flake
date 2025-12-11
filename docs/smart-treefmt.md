@@ -153,7 +153,6 @@ To fix this:
    ```
 
 1. **Use in your projects:**
-
    - Copy the script to your project
    - Or reference it from a shared location
    - Or include it in your Nix flake
