@@ -5,7 +5,10 @@
  */
 
 import termkit from "terminal-kit";
-import { AnalyticsCollector, AggregatedMetrics } from "./analytics-collector.js";
+import {
+  AnalyticsCollector,
+  AggregatedMetrics,
+} from "./analytics-collector.js";
 
 const term = termkit.terminal;
 
@@ -33,7 +36,10 @@ export class TerminalDashboard {
   private document: termkit.Document;
   private currentMetrics: AggregatedMetrics | null = null;
 
-  constructor(collector: AnalyticsCollector, config: Partial<DashboardConfig> = {}) {
+  constructor(
+    collector: AnalyticsCollector,
+    config: Partial<DashboardConfig> = {},
+  ) {
     this.collector = collector;
     this.config = {
       updateInterval: 5000,
@@ -383,7 +389,9 @@ export class TerminalDashboard {
     term(" ".repeat(width));
 
     term.moveTo(2, height - 1);
-    term("[1]Overview [2]Detailed [3]Trends [4]Team [R]efresh [+/-]Range [Q]uit");
+    term(
+      "[1]Overview [2]Detailed [3]Trends [4]Team [R]efresh [+/-]Range [Q]uit",
+    );
 
     term.styleReset();
   }
@@ -411,9 +419,15 @@ export class TerminalDashboard {
           // Data rows
           if (colIndex === columnWidths.length - 1 && cell.includes("✅")) {
             term.green(paddedCell);
-          } else if (colIndex === columnWidths.length - 1 && cell.includes("⚠️")) {
+          } else if (
+            colIndex === columnWidths.length - 1 &&
+            cell.includes("⚠️")
+          ) {
             term.yellow(paddedCell);
-          } else if (colIndex === columnWidths.length - 1 && cell.includes("❌")) {
+          } else if (
+            colIndex === columnWidths.length - 1 &&
+            cell.includes("❌")
+          ) {
             term.red(paddedCell);
           } else {
             term(paddedCell);
@@ -425,7 +439,12 @@ export class TerminalDashboard {
     term.styleReset();
   }
 
-  private drawPerformanceChart(x: number, y: number, width: number, height: number): void {
+  private drawPerformanceChart(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+  ): void {
     if (!this.currentMetrics) return;
 
     // Generate sample data for chart
@@ -464,7 +483,11 @@ export class TerminalDashboard {
     term.gray(`${minValue.toFixed(0)}ms`);
   }
 
-  private drawHistogram(x: number, y: number, metrics: AggregatedMetrics): void {
+  private drawHistogram(
+    x: number,
+    y: number,
+    metrics: AggregatedMetrics,
+  ): void {
     const bins = [
       { label: "<500ms", count: 0 },
       { label: "500-1000ms", count: 0 },

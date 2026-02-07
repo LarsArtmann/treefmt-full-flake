@@ -7,6 +7,7 @@ After thorough investigation, we discovered:
 1. **Two separate git histories** created 17 minutes apart
 
 1. **Main branch has valuable formatter defaults** that improve code quality:
+
    - Shell: 2-space indentation, code simplification
    - Markdown: Numbered headings for better navigation
    - CSS: 100-char width (better for Tailwind)
