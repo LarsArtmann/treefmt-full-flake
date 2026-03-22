@@ -85,7 +85,6 @@ Instead of a complex merge, take the pragmatic approach:
    ```
 
 1. **Update README.md** (20 mins):
-
    - Add section explaining the formatter defaults
    - Show how to override them if needed
 

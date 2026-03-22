@@ -9,13 +9,11 @@ The Performance Analytics Dashboard has been successfully migrated from **blesse
 ### **Key Improvements**
 
 1. **Better Performance**
-
    - Direct terminal control without virtual DOM
    - Lower memory overhead
    - Faster rendering for real-time updates
 
 1. **Richer Features**
-
    - Built-in table rendering
    - Native progress bars
    - Better color support

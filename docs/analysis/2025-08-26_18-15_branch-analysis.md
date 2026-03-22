@@ -167,7 +167,6 @@ Rationale:
    ```
 
 1. Update default branch on GitHub:
-
    - Go to Settings → Branches
    - Change default branch from main to master (or vice versa)
 

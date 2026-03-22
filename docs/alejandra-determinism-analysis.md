@@ -170,13 +170,11 @@ Then configure treefmt to use this wrapper script.
 ## Recommendations
 
 1. **Primary Recommendation**: Switch to `nixfmt-rfc-style` as the default Nix formatter
-
    - It's the official standard
    - Avoids non-determinism issues
    - Future-proof for Nixpkgs contributions
 
 1. **Migration Path**:
-
    - Update `formatters/nix.nix` to use nixfmt-rfc-style
    - Update documentation to explain the change
    - Consider providing both options during a transition period
