@@ -6,6 +6,8 @@
 
 **A comprehensive, production-ready [treefmt](https://github.com/numtide/treefmt) configuration for multiple projects, packaged as a Nix flake.**
 
+[treefmt](https://github.com/numtide/treefmt) unifies code formatters—run `nix fmt` once and it formats everything: Nix, JavaScript, TypeScript, Python, Rust, Shell, YAML, Markdown, JSON, TOML, and more. This flake provides 15+ pre-configured formatters with sensible defaults, cross-platform support, and advanced features like incremental formatting.
+
 > **🚨 CURRENT STATUS: PRIVATE REPOSITORY**  
 > This project is currently in private beta. See [Access Methods](#-access-methods) below for how to use it.
 
