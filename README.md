@@ -2,59 +2,20 @@
 
 [![CI](https://github.com/LarsArtmann/treefmt-full-flake/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/treefmt-full-flake/actions/workflows/ci.yml)
 [![Basic CI](https://github.com/LarsArtmann/treefmt-full-flake/actions/workflows/ci-basic.yml/badge.svg)](https://github.com/LarsArtmann/treefmt-full-flake/actions/workflows/ci-basic.yml)
-![Status: Private Beta](https://img.shields.io/badge/Status-Private%20Beta-orange)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
 **A comprehensive, production-ready [treefmt](https://github.com/numtide/treefmt) configuration for multiple projects, packaged as a Nix flake.**
 
 [treefmt](https://github.com/numtide/treefmt) unifies code formatters—run `nix fmt` once and it formats everything: Nix, JavaScript, TypeScript, Python, Rust, Shell, YAML, Markdown, JSON, TOML, and more. This flake provides 15+ pre-configured formatters with sensible defaults, cross-platform support, and advanced features like incremental formatting.
 
-> **🚨 CURRENT STATUS: PRIVATE REPOSITORY**  
-> This project is currently in private beta. See [Access Methods](#-access-methods) below for how to use it.
+> **⚡ [Quick Start Guide](./QUICKSTART.md)**
 
-> **⚡ [Quick Start Guide](./QUICKSTART.md) - Multiple access methods explained!**
-
-## 🚀 Access Methods
-
-**Choose the method that works for your situation:**
-
-### 🔑 Method 1: SSH Access (If you have repository access)
+## 🚀 Quick Start
 
 ```bash
-# Use templates directly
-nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake
-
-# Or add to your flake.nix inputs
-inputs.treefmt-flake.url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git";
-```
-
-### 📁 Method 2: Local Development (Clone first)
-
-```bash
-# Clone the repository
-git clone git@github.com:LarsArtmann/treefmt-full-flake.git
-
-# Use local template (RECOMMENDED - works immediately!)
-nix flake init -t ./treefmt-full-flake#local-development
-
-# Or reference local path in your flake
-inputs.treefmt-flake.url = "path:./path/to/treefmt-full-flake";
-```
-
-### 🌍 Method 3: Future Public Access
-
-```bash
-# When repository becomes public (roadmap item)
-nix flake init -t github:LarsArtmann/treefmt-full-flake#local-development
-```
-
-### 🎯 Recommended: Self-Contained Template
-
-The `local-development` template works immediately without external dependencies:
-
-```bash
-git clone git@github.com:LarsArtmann/treefmt-full-flake.git
-nix flake init -t ./treefmt-full-flake#local-development
-nix fmt  # Works immediately!
+# Use template directly
+nix flake init -t github:LarsArtmann/treefmt-full-flake
+nix fmt  # Format everything!
 ```
 
 ## ✨ Features
@@ -84,12 +45,8 @@ Add the flake to your inputs:
     };
 
     # Import the treefmt-flake
-    # CURRENTLY PRIVATE REPO - Replace with appropriate access method:
-    # For private repo access: url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git";
-    # For local development: url = "path:./path/to/treefmt-full-flake";
-    # For future public release: url = "github:LarsArtmann/treefmt-full-flake";
     treefmt-flake = {
-      url = "git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git";
+      url = "github:LarsArtmann/treefmt-full-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -151,16 +108,12 @@ Import the flake module and configure which formatter groups to enable:
 This flake provides templates to get started quickly:
 
 ```bash
-# RECOMMENDED: Self-contained template (works immediately!)
-git clone git@github.com:LarsArtmann/treefmt-full-flake.git
-nix flake init -t ./treefmt-full-flake#local-development
-
-# SSH access (if you have repository access)
-nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake
+# Quick start with default template
+nix flake init -t github:LarsArtmann/treefmt-full-flake
 
 # Other templates available:
-nix flake init -t ./treefmt-full-flake#minimal
-nix flake init -t ./treefmt-full-flake#complete
+nix flake init -t github:LarsArtmann/treefmt-full-flake#minimal
+nix flake init -t github:LarsArtmann/treefmt-full-flake#complete
 ```
 
 ## Running Formatters
@@ -407,32 +360,12 @@ git commit --no-verify
 
 ## 🗺️ Roadmap
 
-### Current Status: Private Beta
+### Current Status: Production Ready
 
-- ✅ **Production-Ready**: Comprehensive testing, error handling, performance tracking
 - ✅ **15+ Formatters**: All major languages and file types supported
-- ✅ **Multiple Access Methods**: SSH, local clone, self-contained templates
 - ✅ **Advanced Features**: Incremental formatting, CLI tools, validation
 - ✅ **Cross-Platform**: Linux, macOS, x86_64, aarch64 support
-
-### Planned: Public Release
-
-**Target**: Q3 2025
-
-**Prerequisites for Public Release:**
-
-- [ ] Security audit and sensitive data review
-- [ ] Public CI/CD infrastructure setup
-- [ ] Comprehensive end-to-end testing with external users
-- [ ] Performance optimization based on usage data
-- [ ] Documentation review and user experience testing
-
-**Benefits of Public Release:**
-
-- 🌍 **Universal Access**: `nix flake init -t github:LarsArtmann/treefmt-full-flake`
-- 📦 **Flake Registry**: Listed in official Nix flake registry
-- 🔄 **Community Contributions**: Open source collaboration
-- 📈 **Wider Adoption**: Available to the entire Nix community
+- ✅ **Comprehensive Testing**: Error handling, performance tracking
 
 ### Future Enhancements (See [Issues](https://github.com/LarsArtmann/treefmt-full-flake/issues))
 
@@ -444,12 +377,7 @@ git commit --no-verify
 
 ---
 
-**Want to help with the public release?**
-
-- Try the current access methods and report issues
-- Test the self-contained template in your projects
-- Provide feedback on the user experience
-- Contribute to the [open issues](https://github.com/LarsArtmann/treefmt-full-flake/issues)
+**Contributions welcome!** Check out the [open issues](https://github.com/LarsArtmann/treefmt-full-flake/issues).
 
 ## 📄 License
 

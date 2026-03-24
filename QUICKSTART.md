@@ -2,66 +2,27 @@
 
 > **🎯 Get production-ready formatting with 15+ formatters in under 2 minutes**
 
-## 🚨 Current Status: Private Beta
-
-This project is currently **private**. Choose the access method that works for you:
+## 🚀 Quick Start
 
 ---
-
-## 🚀 Method 1: Self-Contained Template (RECOMMENDED)
-
-**✅ Works immediately • ✅ No external dependencies • ✅ Perfect for testing**
-
-```bash
-# Step 1: Clone the repository
-git clone git@github.com:LarsArtmann/treefmt-full-flake.git
-cd treefmt-full-flake
-
-# Step 2: Create a test project
-mkdir ../test-treefmt && cd ../test-treefmt
-
-# Step 3: Initialize with self-contained template
-nix flake init -t ../treefmt-full-flake#local-development
-
-# Step 4: Test it works immediately!
-echo "console.log('hello world');" > test.js
-nix fmt  # Formats your test.js file!
-
-# Step 5: See what you got
-nix flake show  # Shows all available formatters
-```
-
-**🎉 That's it! You now have a working formatter setup.**
-
----
-
-## 🔧 Method 2: SSH Access (If you have repository access)
 
 ```bash
 # Step 1: Create new project directory
 mkdir my-project && cd my-project
 
 # Step 2: Initialize with template
-nix flake init -t git+ssh://git@github.com/LarsArtmann/treefmt-full-flake
+nix flake init -t github:LarsArtmann/treefmt-full-flake
 
-# Step 3: Edit the template to set your source
-# Edit flake.nix and replace the url with your preferred access method
-
-# Step 4: Test it works
+# Step 3: Test it works
 echo "def hello(): pass" > test.py
 nix fmt  # Formats your test.py file!
 ```
 
+**🎉 That's it! You now have a working formatter setup.**
+
 ---
 
-## 📁 Method 3: Local Integration (For existing projects)
-
-```bash
-# Step 1: Clone treefmt-flake somewhere accessible
-git clone git@github.com:LarsArtmann/treefmt-full-flake.git ~/tools/treefmt-full-flake
-
-# Step 2: Add to your existing project's flake.nix
-```
+## 📁 Method 2: Add to Existing Project
 
 Add to your `flake.nix` inputs:
 
@@ -70,9 +31,14 @@ Add to your `flake.nix` inputs:
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+
     # Add treefmt-flake
     treefmt-flake = {
-      url = "path:/home/user/tools/treefmt-full-flake";  # Use your actual path
+      url = "github:LarsArtmann/treefmt-full-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -85,13 +51,11 @@ Add to your `flake.nix` inputs:
     # Enable formatters you need
     treefmtFlake = {
       projectRootFile = "flake.nix";
-      formatters = {
-        nix.enable = true;        # Nix files
-        web.enable = true;        # JS/TS/CSS
-        python.enable = true;     # Python files
-        yaml.enable = true;       # YAML files
-        markdown.enable = true;   # Markdown files
-      };
+      nix = true;
+      web = true;
+      python = true;
+      yaml = true;
+      markdown = true;
     };
   };
 }
@@ -123,7 +87,7 @@ nix fmt
 git diff  # Should show formatting changes
 ```
 
-**Note**: The self-contained template includes these formatters:
+**Note**: The default template includes these formatters:
 
 - ✅ **Nix**: alejandra
 - ✅ **Web**: prettier (JS, TS, JSON, CSS, HTML, MD)
@@ -138,14 +102,7 @@ For more formatters (Python, Rust, etc.), use the full templates or configure ma
 
 ### 📋 **Formatters Available**
 
-**Self-Contained Template** (works immediately):
-
-- **Nix**: `alejandra`
-- **Web**: `prettier` (JavaScript, TypeScript, CSS, JSON, HTML, Markdown)
-- **Shell**: `shfmt`
-- **YAML**: `yamlfmt`
-
-**Full Templates** (require configuration, 15+ formatters):
+**Default Template** (works immediately):
 
 - **Nix**: `alejandra` (or `nixfmt-rfc-style`)
 - **Web**: `biome` (JavaScript, TypeScript, CSS, JSON)
@@ -219,19 +176,10 @@ treefmtFlake = {
 
 ### ❌ "error: cannot find template"
 
-**Solution**: Make sure you've cloned the repository and are using the correct path:
+**Solution**: Ensure you're using the correct GitHub URL:
 
 ```bash
-ls ./treefmt-full-flake/templates/  # Should show template directories
-```
-
-### ❌ "error: access denied"
-
-**Solution**: Use local clone method instead of SSH:
-
-```bash
-git clone git@github.com:LarsArtmann/treefmt-full-flake.git
-nix flake init -t ./treefmt-full-flake#local-development
+nix flake init -t github:LarsArtmann/treefmt-full-flake
 ```
 
 ### ❌ Formatting not working
@@ -250,23 +198,6 @@ nix flake show                    # See all available templates
 nix develop                       # Enter dev shell
 nix fmt -- --help               # See treefmt options
 ```
-
----
-
-## 🌍 Future: Public Release
-
-**Coming Q3 2025**: When the repository becomes public, usage will be even simpler:
-
-```bash
-# Future public access (not available yet)
-nix flake init -t github:LarsArtmann/treefmt-full-flake#local-development
-```
-
-**Want to help with the public release?**
-
-- Test the current access methods and report issues
-- Provide feedback on the user experience
-- Check out the [open issues](https://github.com/LarsArtmann/treefmt-full-flake/issues)
 
 ---
 
