@@ -157,8 +157,6 @@ nix run .#treefmt-staged
 nix run .#treefmt-since HEAD~5
 ```
 
-See [INCREMENTAL.md](./INCREMENTAL.md) for full details.
-
 ## Editor Integration
 
 ### JetBrains IDEs (IntelliJ, WebStorm, PyCharm, etc.)
@@ -179,14 +177,6 @@ Or manually configure:
    - Trigger: On file save
 
 See [docs/jetbrains-integration.md](./docs/jetbrains-integration.md) for detailed instructions.
-
-### VS Code
-
-_(Coming soon)_
-
-### Neovim
-
-_(Coming soon)_
 
 ## Adding to Justfile
 
@@ -229,9 +219,9 @@ perSystem = {
 
 ## Smart Script
 
-This repository includes both v1 and **v2** intelligent wrappers:
+This repository includes an intelligent wrapper:
 
-### 🚀 **[smart-treefmt-v2.sh](./smart-treefmt-v2.sh)** - Next Generation (Recommended)
+### 🚀 **[smart-treefmt-v2.sh](./smart-treefmt-v2.sh)** - Next Generation
 
 - ⚡ **25x faster startup** with command caching
 - 🔧 **Auto-fix capabilities** - resolves issues automatically
@@ -242,23 +232,7 @@ This repository includes both v1 and **v2** intelligent wrappers:
 - 📜 **History tracking** - logs all operations
 - 🔄 **Self-updating** - stays current automatically
 
-### 📚 **[smart-treefmt.sh](./smart-treefmt.sh)** - Original
-
-- 🔍 **Multi-source resolution** - finds treefmt intelligently
-- 💡 **Detailed error messages** - actionable solutions
-- 🎯 **Project detection** - context-aware guidance
-
-See [v2 Documentation](./docs/smart-treefmt-v2.md) | [v1 Documentation](./docs/smart-treefmt.md)
-
-### 🔮 **[smart-treefmt-v3-prototype.sh](./smart-treefmt-v3-prototype.sh)** - Revolutionary AI (Prototype)
-
-- 🧠 **AI-powered analysis** - semantic code understanding with local LLM
-- 🔮 **Predictive formatting** - prevent issues before they occur
-- 🧬 **Intelligent config evolution** - learns from team patterns
-- ⚡ **Advanced framework detection** - 95%+ accuracy with confidence scores
-- 📊 **Team pattern analysis** - extracts insights from git history
-
-See [Revolutionary Roadmap](./REVOLUTIONARY_ROADMAP.md) | [Revolutionary Improvements](./REVOLUTIONARY_IMPROVEMENTS.md)
+See [Documentation](./docs/smart-treefmt-v2.md)
 
 ## Troubleshooting
 
@@ -369,7 +343,6 @@ git commit --no-verify
 
 ### Future Enhancements (See [Issues](https://github.com/LarsArtmann/treefmt-full-flake/issues))
 
-- 💻 IDE Extensions (VS Code, JetBrains plugins)
 - 🚀 Enhanced CI/CD integrations
 - 🔍 Advanced debugging and observability tools
 - 🎨 Composable template system
