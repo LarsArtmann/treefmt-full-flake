@@ -1,56 +1,9 @@
 {lib}: let
-  # Formatter configuration schema using Nix type system
-  formatterConfigType = lib.types.submodule {
-    options = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Enable this formatter";
-      };
+  # Import centralized types
+  types = import ./types.nix {inherit lib;};
 
-      includes = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [];
-        description = "File patterns to include for this formatter";
-        example = [
-          "*.nix"
-          "*.js"
-        ];
-      };
-
-      excludes = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [];
-        description = "File patterns to exclude from this formatter";
-        example = [
-          "node_modules/**"
-          "dist/**"
-        ];
-      };
-
-      priority = lib.mkOption {
-        type = lib.types.ints.between 1 100;
-        default = 50;
-        description = "Execution priority (1 = highest, 100 = lowest)";
-      };
-
-      command = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-        description = "Custom command to run (overrides default formatter command)";
-      };
-
-      options = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [];
-        description = "Additional command-line options";
-        example = [
-          "--indent=2"
-          "--line-length=100"
-        ];
-      };
-    };
-  };
+  # Use centralized formatter config type
+  formatterConfigType = types.composite.formatterConfig;
 
   # Language-specific formatter group schema
   formatterGroupType = lib.types.attrsOf formatterConfigType;
@@ -72,7 +25,7 @@
       else [];
 
     # Check include patterns are valid
-    patternErrors =
+    patternErrors = lib.filter (x: x != null) (
       map (
         pattern:
           if lib.hasPrefix "/" pattern
@@ -80,7 +33,7 @@
           else null
       )
       config.includes
-      |> lib.filter (x: x != null);
+    );
 
     allErrors = errors ++ includesError ++ priorityError ++ patternErrors;
   in

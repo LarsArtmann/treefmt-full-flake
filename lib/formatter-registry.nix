@@ -153,8 +153,8 @@
     )
     formatterModules;
 
-  # Validate formatter configuration
-  validateFormatterConfig = config: let
+  # Validate formatter names are registered (not config structure - use formatter-schema.nix for that)
+  validateFormatterNames = config: let
     errors = lib.concatMap (
       name:
         if formatterModules ? ${name}
@@ -176,7 +176,7 @@ in {
     listAvailableFormatters
     getFormattersByLanguage
     getFormattersByTool
-    validateFormatterConfig
+    validateFormatterNames
     ;
 
   # Advanced attribute set utilities for configuration management

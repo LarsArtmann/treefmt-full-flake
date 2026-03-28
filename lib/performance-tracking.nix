@@ -1,7 +1,10 @@
 {lib}: let
   # Performance tracking and benchmarking utilities for treefmt
-  # Enhanced with lib.debug, lib.generators, and lib.trivial for better functionality
-  # Debug utilities using lib.debug for performance analysis
+  # Import shared utilities
+  sharedUtils = import ./utils.nix {inherit lib;};
+  inherit (sharedUtils.functional) pipe const id compose;
+
+  # Performance-specific debug utilities
   debugUtils = {
     # Trace performance values for debugging
     tracePerf = name: value: lib.debug.traceVal "PERF[${name}]: ${toString value}";
@@ -13,21 +16,13 @@
     traceIfVerbose = condition: message: lib.debug.traceIf condition message;
   };
 
-  # Functional utilities using lib.trivial
-  functionalUtils = {
-    inherit (lib.trivial) pipe const id;
-
-    # Compose functions for data processing pipelines
-    compose = f: g: x: f (g x);
-
-    # Process with optional debugging
-    processWithDebug = name: processor: input:
-      lib.trivial.pipe input [
-        (x: debugUtils.traceIfVerbose true "Processing ${name}: ${toString x}")
-        processor
-        (debugUtils.tracePerf name)
-      ];
-  };
+  # Process with optional debugging (using shared compose)
+  processWithDebug = name: processor: input:
+    lib.trivial.pipe input [
+      (x: debugUtils.traceIfVerbose true "Processing ${name}: ${toString x}")
+      processor
+      (debugUtils.tracePerf name)
+    ];
 
   # Enhanced JSON generation using lib.generators
   jsonUtils = {
@@ -385,8 +380,9 @@ in {
     generatePerformanceReport
     exportFunctions
     debugUtils
-    functionalUtils
     jsonUtils
+    compose
+    processWithDebug
     ;
 
   # Export shell script helpers

@@ -31,7 +31,7 @@ in {
   inherit (configSchema.validation) validateConfig migrateConfig;
   inherit (securityValidation) validateSecurity secureFileCheck createSecureWrapper sanitizeForShell;
   inherit (projectDetection) generateAutoConfig mergeWithUserConfig analyzeProjectStructure getFormatterRecommendations;
-  inherit (formatterRegistry) getFormatterModule getAllFormatterModules loadFormatterModules;
+  inherit (formatterRegistry) getFormatterModule getAllFormatterModules loadFormatterModules validateFormatterNames;
 
   # Version information
   version = "2.0.0";

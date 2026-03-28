@@ -1,40 +1,15 @@
 {lib}: let
-  # Configuration validation with helpful error messages and suggestions
-  # Enhanced with lib.debug, lib.generators, and lib.trivial for better functionality
-  # Debug utilities for validation tracing
-  debug = {
-    traceValidation = name: result:
-      lib.debug.traceVal "VALIDATION[${name}]: ${
-        if result.isValid
-        then "✅ PASS"
-        else "❌ FAIL"
-      }";
-    traceErrors = errors: lib.debug.traceVal "ERRORS: ${lib.generators.toJSON {} errors}";
-    traceWarnings = warnings: lib.debug.traceVal "WARNINGS: ${lib.generators.toJSON {} warnings}";
-  };
+  # Import shared utilities
+  sharedUtils = import ./utils.nix {inherit lib;};
+  inherit (sharedUtils) debug validation;
+  inherit (sharedUtils.functional) pipe const id composeValidators;
 
-  # Functional utilities for validation pipelines
-  functional = {
-    inherit (lib.trivial) pipe const id;
-
-    # Compose multiple validators
-    composeValidators = validators: input:
-      lib.trivial.pipe input [
-        (lib.foldl (acc: validator: acc // validator input) {
-            isValid = true;
-            errors = [];
-            warnings = [];
-          }
-          validators)
-      ];
-
-    # Apply validator with debug tracing
-    validateWithTrace = name: validator: input:
-      lib.trivial.pipe input [
-        validator
-        (debug.traceValidation name)
-      ];
-  };
+  # Apply validator with debug tracing (using shared debug utilities)
+  validateWithTrace = name: validator: input:
+    lib.trivial.pipe input [
+      validator
+      (debug.traceValidation name)
+    ];
   # Common validation patterns
   validators = {
     # Check if user enabled formatters but project has no matching files
@@ -368,10 +343,14 @@ in {
     stringValidators
     generateRuntimeValidation
     debug
-    functional
     userFriendlyPath
     userFriendlyPort
     ;
+
+  # Re-export functional utilities as a namespace
+  functional = {
+    inherit pipe const id composeValidators;
+  };
 
   # Export enhanced types
   types = {
