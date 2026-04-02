@@ -403,6 +403,8 @@ in {
 
 ### Justfile Commands
 
+The project uses a comprehensive justfile for developer workflows:
+
 ```justfile
 # justfile
 
@@ -411,12 +413,27 @@ default:
     @just --list
 
 # Dogfood: Run all self-validation
+# This ensures the project follows its own policies
 dogfood:
-    @echo "Running self-validation..."
-    @nix fmt -- --check
+    @echo "═══════════════════════════════════════════════════════════════"
+    @echo "  RUNNING SELF-VALIDATION (Dogfood)"
+    @echo "═══════════════════════════════════════════════════════════════"
+    @echo ""
+    @echo "Step 1/4: Checking formatting..."
+    @nix fmt -- --fail-on-change
+    @echo ""
+    @echo "Step 2/4: Running flake checks..."
     @nix flake check
-    @./tests/run-all-tests.sh
-    @echo "✓ Self-validation passed"
+    @echo ""
+    @echo "Step 3/4: Running integration tests..."
+    @./tests/integration/test-nix-fmt.sh
+    @echo ""
+    @echo "Step 4/4: Running branching-flow linters on Go code..."
+    @branching-flow all ./cmd
+    @echo ""
+    @echo "═══════════════════════════════════════════════════════════════"
+    @echo "  ✓ SELF-VALIDATION PASSED"
+    @echo "═══════════════════════════════════════════════════════════════"
 
 # Format all files
 format:
@@ -425,7 +442,7 @@ format:
 
 # Check formatting
 format-check:
-    @nix fmt -- --check
+    @nix fmt -- --fail-on-change
 
 # Run flake checks
 check: format-check
@@ -433,12 +450,31 @@ check: format-check
 
 # Run tests
 test:
-    @./tests/run-all-tests.sh
+    @./tests/integration/test-nix-fmt.sh
+
+# Run performance benchmarks
+benchmark:
+    @./tests/performance/measure-performance.sh
 
 # Setup git hooks
 setup-hooks:
     @./scripts/setup-hooks.sh
 ```
+
+### Branching-Flow Integration
+
+This project uses [branching-flow](https://github.com/LarsArtmann/branching-flow) for Go code quality analysis:
+
+- **CONTEXT**: Detects semantic context loss in error handling
+- **DUPE**: Finds duplicate struct definitions
+- **PHANTOM**: Identifies primitive types that should be phantom types
+- **PANIC**: Detects potential panic conditions
+- **STRONG-ID**: Finds parameters that should use strong ID types
+- **BOOLBLIND**: Analyzes structs with multiple bools that should be bit flags
+- **ANTI-PATTERNS**: Detects O(n) structural anti-patterns
+- **MIXINS**: Identifies O(n²) mixin composition opportunities
+
+The Go test helpers in `cmd/treefmt-test-helper/` demonstrate these patterns.
 
 ### Pre-commit Hook
 

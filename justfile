@@ -13,16 +13,16 @@ dogfood:
     @echo "═══════════════════════════════════════════════════════════════"
     @echo ""
     @echo "Step 1/4: Checking formatting..."
-    @nix fmt -- --check
+    @nix fmt -- --fail-on-change
     @echo ""
     @echo "Step 2/4: Running flake checks..."
     @nix flake check
     @echo ""
     @echo "Step 3/4: Running integration tests..."
-    @nix build .#test-validation 2>/dev/null || ./tests/run-all-tests.sh
+    @./tests/integration/test-nix-fmt.sh
     @echo ""
-    @echo "Step 4/4: Running branching-flow linters..."
-    @branching-flow all .
+    @echo "Step 4/4: Running branching-flow linters on Go code..."
+    @branching-flow all ./cmd
     @echo ""
     @echo "═══════════════════════════════════════════════════════════════"
     @echo "  ✓ SELF-VALIDATION PASSED"
@@ -37,7 +37,7 @@ format:
 # Check if all files are properly formatted
 format-check:
     @echo "Checking formatting..."
-    @nix fmt -- --check
+    @nix fmt -- --fail-on-change
     @echo "Formatting check passed!"
 
 # Run flake checks (includes formatting validation)
