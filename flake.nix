@@ -30,13 +30,14 @@
       ];
 
       flake = {
-        # Export the treefmt modules for use in other flakes
-        flakeModule = ./flake-module.nix;
+        # Export the flake module for use in other flakes
+        flakeModules.default = ./flake-module.nix;
+        flakeModule = ./flake-module.nix; # Backward compatibility
 
-        # Export individual formatter modules
+        # Export formatter modules for direct use
         formatterModules = {
           nix = ./formatters/nix.nix;
-          nix-nixfmt = ./formatters/nix-nixfmt.nix; # Alternative deterministic Nix formatter
+          nix-nixfmt = ./formatters/nix-nixfmt.nix;
           web = ./formatters/web.nix;
           python = ./formatters/python.nix;
           shell = ./formatters/shell.nix;
@@ -47,7 +48,19 @@
           misc = ./formatters/misc.nix;
         };
 
-        # Export templates for common configurations
+        # Export lib functions for programmatic use
+        lib = import ./lib {inherit (inputs.nixpkgs) lib;};
+
+        # Export overlay for extending nixpkgs
+        overlays.default = final: prev: {
+          treefmt-flake = {
+            formatterModules = inputs.self.formatterModules;
+            flakeModule = inputs.self.flakeModule;
+            lib = inputs.self.lib;
+          };
+        };
+
+        # Templates for common configurations
         templates = {
           default = {
             path = ./templates/default;
@@ -73,9 +86,7 @@
         pkgs,
         ...
       }: {
-        # Example configuration for this flake itself
-        # This serves as a demonstration of how to use the flake
-
+        # Configure treefmt for this project
         treefmt = {
           projectRootFile = "flake.nix";
           programs = {
@@ -85,34 +96,20 @@
           };
         };
 
-        # Formatter is provided by the flake-module.nix
-
-        # Integration test suite
-        packages.test-validation = let
-          testSuite = import ./tests/integration/validation-tests.nix {
-            lib = pkgs.lib;
-            inherit pkgs;
-            treefmt-flake = inputs.self;
-          };
-        in
-          testSuite.testRunner;
-
-        # Create a development shell with all tools
+        # Development shell with all tools
         devShells.default = pkgs.mkShell {
           buildInputs = [
-            # Formatters
             config.treefmt.build.wrapper
-            # TypeSpec for custom formatter
             pkgs.typespec
           ];
 
           shellHook = ''
-            echo "Welcome to the treefmt-flake development environment!"
+            echo "treefmt-flake development environment"
             echo ""
             echo "Available commands:"
-            echo "  nix fmt                - Format all files"
-            echo "  nix fmt -- --check     - Check formatting without changing files"
-            echo ""
+            echo "  nix fmt              - Format all files"
+            echo "  nix fmt -- --check   - Check formatting without changes"
+            echo "  nix run .#treefmt-debug - Show debug information"
           '';
         };
       };

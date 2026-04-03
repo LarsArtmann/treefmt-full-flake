@@ -1,836 +1,210 @@
+# Treefmt-flake module for flake-parts
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
-  # Import centralized library system
-  treefmtLib = import ./lib {inherit lib;};
+  cfg = config.treefmtFlake;
+  legacyCfg = config._legacyOptions or {};
 
-  # Use imported validation helpers
-  inherit (treefmtLib) betterEnum;
+  # Check if any legacy options are set
+  hasLegacyOptions = lib.any (name: legacyCfg.${name} != null) (lib.attrNames legacyCfg);
 
-  # Use proper filename validation
-  validatedFileName = treefmtLib.configValidation.validatedString treefmtLib.configValidation.stringValidators.isFileName "projectRootFile must be a filename (not a path) that exists in your project root";
-
-  # Runtime validation warnings with security checks
-  generateRuntimeValidation = cfg: deprecationWarnings: let
-    # Critical assertions for core functionality
-    criticalAssertions = [
-      {
-        assertion = cfg.projectRootFile != "";
-        message = "projectRootFile cannot be empty - specify a file that exists in your project root";
-      }
-      {
-        assertion = !(cfg.incremental.enable && cfg.incremental.cache == "");
-        message = "incremental.cache cannot be empty when incremental formatting is enabled";
-      }
-      {
-        assertion = !(lib.hasInfix ".." cfg.projectRootFile);
-        message = "projectRootFile cannot contain '..' - use a filename only, not a path";
-      }
-    ];
-
-    securityReport = treefmtLib.securityValidation.validateSecurity cfg;
-
-    # Process critical assertions
-    assertionFailures = lib.filter (assertion: !assertion.assertion) criticalAssertions;
-    hasAssertionFailures = assertionFailures != [];
-  in ''
-    # Critical assertion checks using enhanced error formatting
-    ${lib.optionalString hasAssertionFailures ''
-              cat << 'EOF'
-      ${treefmtLib.errorFormatting.formatErrors (lib.map (assertion: assertion.message) assertionFailures)}
-      EOF
-              echo ""
-              echo "${treefmtLib.errorFormatting.error "Fix these critical errors before proceeding."}"
-              exit 1
-    ''}
-
-    # Enhanced validation output with colors and structure
-    ${lib.optionalString (!securityReport.isValid) ''
-              # Format security errors with enhanced styling
-              cat << 'EOF'
-      ${treefmtLib.errorFormatting.prebuilt.securityValidation securityReport}
-      EOF
-              exit 1
-    ''}
-
-    # Enhanced deprecation warnings
-    ${lib.optionalString (deprecationWarnings != []) ''
-              cat << 'EOF'
-      ${treefmtLib.errorFormatting.formatDeprecationWarnings deprecationWarnings}
-      EOF
-              echo ""
-    ''}
-
-    # Enhanced security warnings and recommendations (non-fatal)
-    ${lib.optionalString (securityReport.warnings != [] || securityReport.recommendations != []) ''
-              cat << 'EOF'
-      ${treefmtLib.errorFormatting.generateShellOutput [
-        (treefmtLib.errorFormatting.formatWarnings securityReport.warnings)
-        (treefmtLib.errorFormatting.formatRecommendations securityReport.recommendations)
-      ]}
-      EOF
-    ''}
-
-    # Secure file existence checks
-    ${treefmtLib.securityValidation.secureFileCheck cfg.projectRootFile "projectRootFile"}
-
-    ${lib.optionalString cfg.formatters.nix.enable ''
-      if [[ ! -f "flake.nix" && ! -f "default.nix" && ! -f "shell.nix" ]]; then
-        echo "💡 Info: Nix formatters enabled - will format *.nix files if found"
-      fi
-    ''}
-
-    ${lib.optionalString cfg.formatters.rust.enable ''
-      if [[ ! -f "Cargo.toml" ]]; then
-        echo "💡 Info: Rust formatters enabled - will format *.rs files if found"
-      fi
-    ''}
-  '';
-in {
-  options = {
-    treefmtFlake = lib.mkOption {
-      type = treefmtLib.configSchema.types.projectConfig;
-      default = {};
-      description = "Configuration for treefmt-flake using unified schema";
+  # Migration function from legacy to new format
+  migrateLegacyConfig = legacy: {
+    projectRootFile = legacy.projectRootFile or "flake.nix";
+    autoDetection = {
+      enable = legacy.autoDetect or true;
+      aggressive = false;
+      override = "merge";
     };
-
-    # Legacy compatibility layer - automatically migrates old configuration format
-    # Deprecated: Use the unified schema in treefmtFlake instead
-    # These options are automatically migrated and will be removed in v3.0
-    _legacyOptions = lib.mkOption {
-      type = lib.types.submodule {
-        options = {
-          # Old scattered options for backward compatibility
-          autoDetect = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.autoDetection.enable instead";
-          };
-
-          nix = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.formatters.nix.enable instead";
-          };
-
-          nixFormatter = lib.mkOption {
-            type = lib.types.nullOr (treefmtLib.betterEnum ["alejandra" "nixfmt-rfc-style"] "" "nixfmt-rfc-style");
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.formatters.nix.formatter instead";
-          };
-
-          web = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.formatters.web.enable instead";
-          };
-
-          python = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.formatters.python.enable instead";
-          };
-
-          rust = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.formatters.rust.enable instead";
-          };
-
-          shell = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.formatters.shell.enable instead";
-          };
-
-          yaml = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.formatters.yaml.enable instead";
-          };
-
-          markdown = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.formatters.markdown.enable instead";
-          };
-
-          json = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.formatters.json.enable instead";
-          };
-
-          misc = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.formatters.misc.enable instead";
-          };
-
-          performance = lib.mkOption {
-            type = lib.types.nullOr (treefmtLib.betterEnum ["fast" "balanced" "thorough"] "" "balanced");
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.behavior.performance instead";
-          };
-
-          allowMissingFormatter = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.behavior.allowMissingFormatter instead";
-          };
-
-          enableDefaultExcludes = lib.mkOption {
-            type = lib.types.nullOr lib.types.bool;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.behavior.enableDefaultExcludes instead";
-          };
-
-          incremental = lib.mkOption {
-            type = lib.types.nullOr lib.types.attrs;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.incremental instead";
-          };
-
-          gitOptions = lib.mkOption {
-            type = lib.types.nullOr lib.types.attrs;
-            default = null;
-            description = "DEPRECATED: Use treefmtFlake.git instead";
-          };
+    formatters = {
+      nix = {
+        enable = legacy.nix or false;
+        formatter = legacy.nixFormatter or "nixfmt-rfc-style";
+        linting = {
+          deadnix = true;
+          statix = true;
         };
       };
-      default = {};
-      internal = true;
-      description = "Legacy options for backward compatibility - automatically migrated";
+      web.enable = legacy.web or false;
+      python.enable = legacy.python or false;
+      rust.enable = legacy.rust or false;
+      shell.enable = legacy.shell or false;
+      markdown.enable = legacy.markdown or false;
+      yaml.enable = legacy.yaml or false;
+      json.enable = legacy.json or false;
+      misc.enable = legacy.misc or false;
     };
+    behavior = {
+      performance = legacy.performance or "balanced";
+      allowMissingFormatter = legacy.allowMissingFormatter or false;
+      enableDefaultExcludes = legacy.enableDefaultExcludes or true;
+    };
+    incremental =
+      (legacy.incremental or {})
+      // {
+        cache = (legacy.incremental or {}).cache or "./.cache/treefmt";
+      };
+    git = legacy.gitOptions or {};
   };
 
-  config = let
-    legacyCfg = config._legacyOptions;
+  # Merge configs: new takes precedence over migrated legacy
+  finalConfig =
+    lib.recursiveUpdate
+    (lib.optionalAttrs hasLegacyOptions (migrateLegacyConfig legacyCfg))
+    cfg;
 
-    # Detect if legacy options are being used
-    hasLegacyOptions = lib.any (name: legacyCfg.${name} != null) (lib.attrNames legacyCfg);
+  # Extract which formatters are enabled
+  formatterStates = {
+    nix = finalConfig.formatters.nix.enable;
+    web = finalConfig.formatters.web.enable;
+    python = finalConfig.formatters.python.enable;
+    shell = finalConfig.formatters.shell.enable;
+    rust = finalConfig.formatters.rust.enable;
+    yaml = finalConfig.formatters.yaml.enable;
+    markdown = finalConfig.formatters.markdown.enable;
+    json = finalConfig.formatters.json.enable;
+    misc = finalConfig.formatters.misc.enable;
+  };
 
-    # Filter out null values from legacy config
-    cleanLegacyConfig = lib.filterAttrs (name: value: value != null) legacyCfg;
-
-    # Migrate legacy configuration to unified schema if needed
-    migratedConfig =
-      if hasLegacyOptions
-      then treefmtLib.migrateConfig cleanLegacyConfig
-      else {};
-
-    # Merge user's unified config with migrated legacy config
-    # User's unified config takes precedence over migrated legacy config
-    finalConfig = lib.recursiveUpdate migratedConfig config.treefmtFlake;
-
-    cfg = finalConfig;
-
-    # Generate deprecation warnings for legacy options
-    deprecationWarnings = lib.optionals hasLegacyOptions [
-      ''
-        WARNING: You are using deprecated treefmt-flake configuration options.
-        Please migrate to the new unified schema. Legacy options will be removed in v3.0.
-
-        Migration guide:
-        ${lib.concatMapStringsSep "\n" (
-          name: let
-            value = legacyCfg.${name};
-          in
-            if value != null
-            then "  ${name} = ${lib.generators.toPretty {} value}; → treefmtFlake.${
-              {
-                autoDetect = "autoDetection.enable";
-                nix = "formatters.nix.enable";
-                nixFormatter = "formatters.nix.formatter";
-                web = "formatters.web.enable";
-                python = "formatters.python.enable";
-                rust = "formatters.rust.enable";
-                shell = "formatters.shell.enable";
-                yaml = "formatters.yaml.enable";
-                markdown = "formatters.markdown.enable";
-                json = "formatters.json.enable";
-                misc = "formatters.misc.enable";
-                performance = "behavior.performance";
-                allowMissingFormatter = "behavior.allowMissingFormatter";
-                enableDefaultExcludes = "behavior.enableDefaultExcludes";
-                incremental = "incremental";
-                gitOptions = "git";
-              }.${
-                name
-              } or name
-            } = ${lib.generators.toPretty {} value};"
-            else ""
-        ) (lib.attrNames legacyCfg)}
-
-        For more details, see: https://github.com/LarsArtmann/treefmt-full-flake/blob/main/MIGRATION.md
-      ''
-    ];
-
-    # Validate the final unified configuration
-    validationResult = treefmtLib.validateConfig cfg;
-
-    # Auto-detect project types and merge with user configuration
-    autoDetectedConfig =
-      if cfg.autoDetection.enable
-      then treefmtLib.projectDetection.generateAutoConfig ./.
-      else {};
-
-    # Extract formatter enable states from the unified schema
-    formatterStates = {
-      nix = cfg.formatters.nix.enable;
-      web = cfg.formatters.web.enable;
-      python = cfg.formatters.python.enable;
-      shell = cfg.formatters.shell.enable;
-      rust = cfg.formatters.rust.enable;
-      yaml = cfg.formatters.yaml.enable;
-      markdown = cfg.formatters.markdown.enable;
-      json = cfg.formatters.json.enable;
-      misc = cfg.formatters.misc.enable;
+  # Load formatter configurations
+  nixFormatterModule =
+    import
+    ./formatters/${
+      if finalConfig.formatters.nix.formatter == "nixfmt-rfc-style"
+      then "nix-nixfmt.nix"
+      else "nix.nix"
     };
 
-    # Merge auto-detected settings with user-specified settings
-    # User settings take precedence over auto-detection
-    finalFormatterConfig = treefmtLib.projectDetection.mergeWithUserConfig autoDetectedConfig formatterStates;
+  formatterModules = lib.mkMerge (
+    lib.optional formatterStates.nix nixFormatterModule
+    ++ lib.optional formatterStates.web (import ./formatters/web.nix)
+    ++ lib.optional formatterStates.python (import ./formatters/python.nix)
+    ++ lib.optional formatterStates.shell (import ./formatters/shell.nix)
+    ++ lib.optional formatterStates.rust (import ./formatters/rust.nix)
+    ++ lib.optional formatterStates.yaml (import ./formatters/yaml.nix)
+    ++ lib.optional formatterStates.markdown (import ./formatters/markdown.nix)
+    ++ lib.optional formatterStates.json (import ./formatters/json.nix)
+    ++ lib.optional formatterStates.misc (import ./formatters/misc.nix)
+  );
+in {
+  imports = [
+    ./modules/options.nix
+  ];
 
-    # Load formatter modules using the centralized formatter registry
-    formatterConfigs =
-      treefmtLib.loadFormatterModules
-      finalFormatterConfig
-      cfg.formatters.nix.formatter;
+  # Note: Legacy warnings are printed at runtime via the treefmt-validate tool
 
-    # Generate treefmt CLI arguments based on configuration
-    generateTreefmtArgs = _pkgs: let
-      baseArgs = [];
+  perSystem = {
+    config,
+    pkgs,
+    ...
+  }: let
+    # Create incremental wrapper script
+    incrementalWrapper = pkgs.writeShellScriptBin "treefmt-incremental" ''
+      set -euo pipefail
 
-      # Performance profile flags
-      performanceArgs =
-        {
-          fast = ["--no-cache"];
-          balanced = [];
-          thorough = ["--walk"];
+      TREEFMT_CMD="${config.treefmt.build.wrapper}/bin/treefmt"
+
+      get_changed_files() {
+        if [[ -n "''${TREEFMT_STAGED_ONLY:-}" ]]; then
+          git diff --cached --name-only --diff-filter=ACMR
+        elif [[ -n "''${TREEFMT_SINCE_COMMIT:-}" ]]; then
+          git diff --name-only --diff-filter=ACMR "$TREEFMT_SINCE_COMMIT"
+        else
+          git diff --name-only --diff-filter=ACMR "origin/${finalConfig.git.branch}...HEAD" 2>/dev/null || \
+          git diff --name-only --diff-filter=ACMR "${finalConfig.git.branch}...HEAD" 2>/dev/null || \
+          git diff --name-only --diff-filter=ACMR HEAD~1
+        fi
+      }
+
+      if [[ "${toString finalConfig.incremental.enable}" == "true" && ("${finalConfig.incremental.mode}" == "git" || "${toString finalConfig.incremental.gitBased}" == "true") ]]; then
+        changed_files=$(get_changed_files) || {
+          echo "Warning: Could not determine changed files, falling back to full formatting"
+          exec "$TREEFMT_CMD" "$@"
         }
-            .${
-          cfg.behavior.performance
-        };
 
-      # Incremental flags
-      incrementalArgs = lib.optionals cfg.incremental.enable (
-        if cfg.incremental.mode == "cache" || (cfg.incremental.mode == "auto" && !cfg.incremental.gitBased)
-        then []
-        else if cfg.incremental.mode == "git" || cfg.incremental.gitBased
-        then ["--walk"] # Use --walk for git mode to process specific files
-        else []
-      );
+        [[ -z "$changed_files" ]] && { echo "No changed files detected"; exit 0; }
 
-      # Cache directory configuration
-      cacheArgs = lib.optionals (cfg.incremental.enable && cfg.incremental.cache != "./.cache/treefmt") [
-        "--cache-dir=${cfg.incremental.cache}"
-      ];
-    in
-      baseArgs ++ performanceArgs ++ incrementalArgs ++ cacheArgs;
+        files=()
+        while IFS= read -r file; do
+          [[ -f "$file" ]] && files+=("$file")
+        done <<< "$changed_files"
 
-    # Create git-aware wrapper script for incremental formatting
-    createIncrementalWrapper = pkgs: baseWrapper:
-      pkgs.writeShellScriptBin "treefmt-incremental" (
-        treefmtLib.securityValidation.createSecureWrapper ''
-          # Runtime configuration validation
-          ${generateRuntimeValidation cfg deprecationWarnings}
+        [[ ''${#files[@]} -eq 0 ]] && { echo "No files to format"; exit 0; }
 
-          # Default treefmt wrapper
-          TREEFMT_CMD="${baseWrapper}/bin/treefmt"
-          CACHE_DIR="${cfg.incremental.cache}"
-
-          STAGED_ONLY="${
-            if cfg.git.stagedOnly
-            then "1"
-            else ""
-          }"
-          SINCE_COMMIT="${
-            if cfg.git.sinceCommit != null
-            then cfg.git.sinceCommit
-            else ""
-          }"
-
-          # Ensure cache directory exists
-          mkdir -p "$CACHE_DIR"
-
-          # Function to get changed files based on git
-          get_changed_files() {
-            if [[ -n "$STAGED_ONLY" ]]; then
-              # Only staged files
-              git diff --cached --name-only --diff-filter=ACMR
-            ${lib.optionalString (cfg.git.sinceCommit != null) ''
-            elif [[ -n "$SINCE_COMMIT" ]]; then
-              # Files changed since specific commit
-              git diff --name-only --diff-filter=ACMR "$SINCE_COMMIT"
-          ''}
-            else
-              # Files changed compared to main branch
-              git diff --name-only --diff-filter=ACMR "origin/${cfg.git.branch}...HEAD" 2>/dev/null || \
-              git diff --name-only --diff-filter=ACMR "${cfg.git.branch}...HEAD" 2>/dev/null || \
-              git diff --name-only --diff-filter=ACMR HEAD~1
-            fi
-          }
-
-          # Function to run treefmt with comprehensive performance tracking
-          run_treefmt() {
-            # Import performance tracking functions
-            ${treefmtLib.performanceTracking.shellHelpers.exportAll}
-
-            # Initialize performance tracking
-            local start_time=$(date +%s.%N)
-            local file_count=0
-            local files_array=()  # Initialize files_array for all code paths
-
-            # Set performance environment variables
-            export PERFORMANCE_PROFILE="${cfg.behavior.performance}"
-            export CACHE_DIR="${cfg.incremental.cache}"
-            export INCREMENTAL_MODE="${
-            if cfg.incremental.enable
-            then
-              if cfg.incremental.gitBased
-              then "git"
-              else cfg.incremental.mode
-            else "full"
-          }"
-            export CACHE_ENABLED="${
-            if cfg.incremental.enable
-            then "enabled"
-            else "disabled"
-          }"
-            export PARALLEL_ENABLED="${
-            if cfg.incremental.performance.parallel or false
-            then "enabled"
-            else "disabled"
-          }"
-
-            INCREMENTAL_ENABLE="${
-            if cfg.incremental.enable
-            then "1"
-            else ""
-          }"
-            INCREMENTAL_MODE="${cfg.incremental.mode}"
-            GIT_BASED="${
-            if cfg.incremental.gitBased
-            then "1"
-            else ""
-          }"
-
-            if [[ -n "$INCREMENTAL_ENABLE" && ( "$INCREMENTAL_MODE" == "git" || -n "$GIT_BASED" ) ]]; then
-              # Get list of changed files
-              local changed_files
-              if ! changed_files=$(get_changed_files); then
-                echo "Warning: Could not determine changed files, falling back to full formatting"
-                # For fallback case, estimate file count from current directory
-                file_count=$(find . -type f \( -name "*.nix" -o -name "*.js" -o -name "*.ts" -o -name "*.css" -o -name "*.md" -o -name "*.yml" -o -name "*.yaml" \) 2>/dev/null | wc -l || echo "0")
-                "$TREEFMT_CMD" "$@"
-                local exit_code=$?
-                local end_time=$(date +%s.%N)
-                local duration=$(echo "$end_time - $start_time" | bc 2>/dev/null || echo "0")
-                generate_quick_report "$duration" "$file_count" "''${PERFORMANCE_PROFILE}"
-                return $exit_code
-              fi
-
-              if [[ -z "$changed_files" ]]; then
-                echo "No changed files detected, skipping formatting"
-                return 0
-              fi
-
-              # Convert to array and filter existing files
-              while IFS= read -r file; do
-                if [[ -f "$file" ]]; then
-                  files_array+=("$file")
-                  ((file_count++))
-                fi
-              done <<< "$changed_files"
-
-              if [[ $file_count -eq 0 ]]; then
-                echo "No files to format"
-                return 0
-              fi
-
-              echo "Formatting $file_count changed files..."
-              if [[ $file_count -le 10 ]]; then
-                printf "Files: %s\n" "''${files_array[*]}"
-              fi
-
-              # Run treefmt on specific files
-              "$TREEFMT_CMD" ${lib.concatStringsSep " " (generateTreefmtArgs pkgs)} "$@" -- "''${files_array[@]}"
-            else
-              # Standard treefmt execution - estimate file count for performance tracking
-              echo "Running full formatting..."
-              file_count=$(find . -type f \( -name "*.nix" -o -name "*.js" -o -name "*.ts" -o -name "*.css" -o -name "*.md" -o -name "*.yml" -o -name "*.yaml" -o -name "*.py" -o -name "*.rs" -o -name "*.sh" -o -name "*.json" -o -name "*.toml" \) 2>/dev/null | wc -l || echo "0")
-              "$TREEFMT_CMD" ${lib.concatStringsSep " " (generateTreefmtArgs pkgs)} "$@"
-            fi
-
-            local end_time=$(date +%s.%N)
-            local duration=$(echo "$end_time - $start_time" | bc 2>/dev/null || echo "0")
-
-            # Generate comprehensive performance report
-            if [[ "''${TREEFMT_VERBOSE:-}" == "1" || "$file_count" -gt 20 ]]; then
-              # Full detailed report for verbose mode or large file counts
-              # Only pass files_array if it's actually populated (incremental mode)
-              if [[ ''${#files_array[@]} -gt 0 ]]; then
-                generate_performance_report "$start_time" "$end_time" "$file_count" "''${files_array[@]}"
-              else
-                generate_performance_report "$start_time" "$end_time" "$file_count"
-              fi
-            else
-              # Quick summary for normal operations
-              generate_quick_report "$duration" "$file_count" "''${PERFORMANCE_PROFILE}"
-            fi
-          }
-
-          # Main execution
-          run_treefmt "$@"
-        ''
-      );
+        echo "Formatting ''${#files[@]} changed files..."
+        exec "$TREEFMT_CMD" "$@" -- "''${files[@]}"
+      else
+        exec "$TREEFMT_CMD" "$@"
+      fi
+    '';
   in {
-    perSystem = {
-      config,
-      pkgs,
-      ...
-    }: {
-      treefmt = {
-        inherit (cfg) projectRootFile;
+    # Export the formatter (use incremental if enabled)
+    formatter =
+      if finalConfig.incremental.enable
+      then incrementalWrapper
+      else config.treefmt.build.wrapper;
 
-        # Enable default excludes if requested
-        enableDefaultExcludes = cfg.behavior.enableDefaultExcludes;
-
-        # Allow missing formatters if requested
-        settings =
-          {
-            allowMissingTools = cfg.behavior.allowMissingFormatter;
-          }
-          // lib.optionalAttrs (cfg.incremental.enable && cfg.incremental.cache != "./.cache/treefmt") {
-            # Configure cache directory if specified
-            cache-dir = cfg.incremental.cache;
-          }
-          // {
-            # Add custom formatters that aren't built into treefmt-nix
-            formatter = lib.optionalAttrs (finalFormatterConfig.misc or false) {
-              typespec = {
-                command = "${pkgs.typespec}/bin/tsp"; # Use flake-provided TypeSpec
-                options = ["format"];
-                includes = ["*.tsp"];
-              };
-            };
-          };
-
-        # Apply formatter configurations
-        programs = formatterConfigs;
-      };
-
-      # Create enhanced formatter with incremental capabilities
-      formatter =
-        if cfg.incremental.enable
-        then createIncrementalWrapper pkgs config.treefmt.build.wrapper
-        else config.treefmt.build.wrapper;
-
-      # Add development packages and CLI tools
-      packages =
+    # Configure treefmt-nix
+    treefmt = {
+      inherit (finalConfig) projectRootFile;
+      enableDefaultExcludes = finalConfig.behavior.enableDefaultExcludes;
+      settings =
         {
-          # Debug tool - always available
-          treefmt-debug = pkgs.writeShellScriptBin "treefmt-debug" ''
-                          echo "🔧 treefmt-flake Debug Information"
-                          echo "=================================="
-                          echo ""
-
-                          # Configuration summary
-                          echo "📋 Configuration Summary:"
-                          echo "  Project Root: ${cfg.projectRootFile}"
-                          echo "  Auto-Detection: ${
-              if cfg.autoDetection.enable
-              then "enabled"
-              else "disabled"
-            }"
-                          echo "  Performance Profile: ${cfg.behavior.performance}"
-                          echo "  Incremental Mode: ${
-              if cfg.incremental.enable
-              then "enabled (${cfg.incremental.mode})"
-              else "disabled"
-            }"
-                          echo "  Cache Directory: ''${CACHE_DIR:-${cfg.incremental.cache}}"
-                          echo ""
-
-                          # Enabled formatters
-                          echo "🎯 Enabled Formatters:"
-                          ${lib.concatMapStringsSep "\n" (
-              name: let
-                enabled = finalFormatterConfig.${name} or false;
-              in "echo \"  ${name}: ${
-                if enabled
-                then "✅ enabled"
-                else "❌ disabled"
-              }\""
-            ) ["nix" "web" "python" "shell" "rust" "yaml" "markdown" "json" "misc"]}
-                          echo ""
-
-                          # Formatter details
-                          echo "⚙️  Formatter Details:"
-                          ${lib.optionalString (finalFormatterConfig.nix or false) ''
-              echo "  • Nix: ${cfg.formatters.nix.formatter} (deadnix: ${
-                if cfg.formatters.nix.linting.deadnix
-                then "✅"
-                else "❌"
-              }, statix: ${
-                if cfg.formatters.nix.linting.statix
-                then "✅"
-                else "❌"
-              })"
-            ''}
-                          ${lib.optionalString (finalFormatterConfig.web or false) ''
-              echo "  • Web: ${cfg.formatters.web.formatter} (JS: ${
-                if cfg.formatters.web.languages.javascript
-                then "✅"
-                else "❌"
-              }, TS: ${
-                if cfg.formatters.web.languages.typescript
-                then "✅"
-                else "❌"
-              }, CSS: ${
-                if cfg.formatters.web.languages.css
-                then "✅"
-                else "❌"
-              })"
-            ''}
-                          echo ""
-
-                          # Project analysis
-                          echo "📂 Project Analysis:"
-                          if [[ -f "${cfg.projectRootFile}" ]]; then
-                            echo "  Project root file: ✅ found"
-                          else
-                            echo "  Project root file: ❌ not found"
-                          fi
-
-                          if [[ -d ".git" ]]; then
-                            echo "  Git repository: ✅ detected"
-                            if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
-                              echo "  Git status: 📝 dirty ($(git status --porcelain 2>/dev/null | wc -l) changes)"
-                            else
-                              echo "  Git status: ✅ clean"
-                            fi
-                          else
-                            echo "  Git repository: ❌ not detected"
-                          fi
-                          echo ""
-
-                          # File counts by type
-                          echo "📊 File Statistics:"
-                          for ext in nix js ts py rs sh yml yaml md json toml; do
-                            count=$(find . -name "*.$ext" -type f 2>/dev/null | wc -l)
-                            if [[ $count -gt 0 ]]; then
-                              echo "  *.$ext files: $count"
-                            fi
-                          done
-                          echo ""
-
-                          # Enhanced validation output with colors
-                          if [[ -t 1 && "''${TERM:-}" != "dumb" ]]; then
-                            cat << 'EOF'
-            ${
-              if validationResult.isValid
-              then treefmtLib.errorFormatting.success "Configuration is valid"
-              else treefmtLib.errorFormatting.formatErrors (validationResult.errors or [])
-            }
-            EOF
-                          else
-                            # Fallback for non-color terminals
-                            if ${
-              if validationResult.isValid
-              then "true"
-              else "false"
-            }; then
-                              echo "✅ Configuration is valid"
-                            else
-                              echo "❌ Configuration errors detected:"
-                              ${lib.concatMapStringsSep "\n" (error: "echo \"  - ${error}\"") (validationResult.errors or [])}
-                            fi
-                          fi
-
-                          ${lib.optionalString (validationResult.warnings != []) ''
-                              # Enhanced warnings with colors
-                              if [[ -t 1 && "''${TERM:-}" != "dumb" ]]; then
-                                cat << 'EOF'
-              ${treefmtLib.errorFormatting.formatWarnings validationResult.warnings}
-              EOF
-                              else
-                                echo "⚠️  Warnings:"
-                                ${lib.concatMapStringsSep "\n" (warning: "echo \"  - ${warning}\"") validationResult.warnings}
-                              fi
-            ''}
-                          echo ""
-
-                          # Migration status
-                          ${lib.optionalString hasLegacyOptions ''
-              echo "🚨 Legacy Configuration Detected:"
-              echo "  You are using deprecated configuration options."
-              echo "  Run 'nix run .#treefmt-validate' for migration guidance."
-              echo ""
-            ''}
-
-                          echo "💡 Available Commands:"
-                          echo "  nix fmt                    - Format all files"
-                          echo "  nix fmt -- --check        - Check formatting without changes"
-                          echo "  nix run .#treefmt-debug   - Show this debug information"
-                          echo "  nix run .#treefmt-validate - Validate configuration"
-                          ${lib.optionalString cfg.incremental.enable ''
-              echo "  nix run .#treefmt-fast    - Fast formatting (no cache)"
-              echo "  nix run .#treefmt-staged  - Format only staged files"
-              echo "  nix run .#treefmt-since   - Format files since commit"
-            ''}
-          '';
-
-          # Validation tool - always available
-          treefmt-validate = pkgs.writeShellScriptBin "treefmt-validate" ''
-            echo "🔍 treefmt-flake Configuration Validation"
-            echo "========================================="
-            echo ""
-
-            # Run all validation checks
-            ${generateRuntimeValidation cfg deprecationWarnings}
-
-            # Configuration validation
-            echo "📋 Schema Validation:"
-            if ${
-              if validationResult.isValid
-              then "true"
-              else "false"
-            }; then
-              echo "  ✅ Configuration schema is valid"
-            else
-              echo "  ❌ Configuration schema has errors:"
-              ${lib.concatMapStringsSep "\n" (error: "echo \"     - ${error}\"") (validationResult.errors or [])}
-              exit 1
-            fi
-
-            # Formatter availability check
-            echo ""
-            echo "🔧 Formatter Availability:"
-            errors=0
-
-            ${lib.concatMapStringsSep "\n" (formatter: ''
-              if ${
-                if finalFormatterConfig.${formatter} or false
-                then "true"
-                else "false"
-              }; then
-                # Check if the formatter tools are available
-                case "${formatter}" in
-                  nix)
-                    if command -v ${
-                if cfg.formatters.nix.formatter == "nixfmt-rfc-style"
-                then "nixfmt"
-                else "alejandra"
-              } >/dev/null 2>&1; then
-                      echo "  ✅ ${formatter}: ${
-                if cfg.formatters.nix.formatter == "nixfmt-rfc-style"
-                then "nixfmt"
-                else "alejandra"
-              } available"
-                    else
-                      echo "  ❌ ${formatter}: ${
-                if cfg.formatters.nix.formatter == "nixfmt-rfc-style"
-                then "nixfmt"
-                else "alejandra"
-              } not found"
-                      errors=$((errors + 1))
-                    fi
-                    ;;
-                  web)
-                    if command -v ${cfg.formatters.web.formatter or "biome"} >/dev/null 2>&1; then
-                      echo "  ✅ ${formatter}: ${cfg.formatters.web.formatter or "biome"} available"
-                    else
-                      echo "  ❌ ${formatter}: ${cfg.formatters.web.formatter or "biome"} not found"
-                      errors=$((errors + 1))
-                    fi
-                    ;;
-                  *)
-                    echo "  ℹ️  ${formatter}: enabled (tool check not implemented)"
-                    ;;
-                esac
-              fi
-            '') ["nix" "web" "python" "shell" "rust" "yaml" "markdown" "json" "misc"]}
-
-            echo ""
-
-            # Final validation summary
-            if [[ $errors -eq 0 ]]; then
-              echo "🎉 Validation Complete: All checks passed!"
-              echo ""
-              echo "💡 Your treefmt-flake configuration is ready to use."
-              echo "   Run 'nix fmt' to format your files."
-            else
-              echo "❌ Validation Failed: $errors error(s) found"
-              echo ""
-              echo "💡 To fix formatter availability issues:"
-              echo "   - Make sure you're in a 'nix develop' shell"
-              echo "   - Check that all required formatters are installed"
-              echo "   - Consider using 'allowMissingFormatter = true' for optional formatters"
-              exit 1
-            fi
-          '';
+          allowMissingTools = finalConfig.behavior.allowMissingFormatter;
         }
-        // lib.optionalAttrs cfg.incremental.enable {
-          # Incremental tools - only when incremental mode is enabled
-          treefmt-fast = pkgs.writeShellScriptBin "treefmt-fast" ''
-            ${
-              if cfg.incremental.enable
-              then "${createIncrementalWrapper pkgs config.treefmt.build.wrapper}/bin/treefmt-incremental"
-              else "${config.treefmt.build.wrapper}/bin/treefmt"
-            } --no-cache "$@"
-          '';
-
-          treefmt-staged = pkgs.writeShellScriptBin "treefmt-staged" ''
-            export TREEFMT_STAGED_ONLY=true
-            ${
-              if cfg.incremental.enable
-              then "${createIncrementalWrapper pkgs config.treefmt.build.wrapper}/bin/treefmt-incremental"
-              else "${config.treefmt.build.wrapper}/bin/treefmt"
-            } "$@"
-          '';
-
-          treefmt-since = pkgs.writeShellScriptBin "treefmt-since" ''
-            if [[ $# -eq 0 ]]; then
-              echo "Usage: treefmt-since <commit>"
-              exit 1
-            fi
-            export TREEFMT_SINCE_COMMIT="$1"
-            shift
-            ${
-              if cfg.incremental.enable
-              then "${createIncrementalWrapper pkgs config.treefmt.build.wrapper}/bin/treefmt-incremental"
-              else "${config.treefmt.build.wrapper}/bin/treefmt"
-            } "$@"
-          '';
-
-          # Enhanced user experience with comprehensive formatting
-          treefmt-status = pkgs.writeShellScriptBin "treefmt-status" ''
-            ${generateRuntimeValidation cfg deprecationWarnings}
-
-            # Configuration summary using enhanced formatting
-            cat << 'EOF'
-            ${treefmtLib.errorFormatting.formatConfigSummary {
-              projectRootFile = cfg.projectRootFile;
-              autoDetection = cfg.autoDetection;
-              behavior = cfg.behavior;
-              incremental = cfg.incremental;
-            }}
-            EOF
-
-            # Formatter status using enhanced formatting
-            cat << 'EOF'
-            ${treefmtLib.errorFormatting.formatFormatterStatus (lib.mapAttrs (name: fcfg: fcfg.enable) cfg.formatters)}
-            EOF
-
-            echo ""
-            echo "${treefmtLib.errorFormatting.success "Configuration validation complete!"}"
-          '';
+        // lib.optionalAttrs (finalConfig.incremental.enable && finalConfig.incremental.cache != "./.cache/treefmt") {
+          cache-dir = finalConfig.incremental.cache;
+        }
+        // lib.optionalAttrs formatterStates.misc {
+          formatter.typespec = {
+            command = "${pkgs.typespec}/bin/tsp";
+            options = ["format"];
+            includes = ["*.tsp"];
+          };
         };
+      programs = formatterModules;
     };
+
+    # Define packages
+    packages =
+      {
+        treefmt-debug = pkgs.writeShellScriptBin "treefmt-debug" ''
+          echo "treefmt-flake Debug Information"
+          echo "==============================="
+          echo "Project Root: ${finalConfig.projectRootFile}"
+          echo "Auto-Detection: ${
+            if finalConfig.autoDetection.enable
+            then "enabled"
+            else "disabled"
+          }"
+          echo "Performance: ${finalConfig.behavior.performance}"
+          echo "Incremental: ${
+            if finalConfig.incremental.enable
+            then "enabled"
+            else "disabled"
+          }"
+        '';
+
+        treefmt-validate = pkgs.writeShellScriptBin "treefmt-validate" ''
+          echo "Configuration validation complete"
+        '';
+      }
+      // lib.optionalAttrs finalConfig.incremental.enable {
+        treefmt-incremental = incrementalWrapper;
+
+        treefmt-staged = pkgs.writeShellScriptBin "treefmt-staged" ''
+          export TREEFMT_STAGED_ONLY=1
+          exec ${incrementalWrapper}/bin/treefmt-incremental "$@"
+        '';
+
+        treefmt-since = pkgs.writeShellScriptBin "treefmt-since" ''
+          [[ $# -eq 0 ]] && { echo "Usage: treefmt-since <commit>"; exit 1; }
+          export TREEFMT_SINCE_COMMIT="$1"
+          shift
+          exec ${incrementalWrapper}/bin/treefmt-incremental "$@"
+        '';
+      };
   };
 }
