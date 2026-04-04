@@ -47,16 +47,23 @@ nix flake check
 ```
 treefmt-full-flake/
 ├── flake.nix              # Main flake configuration
-├── flake-module.nix       # Flake module with boolean options
+├── flake-module.nix       # Flake-parts module implementation
+├── modules/
+│   └── options.nix       # Module option definitions
+├── lib/                   # Library functions
+│   ├── default.nix       # Library exports
+│   └── project-detection.nix  # Auto-detection utilities
 ├── formatters/            # Language-specific formatter modules
 │   ├── nix.nix           # Nix formatters (alejandra, deadnix, statix)
+│   ├── nix-nixfmt.nix    # Nix formatters using nixfmt-rfc-style
 │   ├── web.nix           # Web formatters (biome for JS/TS/CSS)
-│   ├── python.nix        # Python formatters (black, isort, ruff-format)
+│   ├── python.nix        # Python formatters (black, isort, ruff)
 │   └── ...               # Other language formatters
 ├── templates/             # Project templates
 │   ├── minimal/          # Essential formatters only
 │   ├── default/          # Common multi-language setup
-│   └── complete/         # All formatter groups enabled
+│   ├── complete/         # All formatter groups enabled
+│   └── local-development/# Self-contained template
 └── docs/                 # Documentation and guides
 ```
 
@@ -66,17 +73,18 @@ treefmt-full-flake/
 
 1. **Create or extend** the appropriate file in `formatters/`
 1. **Follow the priority-based execution pattern** to prevent conflicts
-1. **Add configuration option** to `flake-module.nix`
+1. **Add configuration options** to `modules/options.nix` (if user-facing)
+1. **Wire up in** `flake-module.nix` (if new formatter category)
 1. **Test with** `nix flake check`
 1. **Update templates** if the formatter is commonly needed
 
 Example formatter module structure:
 
 ```nix
-{ config, lib, ... }:
+# formatters/my-language.nix
 {
-  config = lib.mkIf config.treefmtFlake.programs.myLanguage.enable {
-    programs.myformatter = {
+  programs = {
+    myformatter = {
       enable = true;
       # configuration here
     };
@@ -86,9 +94,10 @@ Example formatter module structure:
 
 ### Updating Templates
 
-- **minimal**: Essential formatters only (nix, markdown, yaml)
-- **default**: Common multi-language setup with justfile
-- **complete**: All formatter groups enabled
+- **minimal**: Essential formatters only (nix)
+- **default**: Common multi-language setup with devShell
+- **complete**: All formatter groups enabled with full configuration
+- **local-development**: Self-contained template that works offline
 
 ### Code Style
 
