@@ -45,17 +45,19 @@ Add to your `flake.nix` inputs:
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} {
     imports = [
-      inputs.treefmt-flake.flakeModule
+      inputs.treefmt-flake.flakeModules.default
     ];
 
     # Enable formatters you need
     treefmtFlake = {
       projectRootFile = "flake.nix";
-      nix = true;
-      web = true;
-      python = true;
-      yaml = true;
-      markdown = true;
+      formatters = {
+        nix.enable = true;
+        web.enable = true;
+        python.enable = true;
+        yaml.enable = true;
+        markdown.enable = true;
+      };
     };
   };
 }
@@ -129,7 +131,6 @@ treefmt-status            # Show configuration summary (if available)
 - **Incremental formatting**: Only format changed files
 - **Parallel processing**: Format multiple files simultaneously
 - **Smart caching**: Skip files that haven't changed
-- **Performance tracking**: See timing and file statistics
 
 ---
 
