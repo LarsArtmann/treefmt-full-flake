@@ -57,26 +57,25 @@ Before completing any work, ask yourself:
 ```
 project/
 ├── flake.nix                    # Entry point with all imports
-├── flake-module.nix             # Flake module definition
+├── flake-module.nix             # Flake-parts module implementation
+├── modules/
+│   └── options.nix              # Module option definitions
 ├── lib/
 │   ├── default.nix              # Central exports
-│   ├── types.nix                # Centralized type definitions
-│   ├── config-schema.nix        # Configuration schema
-│   ├── config-validation.nix    # Validation utilities
-│   ├── security-validation.nix  # Security checks
-│   ├── formatter-registry.nix   # Formatter registration
-│   ├── error-formatting.nix     # Error formatting utilities
-│   └── performance-tracking.nix  # Performance metrics
+│   └── project-detection.nix    # Auto-detection utilities
 ├── formatters/
 │   ├── nix.nix                  # Nix formatter module
+│   ├── nix-nixfmt.nix           # Nix with nixfmt-rfc-style
 │   ├── web.nix                  # Web formatter module
 │   └── ...
 ├── templates/
 │   ├── default/
-│   └── minimal/
+│   ├── minimal/
+│   ├── complete/
+│   └── local-development/
 ├── tests/
 │   ├── integration/
-│   └── unit/
+│   └── templates/
 ├── scripts/
 │   └── setup-hooks.sh
 └── justfile                     # Developer commands
@@ -93,72 +92,60 @@ project/
 
 ## 3. Type Safety
 
-### Centralized Types (`lib/types.nix`)
+### Standard Nix Types (flake-parts style)
 
-All types should be defined centrally and imported where needed:
+Use standard `lib.types` from nixpkgs. Define options directly in the module:
 
 ```nix
-# lib/types.nix
-{lib}: {
-  types = {
-    # Enum with description
-    performanceProfile = lib.types.enum ["fast" "balanced" "thorough"] // {
+# modules/options.nix
+{lib, ...}: {
+  options.myModule = {
+    # Standard enum type
+    profile = lib.mkOption {
+      type = lib.types.enum ["fast" "balanced" "thorough"];
+      default = "balanced";
       description = "Performance optimization profile";
     };
 
-    # Validated string
-    fileName = lib.types.str // {
-      check = x: !lib.hasInfix "/" x && x != "";
-      description = "Must be a filename without directory paths";
-    };
-
-    # Composite type
-    formatterConfig = lib.types.submodule {
-      options = {
-        enable = lib.mkOption { ... };
-        priority = lib.mkOption { ... };
+    # Standard submodule
+    settings = lib.mkOption {
+      type = lib.types.submodule {
+        options = {
+          enable = lib.mkEnableOption "feature";
+          timeout = lib.mkOption {
+            type = lib.types.ints.positive;
+            default = 30;
+          };
+        };
       };
+      default = {};
     };
   };
-
-  # Re-export validation helpers
-  validators = { ... };
 }
 ```
 
 ### Validation Patterns
 
 ```nix
-# ❌ BAD: No validation
-projectRootFile = lib.types.str;
+# ❌ BAD: Over-engineered custom types
+# (Previously had custom types.nix, config-schema.nix, etc.)
 
-# ✅ GOOD: Validated type with error message
-projectRootFile = lib.types.str // {
-  check = x: x != "" && !lib.hasInfix "/" x;
-  description = "Must be a non-empty filename without paths";
-};
+# ✅ GOOD: Use standard nixpkgs types
+lib.mkOption {
+  type = lib.types.str;
+  default = "flake.nix";
+  description = "File marking project root";
+}
 
-# ✅ BETTER: Custom validator with helpful error
-validatedString = validator: description:
-  lib.types.str // {
-    check = x:
-      if lib.isString x && validator x
-      then true
-      else throw "❌ Invalid value: ${toString x}. ${description}";
-  };
-```
-
-### Schema Definition (`lib/config-schema.nix`)
-
-```nix
-{lib}: let
-  types = import ./types.nix {inherit lib;};
-in {
-  # Project configuration schema
-  projectConfigSchema = lib.types.submodule {
+# ✅ GOOD: Simple submodule pattern
+lib.mkOption {
+  type = lib.types.submodule {
     options = {
-      projectRootFile = lib.mkOption {
-        type = types.types.fileName;
+      enable = lib.mkEnableOption "feature";
+      nested = lib.mkOption { ... };
+    };
+  };
+}
         default = "flake.nix";
         description = "File that marks the project root";
       };
