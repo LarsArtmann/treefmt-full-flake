@@ -116,22 +116,7 @@ jobs:
           name: treefmt-full-flake
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
           skipPush: ${{ github.event_name == 'pull_request' }}
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: ./cmd/treefmt-test-helper/go.mod
       - name: Run nix fmt integration test
         run: |
           chmod +x ./tests/integration/test-nix-fmt.sh
           ./tests/integration/test-nix-fmt.sh
-  go-quality:
-    name: Go Code Quality
-    runs-on: ["self-hosted", "linux", "x64"]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: ./cmd/treefmt-test-helper/go.mod
-      - name: Run branching-flow linters
-        run: branching-flow all ./cmd
