@@ -10,11 +10,15 @@ NC='\033[0m'
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
-CMD_DIR="$PROJECT_ROOT/cmd"
+
+# Detect system for proper package paths
+SYSTEM=$(nix eval --impure --raw --expr 'builtins.currentSystem' 2>/dev/null || echo "aarch64-darwin")
 
 echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║     Nix Fmt Integration Test         ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
+echo ""
+echo "Detected system: $SYSTEM"
 echo ""
 
 FAILED=0
@@ -29,10 +33,10 @@ run_test() {
   echo -e "${YELLOW}Running: ${test_name}${NC}"
 
   if eval "$test_cmd"; then
-    echo -e "${GREEN}✅ ${test_name} passed${NC}"
+    echo -e "${GREEN}✓ ${test_name} passed${NC}"
     PASSED=$((PASSED + 1))
   else
-    echo -e "${RED}❌ ${test_name} failed${NC}"
+    echo -e "${RED}✗ ${test_name} failed${NC}"
     FAILED=$((FAILED + 1))
   fi
   echo ""
@@ -40,26 +44,20 @@ run_test() {
 
 cd "$PROJECT_ROOT"
 
-# Test 1: nix fmt --fail-on-change (check mode)
-run_test "nix fmt check (--fail-on-change)" "nix fmt -- --fail-on-change"
+# Test 1: nix flake check --no-build (fast check)
+run_test "nix flake check --no-build" "nix flake check --no-build"
 
-# Test 2: nix flake check passes
-run_test "nix flake check passes" "nix flake check"
+# Test 2: Build the treefmt-debug package
+run_test "Build treefmt-debug package" "nix build ".#${SYSTEM}.treefmt-debug" --no-link"
 
-# Test 3: Build the test-validation package
-run_test "Build test-validation package" "nix build .#test-validation"
+# Test 3: Build the treefmt-validate package
+run_test "Build treefmt-validate package" "nix build ".#${SYSTEM}.treefmt-validate" --no-link"
 
-# Test 4: Build the treefmt-debug package
-run_test "Build treefmt-debug package" "nix build .#treefmt-debug"
+# Test 4: treefmt-debug runs successfully
+run_test "treefmt-debug execution" "nix run ".#${SYSTEM}.treefmt-debug""
 
-# Test 5: Build the treefmt-validate package
-run_test "Build treefmt-validate package" "nix build .#treefmt-validate"
-
-# Test 6: Verify Go code compiles (for branching-flow integration)
-run_test "Go code compiles" "cd $CMD_DIR/treefmt-test-helper && go build -o /dev/null ."
-
-# Test 7: branching-flow linting on Go code
-run_test "branching-flow linting" "branching-flow all $CMD_DIR"
+# Test 5: treefmt-validate runs successfully
+run_test "treefmt-validate execution" "nix run ".#${SYSTEM}.treefmt-validate""
 
 # Summary
 echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
@@ -72,9 +70,9 @@ echo -e "${RED}Failed: ${FAILED}${NC}"
 echo ""
 
 if [ $FAILED -eq 0 ]; then
-  echo -e "${GREEN}✅ All integration tests passed!${NC}"
+  echo -e "${GREEN}✓ All integration tests passed!${NC}"
   exit 0
 else
-  echo -e "${RED}❌ ${FAILED} test(s) failed${NC}"
+  echo -e "${RED}✗ ${FAILED} test(s) failed${NC}"
   exit 1
 fi

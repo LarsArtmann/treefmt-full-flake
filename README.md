@@ -58,50 +58,53 @@ Import the flake module and configure which formatter groups to enable:
 ```nix
 {
   imports = [
-    # Import the treefmt-flake module
-    inputs.treefmt-flake.flakeModule
+    # Import the treefmt-flake module (recommended)
+    inputs.treefmt-flake.flakeModules.default
+
+    # Alternative: backward compatibility alias
+    # inputs.treefmt-flake.flakeModule
   ];
 
   # Configure which formatter groups to enable
   treefmtFlake = {
-    nix = true;
-    web = true;
-    python = true;
-    shell = true;
-    yaml = true;
-    markdown = true;
-    json = true;
-
-    # Configure project root
     projectRootFile = "flake.nix";
 
-    # Enable default excludes
-    enableDefaultExcludes = true;
+    formatters = {
+      nix.enable = true;
+      web.enable = true;
+      python.enable = true;
+      shell.enable = true;
+      yaml.enable = true;
+      markdown.enable = true;
+      json.enable = true;
+    };
 
-    # Don't allow missing formatters
-    allowMissingFormatter = false;
+    behavior = {
+      enableDefaultExcludes = true;
+      allowMissingFormatter = false;
+    };
   };
 }
 ```
 
 ### Available Formatter Groups
 
-- `nix`: Nix formatters (alejandra/nixfmt-rfc-style, deadnix, statix)
-- `web`: Web formatters (biome for JS/TS/CSS)
-- `python`: Python formatters (black, isort, ruff)
-- `shell`: Shell formatters (shfmt, shellcheck)
-- `rust`: Rust formatters (rustfmt)
-- `yaml`: YAML formatters (yamlfmt)
-- `markdown`: Markdown formatters (mdformat)
-- `json`: JSON formatters (jsonfmt, jq)
-- `misc`: Miscellaneous formatters
+- `formatters.nix`: Nix formatters (alejandra/nixfmt-rfc-style, deadnix, statix)
+- `formatters.web`: Web formatters (biome for JS/TS/CSS)
+- `formatters.python`: Python formatters (black, isort, ruff)
+- `formatters.shell`: Shell formatters (shfmt, shellcheck)
+- `formatters.rust`: Rust formatters (rustfmt)
+- `formatters.yaml`: YAML formatters (yamlfmt)
+- `formatters.markdown`: Markdown formatters (mdformat)
+- `formatters.json`: JSON formatters (jsonfmt, jq)
+- `formatters.misc`: Miscellaneous formatters
 
 ### Configuration Options
 
 - `projectRootFile`: File that marks the project root (default: "flake.nix")
-- `enableDefaultExcludes`: Enable default excludes for common patterns (default: true)
-- `allowMissingFormatter`: Allow missing formatters (default: false)
-- `nixFormatter`: Choose between "alejandra" (default) or "nixfmt-rfc-style" (deterministic)
+- `behavior.enableDefaultExcludes`: Enable default excludes for common patterns (default: true)
+- `behavior.allowMissingFormatter`: Allow missing formatters (default: false)
+- `formatters.nix.formatter`: Choose between "alejandra" or "nixfmt-rfc-style" (default)
 
 ## Using Templates
 
@@ -140,7 +143,7 @@ treefmtFlake = {
     mode = "git";
     cache = "./.cache/treefmt";
   };
-  performance = "balanced";
+  behavior.performance = "balanced";
 };
 ```
 
@@ -337,9 +340,9 @@ git commit --no-verify
 ### Current Status: Production Ready
 
 - ✅ **15+ Formatters**: All major languages and file types supported
-- ✅ **Advanced Features**: Incremental formatting, CLI tools, validation
+- ✅ **Advanced Features**: Incremental formatting, CLI tools
 - ✅ **Cross-Platform**: Linux, macOS, x86_64, aarch64 support
-- ✅ **Comprehensive Testing**: Error handling, performance tracking
+- ✅ **Flake-parts Native**: Built on standard flake-parts patterns
 
 ### Future Enhancements (See [Issues](https://github.com/LarsArtmann/treefmt-full-flake/issues))
 
