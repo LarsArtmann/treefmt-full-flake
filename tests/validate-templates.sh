@@ -18,19 +18,19 @@ echo "=========================="
 echo ""
 
 validate_nix() {
-    local file="$1"
-    local name="$2"
+  local file="$1"
+  local name="$2"
 
-    echo -n "Validating $name... "
+  echo -n "Validating $name... "
 
-    # Use nix-instantiate --parse for fast syntax check
-    if nix-instantiate --parse "$file" > /dev/null 2>&1; then
-        echo -e "${GREEN}OK${NC}"
-        PASSED=$((PASSED + 1))
-    else
-        echo -e "${RED}FAILED${NC}"
-        FAILED=$((FAILED + 1))
-    fi
+  # Use nix-instantiate --parse for fast syntax check
+  if nix-instantiate --parse "$file" >/dev/null 2>&1; then
+    echo -e "${GREEN}OK${NC}"
+    PASSED=$((PASSED + 1))
+  else
+    echo -e "${RED}FAILED${NC}"
+    FAILED=$((FAILED + 1))
+  fi
 }
 
 # Validate all templates
@@ -43,9 +43,9 @@ echo ""
 echo "Results: $PASSED passed, $FAILED failed"
 
 if [ $FAILED -eq 0 ]; then
-    echo -e "${GREEN}All templates are syntactically valid!${NC}"
-    exit 0
+  echo -e "${GREEN}All templates are syntactically valid!${NC}"
+  exit 0
 else
-    echo -e "${RED}Some templates have syntax errors${NC}"
-    exit 1
+  echo -e "${RED}Some templates have syntax errors${NC}"
+  exit 1
 fi

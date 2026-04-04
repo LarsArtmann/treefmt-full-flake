@@ -217,13 +217,14 @@ in {
       '';
 
       # Verify packages build
-      treefmt-packages = pkgs.runCommand "treefmt-packages-check" {
-        buildInputs = [config.treefmt.build.wrapper];
-      } ''
-        echo "Checking treefmt packages..."
-        ${config.treefmt.build.wrapper}/bin/treefmt --version || true
-        touch $out
-      '';
+      treefmt-packages =
+        pkgs.runCommand "treefmt-packages-check" {
+          buildInputs = [config.treefmt.build.wrapper];
+        } ''
+          echo "Checking treefmt packages..."
+          ${config.treefmt.build.wrapper}/bin/treefmt --version || true
+          touch $out
+        '';
 
       # Verify formatter modules exist
       treefmt-modules = pkgs.runCommand "treefmt-modules-check" {} ''

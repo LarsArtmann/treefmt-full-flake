@@ -10,7 +10,8 @@
 
   # Verify formatter modules exist
   formatterModulesExist =
-    treefmtLib.formatterModules.nix != null
+    treefmtLib.formatterModules.nix
+    != null
     && treefmtLib.formatterModules.web != null
     && treefmtLib.formatterModules.python != null;
 
@@ -23,8 +24,16 @@
     echo "==============================="
     echo ""
     echo "Test Results:"
-    echo "  Formatter modules exist: ${if formatterModulesExist then "PASS" else "FAIL"}"
-    echo "  Project detection exists: ${if projectDetectionExists then "PASS" else "FAIL"}"
+    echo "  Formatter modules exist: ${
+      if formatterModulesExist
+      then "PASS"
+      else "FAIL"
+    }"
+    echo "  Project detection exists: ${
+      if projectDetectionExists
+      then "PASS"
+      else "FAIL"
+    }"
     echo ""
     echo "All integration tests passed!"
   '';
