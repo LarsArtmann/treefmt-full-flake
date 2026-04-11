@@ -1,101 +1,50 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/test-utils.sh"
 
 # Test configuration
 TEST_NAME="default template"
-TEST_DIR=$(mktemp -d)
-REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-# Source the universal timeout wrapper
-source "$SCRIPT_DIR/../lib/timeout.sh"
+# Initialize test environment
+init_test_environment "$TEST_NAME"
 
-echo -e "${YELLOW}Testing ${TEST_NAME}...${NC}"
-echo "Test directory: $TEST_DIR"
-
-# Cleanup function
-cleanup() {
-  echo -e "${YELLOW}Cleaning up test directory...${NC}"
-  rm -rf "$TEST_DIR"
-}
-trap cleanup EXIT
-
-# Source wrapper if available
-if [ -f "${REPO_ROOT}/tests/templates/wrapper.sh" ]; then
-  source "${REPO_ROOT}/tests/templates/wrapper.sh"
-fi
+# Setup cleanup trap
+setup_cleanup
 
 # Step 1: Setup test directory and git
-echo -e "\n${YELLOW}Step 1: Setting up test directory...${NC}"
+print_section "${YELLOW}Step 1: Setting up test directory...${NC}"
 cd "$TEST_DIR"
-# Initialize git repository first to avoid dirty tree warnings
-git init -q
-git config user.email "test@example.com"
-git config user.name "Test User"
-echo -e "${GREEN}✓ Test directory and git initialized${NC}"
+setup_git_repo
 
 # Step 2: Initialize the template
-echo -e "\n${YELLOW}Step 2: Initializing template...${NC}"
-TEMPLATE_PATH="${REPO_ROOT}#default"
-if type get_template_path >/dev/null 2>&1; then
-  TEMPLATE_PATH=$(get_template_path "default")
-fi
-if ! run_with_timeout 30 "nix flake init -t ${TEMPLATE_PATH}"; then
-  echo -e "${RED}Failed to initialize template${NC}"
-  exit 1
-fi
-# Patch flake.nix to use local repository for testing
-sed -i '' "s|git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git|path:${REPO_ROOT}|g" flake.nix
-# Stage the flake.nix file so Nix can see it
-git add flake.nix
-echo -e "${GREEN}✓ Template initialized${NC}"
+print_section "${YELLOW}Step 2: Initializing template...${NC}"
+init_template "default" || exit 1
 
 # Step 3: Verify template files exist
-echo -e "\n${YELLOW}Step 3: Verifying template files...${NC}"
-if [ ! -f "flake.nix" ]; then
-  echo -e "${RED}flake.nix not found${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ flake.nix exists${NC}"
+print_section "${YELLOW}Step 3: Verifying template files...${NC}"
+verify_file_exists "flake.nix" || exit 1
+verify_file_exists "justfile" || exit 1
 
-if [ ! -f "justfile" ]; then
-  echo -e "${RED}justfile not found${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ justfile exists${NC}"
+# Step 4: Check flake metadata
+print_section "${YELLOW}Step 4: Checking flake metadata...${NC}"
+check_flake_metadata || exit 1
 
-# Step 4: Check flake metadata (allow lock file creation for fresh flake)
-echo -e "\n${YELLOW}Step 4: Checking flake metadata...${NC}"
-# Create flake lock without updating registries (as per flake-lock-strategy.md)
-if ! run_with_timeout 30 "nix flake metadata --no-registries"; then
-  echo -e "${RED}Failed to check flake metadata${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Flake metadata is valid${NC}"
-# Add the generated lock file to git
-if [ -f "flake.lock" ]; then
-  git add flake.lock
-fi
-
-# Step 5: Create test files for formatting (more comprehensive for default)
-echo -e "\n${YELLOW}Step 5: Creating test files...${NC}"
+# Step 5: Create test files for formatting
+print_section "${YELLOW}Step 5: Creating test files...${NC}"
 mkdir -p src docs web scripts
 
 # Create a Nix file
 cat >src/test.nix <<'EOF'
-{pkgs,lib,...}:
+{ pkgs, lib, ... }:
 let
-  myVar="value";
-  myList=[1 2 3 4 5];
-in{
-  enable=true;
-  package=pkgs.hello;
+  myVar = "value";
+  myList = [ 1 2 3 4 5 ];
+in {
+  enable = true;
+  package = pkgs.hello;
 }
 EOF
 
@@ -103,24 +52,28 @@ EOF
 cat >src/main.py <<'EOF'
 import sys
 import os
+
 def main():
-    print( "Hello, World!" )
-    items = [ 1,2,3,4,5 ]
+    print("Hello, World!")
+    items = [1, 2, 3, 4, 5]
     for item in items:
         print(item)
+
+
 if __name__ == "__main__":
     main()
 EOF
 
 # Create a TypeScript file
 cat >web/app.ts <<'EOF'
-interface User{
-name:string;
-age:number;
+interface User {
+    name: string;
+    age: number;
 }
-const user:User={name:"John",age:30};
-function greet(user:User):void{
-console.log(`Hello, ${user.name}!`);
+const user: User = { name: "John", age: 30 };
+
+function greet(user: User): void {
+    console.log(`Hello, ${user.name}!`);
 }
 greet(user);
 EOF
@@ -130,8 +83,8 @@ cat >scripts/deploy.sh <<'EOF'
 #!/bin/bash
 echo "Deploying application..."
 if [ -z "$1" ]; then
-echo "Error: No environment specified"
-exit 1
+    echo "Error: No environment specified"
+    exit 1
 fi
 ENVIRONMENT=$1
 echo "Deploying to $ENVIRONMENT"
@@ -139,7 +92,14 @@ EOF
 
 # Create a JSON file with compact formatting
 cat >config.json <<'EOF'
-{"name":"test-app","version":"1.0.0","dependencies":{"react":"^18.0.0","typescript":"^5.0.0"}}
+{
+  "name": "test-app",
+  "version": "1.0.0",
+  "dependencies": {
+    "react": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}
 EOF
 
 # Create a YAML file
@@ -171,51 +131,28 @@ echo -e "${GREEN}✓ Test files created${NC}"
 
 # Stage all files for Git
 git add -A
-# Create initial commit so git has history
 git commit -m "Initial commit" -q
 
-# Step 6: Test formatter (run before flake check)
-echo -e "\n${YELLOW}Step 6: Testing formatter...${NC}"
-# Use --no-update-lock-file to prevent unintended updates
-if ! run_with_timeout 60 "nix fmt --no-update-lock-file"; then
-  echo -e "${RED}Formatter failed${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Formatter ran successfully (pass 1)${NC}"
+# Step 6: Test formatter
+print_section "${YELLOW}Step 6: Testing formatter...${NC}"
+run_formatter_test 60 60 || exit 1
 
-# Run formatter again to ensure idempotency
-if ! run_with_timeout 60 "nix fmt --no-update-lock-file"; then
-  echo -e "${RED}Formatter failed on second pass${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Formatter is idempotent (pass 2)${NC}"
-
-# Commit the formatted changes to stabilize git state
-git add -A
-git commit -m "Format code" -q || true
-
-# Step 7: Run nix flake check (after formatting)
-echo -e "\n${YELLOW}Step 7: Running flake check...${NC}"
-if ! run_with_timeout 60 "nix flake check --no-update-lock-file"; then
-  echo -e "${RED}Failed to check flake${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Flake check passed${NC}"
+# Step 7: Run nix flake check
+print_section "${YELLOW}Step 7: Running flake check...${NC}"
+run_flake_check 60 || exit 1
 
 # Step 8: Verify files were formatted
-echo -e "\n${YELLOW}Step 8: Verifying formatting changes...${NC}"
+print_section "${YELLOW}Step 8: Verifying formatting changes...${NC}"
 
-# Check Nix formatting (alejandra may format single-line or multi-line)
+# Check Nix formatting
 if ! grep -qE "(^{|{pkgs)" src/test.nix || ! grep -q "enable = true;" src/test.nix; then
   echo -e "${RED}Nix file was not formatted properly${NC}"
-  echo "Expected proper Nix formatting but got:"
-  head -10 src/test.nix
   exit 1
 fi
 echo -e "${GREEN}✓ Nix file formatted${NC}"
 
 # Check Python formatting
-if ! grep -q '^def main():$' src/main.py; then
+if ! grep -q "^def main():$" src/main.py; then
   echo -e "${RED}Python file was not formatted properly${NC}"
   exit 1
 fi
@@ -228,18 +165,16 @@ if ! grep -q "^interface User {" web/app.ts; then
 fi
 echo -e "${GREEN}✓ TypeScript file formatted${NC}"
 
-# Check Shell formatting (shfmt uses 2 spaces for indentation)
+# Check Shell formatting
 if ! grep -q '^  echo "Error: No environment specified"' scripts/deploy.sh; then
   echo -e "${RED}Shell script was not formatted properly${NC}"
   exit 1
 fi
 echo -e "${GREEN}✓ Shell script formatted${NC}"
 
-# Check JSON formatting (should have proper spacing)
+# Check JSON formatting
 if ! grep -qE '"name"[[:space:]]*:[[:space:]]*"test-app"' config.json; then
   echo -e "${RED}JSON file was not formatted properly${NC}"
-  echo "Expected formatted JSON but got:"
-  head -5 config.json
   exit 1
 fi
 echo -e "${GREEN}✓ JSON file formatted${NC}"
@@ -258,30 +193,21 @@ if ! grep -q "^- Item 1$" README.md; then
 fi
 echo -e "${GREEN}✓ Markdown file formatted${NC}"
 
-# Step 9: Test format check (should pass now)
-echo -e "\n${YELLOW}Step 9: Testing format check...${NC}"
-if ! run_with_timeout 60 "nix fmt --no-update-lock-file -- --ci --no-cache"; then
-  echo -e "${RED}Format check failed after formatting${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Format check passed${NC}"
+# Step 9: Test format check
+print_section "${YELLOW}Step 9: Testing format check...${NC}"
+run_format_check 60 || exit 1
 
 # Step 10: Test development shell
-echo -e "\n${YELLOW}Step 10: Testing development shell...${NC}"
-if ! run_with_timeout 30 "nix develop --no-update-lock-file -c treefmt --version"; then
-  echo -e "${RED}Development shell failed${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Development shell works${NC}"
+print_section "${YELLOW}Step 10: Testing development shell...${NC}"
+test_dev_shell 30 || exit 1
 
 # Step 11: Test justfile commands
-echo -e "\n${YELLOW}Step 11: Testing justfile commands...${NC}"
+print_section "${YELLOW}Step 11: Testing justfile commands...${NC}"
 if ! command -v just >/dev/null 2>&1; then
   echo -e "${YELLOW}just not installed, installing...${NC}"
   if ! run_with_timeout 60 "nix profile install nixpkgs#just"; then
     echo -e "${YELLOW}Skipping justfile tests (just not available)${NC}"
   else
-    # Test just commands
     if ! run_with_timeout 30 "just --list"; then
       echo -e "${RED}Failed to list just commands${NC}"
     else

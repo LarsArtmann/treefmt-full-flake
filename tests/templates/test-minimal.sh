@@ -1,119 +1,52 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
 # Source shared utilities
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/timeout.sh"
+source "$SCRIPT_DIR/../lib/test-utils.sh"
 
 # Test configuration
 TEST_NAME="minimal template"
-TEST_DIR=$(mktemp -d)
-REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 
-echo -e "${YELLOW}Testing ${TEST_NAME}...${NC}"
-echo "Test directory: $TEST_DIR"
+# Initialize test environment
+init_test_environment "$TEST_NAME"
 
-# Cleanup function
-cleanup() {
-  echo -e "${YELLOW}Cleaning up test directory...${NC}"
-  # Use trash if available, otherwise rm -rf
-  if command -v trash >/dev/null 2>&1; then
-    trash "$TEST_DIR" 2>/dev/null || rm -rf "$TEST_DIR"
-  else
-    rm -rf "$TEST_DIR"
-  fi
-
-  # Also clean up any test artifacts in the repo root if test failed
-  if [ $? -ne 0 ]; then
-    echo -e "${YELLOW}Cleaning up any test artifacts in repo root...${NC}"
-    # Clean up common test artifact patterns
-    for pattern in template-test-* test-comprehensive test-schema-debug treefmt-template-debug final-test; do
-      for dir in "${REPO_ROOT}"/$pattern; do
-        if [[ -d $dir ]]; then
-          echo "  Removing artifact: $(basename "$dir")"
-          trash "$dir" 2>/dev/null || rm -rf "$dir"
-        fi
-      done
-    done
-  fi
-}
-trap cleanup EXIT
-
-# Timeout function is provided by the universal timeout wrapper
-
-# Source wrapper if available
-if [ -f "${REPO_ROOT}/tests/templates/wrapper.sh" ]; then
-  source "${REPO_ROOT}/tests/templates/wrapper.sh"
-fi
+# Setup cleanup trap
+setup_cleanup
 
 # Step 1: Setup test directory and git
-echo -e "\n${YELLOW}Step 1: Setting up test directory...${NC}"
+print_section "${YELLOW}Step 1: Setting up test directory...${NC}"
 cd "$TEST_DIR"
-# Initialize git repository first to avoid dirty tree warnings
-git init -q
-git config user.email "test@example.com"
-git config user.name "Test User"
-echo -e "${GREEN}✓ Test directory and git initialized${NC}"
+setup_git_repo
 
 # Step 2: Initialize the template
-echo -e "\n${YELLOW}Step 2: Initializing template...${NC}"
-TEMPLATE_PATH="${REPO_ROOT}#minimal"
-if type get_template_path >/dev/null 2>&1; then
-  TEMPLATE_PATH=$(get_template_path "minimal")
-fi
-if ! run_with_timeout 30 "nix flake init -t ${TEMPLATE_PATH}"; then
-  echo -e "${RED}Failed to initialize template${NC}"
-  exit 1
-fi
-# Patch flake.nix to use local repository for testing
-sed -i '' "s|git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git|path:${REPO_ROOT}|g" flake.nix
-# Stage the flake.nix file so Nix can see it
-git add flake.nix
-echo -e "${GREEN}✓ Template initialized${NC}"
+print_section "${YELLOW}Step 2: Initializing template...${NC}"
+init_template "minimal" || exit 1
 
 # Step 3: Verify template files exist
-echo -e "\n${YELLOW}Step 3: Verifying template files...${NC}"
-if [ ! -f "flake.nix" ]; then
-  echo -e "${RED}flake.nix not found${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ flake.nix exists${NC}"
+print_section "${YELLOW}Step 3: Verifying template files...${NC}"
+verify_file_exists "flake.nix" || exit 1
 
-# Step 4: Check flake metadata (allow lock file creation for fresh flake)
-echo -e "\n${YELLOW}Step 4: Checking flake metadata...${NC}"
-# Create flake lock without updating registries (as per flake-lock-strategy.md)
-if ! run_with_timeout 30 "nix flake metadata --no-registries"; then
-  echo -e "${RED}Failed to check flake metadata${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Flake metadata is valid${NC}"
-# Add the generated lock file to git
-if [ -f "flake.lock" ]; then
-  git add flake.lock
-fi
+# Step 4: Check flake metadata
+print_section "${YELLOW}Step 4: Checking flake metadata...${NC}"
+check_flake_metadata || exit 1
 
 # Step 5: Create test files for formatting
-echo -e "\n${YELLOW}Step 5: Creating test files...${NC}"
+print_section "${YELLOW}Step 5: Creating test files...${NC}"
 mkdir -p src docs
 
 # Create a Nix file with formatting issues
 cat >src/test.nix <<'EOF'
-{pkgs,lib,...}:
+{ pkgs, lib, ... }:
 let
-  myVar="value";
-  myList=[1 2 3 4 5];
-in{
-  enable=true;
-  package=pkgs.hello;
-  config={
-    key1="value1";
-    key2="value2";
+  myVar = "value";
+  myList = [ 1 2 3 4 5 ];
+in {
+  enable = true;
+  package = pkgs.hello;
+  config = {
+    key1 = "value1";
+    key2 = "value2";
   };
 }
 EOF
@@ -157,86 +90,47 @@ echo -e "${GREEN}✓ Test files created${NC}"
 
 # Stage all files for Git
 git add -A
-# Create initial commit so git has history
 git commit -m "Initial commit" -q
 
-# Step 6: Test formatter (run before flake check)
-echo -e "\n${YELLOW}Step 6: Testing formatter...${NC}"
-# First, show the formatter is available
-if ! run_with_timeout 30 "nix fmt -- --version"; then
-  echo -e "${RED}Formatter not available${NC}"
-  exit 1
-fi
+# Step 6: Test formatter
+print_section "${YELLOW}Step 6: Testing formatter...${NC}"
+run_formatter_test 30 60 || exit 1
 
-# Run formatter twice to ensure stability
-# Use --no-update-lock-file to prevent unintended updates
-if ! run_with_timeout 60 "nix fmt --no-update-lock-file"; then
-  echo -e "${RED}Formatter failed${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Formatter ran successfully (pass 1)${NC}"
-
-# Run formatter again to ensure idempotency
-if ! run_with_timeout 60 "nix fmt --no-update-lock-file"; then
-  echo -e "${RED}Formatter failed on second pass${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Formatter is idempotent (pass 2)${NC}"
-
-# Commit the formatted changes to stabilize git state
-git add -A
-git commit -m "Format code" -q || true
-
-# Step 7: Run nix flake check (after formatting)
-echo -e "\n${YELLOW}Step 7: Running flake check...${NC}"
-if ! run_with_timeout 60 "nix flake check --no-update-lock-file"; then
-  echo -e "${RED}Failed to check flake${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Flake check passed${NC}"
+# Step 7: Run nix flake check
+print_section "${YELLOW}Step 7: Running flake check...${NC}"
+run_flake_check 60 || exit 1
 
 # Step 8: Verify files were formatted
-echo -e "\n${YELLOW}Step 8: Verifying formatting changes...${NC}"
-# Check if Nix file was formatted (alejandra may format single-line or multi-line)
-# Before: {pkgs,lib,...}:
-# After: proper formatting with newlines and spaces
+print_section "${YELLOW}Step 8: Verifying formatting changes...${NC}"
+
+# Check Nix file
 if ! grep -qE "(^{|{pkgs)" src/test.nix || ! grep -q "pkgs.hello" src/test.nix; then
   echo -e "${RED}Nix file was not formatted properly${NC}"
-  echo "Expected proper Nix formatting but got:"
-  head -10 src/test.nix
   exit 1
 fi
 echo -e "${GREEN}✓ Nix file formatted${NC}"
 
-# Check if Markdown file was formatted (mdformat normalizes lists)
+# Check Markdown file
 if ! grep -q "^- Item 1$" docs/README.md; then
   echo -e "${RED}Markdown file was not formatted properly${NC}"
   exit 1
 fi
 echo -e "${GREEN}✓ Markdown file formatted${NC}"
 
-# Check if YAML file was formatted (yamlfmt removes extra spaces)
+# Check YAML file
 if ! grep -q "^name: " config.yaml && ! grep -q "^version: " config.yaml; then
   echo -e "${RED}YAML file was not formatted properly${NC}"
   exit 1
 fi
 echo -e "${GREEN}✓ YAML file formatted${NC}"
 
-# Step 9: Test format check (should pass now)
-echo -e "\n${YELLOW}Step 9: Testing format check...${NC}"
-if ! run_with_timeout 60 "nix fmt --no-update-lock-file -- --ci --no-cache"; then
-  echo -e "${RED}Format check failed after formatting${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Format check passed${NC}"
+# Step 9: Test format check
+print_section "${YELLOW}Step 9: Testing format check...${NC}"
+run_format_check 60 || exit 1
 
 # Step 10: Test development shell
-echo -e "\n${YELLOW}Step 10: Testing development shell...${NC}"
-if ! run_with_timeout 30 "nix develop --no-update-lock-file -c treefmt --version"; then
-  echo -e "${RED}Development shell failed${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ Development shell works${NC}"
+print_section "${YELLOW}Step 10: Testing development shell...${NC}"
+test_dev_shell 30 || exit 1
 
 # Success
 echo -e "\n${GREEN}✅ All tests passed for ${TEST_NAME}!${NC}"

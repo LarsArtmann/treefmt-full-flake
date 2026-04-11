@@ -1,22 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/test-utils.sh"
 
 # Test configuration
-REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "${BASH_SOURCE[0]}/../../.." && pwd)
 TEST_DIR=$(mktemp -d)
 FAILED_TESTS=0
 PASSED_TESTS=0
-
-# Source the universal timeout wrapper
-source "$SCRIPT_DIR/../lib/timeout.sh"
 
 echo -e "${BLUE}Testing formatters in isolation...${NC}"
 echo "Repository root: $REPO_ROOT"
@@ -36,14 +29,14 @@ test_formatter() {
   local test_file=$3
   local test_content=$4
   local expected_pattern=$5
-
+  
   echo -ne "Testing ${formatter_name}... "
-
+  
   # Create test directory
   local test_subdir="$TEST_DIR/$formatter_name"
   mkdir -p "$test_subdir"
   cd "$test_subdir"
-
+  
   # Create flake.nix that only enables this formatter
   cat >flake.nix <<EOF
 {
@@ -75,17 +68,17 @@ test_formatter() {
     };
 }
 EOF
-
+  
   # Initialize git repo (required by treefmt)
   git init -q
   git config user.email "test@example.com"
   git config user.name "Test User"
   git add flake.nix
-
+  
   # Create test file
   echo -e "$test_content" >"$test_file"
   git add "$test_file"
-
+  
   # Run formatter with --no-update-lock-file to prevent unintended updates
   if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
     # Check if formatting was applied
@@ -114,7 +107,7 @@ test_formatter "alejandra" "nix" "test.nix" '{foo="bar";}' '  foo = "bar";'
 
 echo -e "\n${YELLOW}Testing Web formatters...${NC}"
 test_formatter "biome-js" "web" "test.js" 'const x=1;const y=2' 'const x = 1;'
-test_formatter "biome-json" "web" "test.json" '{"name":"test","version":"1.0"}' '"name": "test"'
+test_formatter "biome-json" "web" "test.json" '{"Name":"test","version":"1.0"}' '"name": "test"'
 test_formatter "biome-css" "web" "test.css" 'body{margin:0}' 'body {'
 
 echo -e "\n${YELLOW}Testing Python formatters...${NC}"

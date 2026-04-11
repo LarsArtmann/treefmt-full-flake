@@ -2,12 +2,10 @@
 # Quick template syntax validation (no network required)
 set -euo pipefail
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
+# Source shared utilities
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/test-utils.sh"
+
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 FAILED=0
@@ -20,9 +18,9 @@ echo ""
 validate_nix() {
   local file="$1"
   local name="$2"
-
+  
   echo -n "Validating $name... "
-
+  
   # Use nix-instantiate --parse for fast syntax check
   if nix-instantiate --parse "$file" >/dev/null 2>&1; then
     echo -e "${GREEN}OK${NC}"

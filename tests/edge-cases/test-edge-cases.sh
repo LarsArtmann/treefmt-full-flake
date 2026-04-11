@@ -1,40 +1,30 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/test-utils.sh"
 
 # Test configuration
 TEST_NAME="edge cases"
-TEST_DIR=$(mktemp -d)
-REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-# Source the universal timeout wrapper
-source "$SCRIPT_DIR/../lib/timeout.sh"
+# Initialize test environment
+init_test_environment "$TEST_NAME"
 
-echo -e "${YELLOW}Testing ${TEST_NAME}...${NC}"
-echo "Test directory: $TEST_DIR"
-
-# Cleanup function
-cleanup() {
-  echo -e "${YELLOW}Cleaning up test directory...${NC}"
-  rm -rf "$TEST_DIR"
-}
-trap cleanup EXIT
+# Setup cleanup trap
+setup_cleanup
 
 # Setup test directory
 cd "$TEST_DIR"
-git init -q
-git config user.email "test@example.com"
-git config user.name "Test User"
+setup_git_repo
 
 # Initialize with minimal template
 echo -e "\n${YELLOW}Initializing minimal template...${NC}"
-if ! run_with_timeout 30 "nix flake init -t ${REPO_ROOT}#minimal"; then
+TEMPLATE_PATH="${REPO_ROOT}#minimal"
+if type get_template_path >/dev/null 2>&1; then
+  TEMPLATE_PATH=$(get_template_path "minimal")
+fi
+if ! run_with_timeout 30 "nix flake init -t ${TEMPLATE_PATH}"; then
   echo -e "${RED}Failed to initialize template${NC}"
   exit 1
 fi
@@ -120,7 +110,6 @@ git commit -m "Add edge case test files" -q
 
 # Run formatter
 echo -e "\n${YELLOW}Running formatter on edge cases...${NC}"
-# Use --no-update-lock-file to prevent unintended updates
 if ! run_with_timeout 120 "nix fmt --no-update-lock-file 2>&1"; then
   echo -e "${RED}Formatter failed on edge cases${NC}"
   exit 1

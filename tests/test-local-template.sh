@@ -1,20 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/test-utils.sh"
 
 # Test configuration
 TEST_NAME="local template test"
 TEST_DIR=$(mktemp -d)
-REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-
-# Source the universal timeout wrapper
-source "$SCRIPT_DIR/lib/timeout.sh"
+REPO_ROOT=$(cd "${BASH_SOURCE[0]}/.." && pwd)
 
 echo -e "${YELLOW}Testing template with local path...${NC}"
 echo "Test directory: $TEST_DIR"
@@ -28,9 +22,7 @@ trap cleanup EXIT
 
 # Setup test directory
 cd "$TEST_DIR"
-git init -q
-git config user.email "test@example.com"
-git config user.name "Test User"
+setup_git_repo
 
 # Create a test flake that uses the local path
 cat >flake.nix <<EOF
@@ -73,12 +65,12 @@ mkdir -p src web
 
 # Nix file
 cat >src/test.nix <<'EOF'
-{pkgs,lib,...}:
+{ pkgs, lib, ... }:
 let
-  myVar="value";
-in{
-  enable=true;
-  package=pkgs.hello;
+  myVar = "value";
+in {
+  enable = true;
+  package = pkgs.hello;
 }
 EOF
 

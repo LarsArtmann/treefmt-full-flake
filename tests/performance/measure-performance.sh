@@ -1,23 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/test-utils.sh"
 
 # Configuration
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
 RESULTS_FILE="$SCRIPT_DIR/performance-results.json"
 ITERATIONS=${1:-3} # Number of iterations per test
 
-echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║    Performance Measurement Suite       ║${NC}"
-echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
-echo ""
+print_banner "Performance Measurement Suite"
 echo -e "${YELLOW}Running $ITERATIONS iterations per test${NC}"
 echo ""
 
@@ -37,16 +30,16 @@ measure_time() {
   local name=$1
   local cmd=$2
   local times=()
-
+  
   echo -e "${YELLOW}Measuring: $name${NC}"
-
+  
   for i in $(seq 1 $ITERATIONS); do
     echo -n "  Iteration $i/$ITERATIONS... "
-
+    
     # Create temporary directory for test
     local test_dir=$(mktemp -d)
     cd "$test_dir"
-
+    
     # Measure execution time
     local start_time=$(date +%s.%N)
     if eval "$cmd" >/dev/null 2>&1; then
@@ -58,17 +51,17 @@ measure_time() {
       echo -e "${RED}Failed${NC}"
       times+=(0)
     fi
-
+    
     # Cleanup
     cd - >/dev/null
     rm -rf "$test_dir"
   done
-
+  
   # Calculate statistics
   local sum=0
   local min=${times[0]}
   local max=${times[0]}
-
+  
   for time in "${times[@]}"; do
     sum=$(echo "$sum + $time" | bc)
     if (($(echo "$time < $min" | bc -l))); then
@@ -78,12 +71,12 @@ measure_time() {
       max=$time
     fi
   done
-
+  
   local avg=$(echo "scale=3; $sum / $ITERATIONS" | bc)
-
+  
   echo -e "  ${GREEN}Average: ${avg}s, Min: ${min}s, Max: ${max}s${NC}"
   echo ""
-
+  
   # Add to results file
   if [ "$name" != "format-check" ]; then
     echo "," >>"$RESULTS_FILE"
@@ -156,19 +149,16 @@ echo "  }" >>"$RESULTS_FILE"
 echo "}" >>"$RESULTS_FILE"
 
 # Display summary
-echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║         Performance Summary            ║${NC}"
-echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
-echo ""
+print_banner "Performance Summary"
 
 # Parse and display results
 if command -v jq >/dev/null 2>&1; then
   echo -e "${YELLOW}Template Initialization:${NC}"
   jq -r '.tests | to_entries | .[] | select(.key | startswith("template-init")) | "  \(.key): \(.value.avg)s avg"' "$RESULTS_FILE"
-
+  
   echo -e "\n${YELLOW}Formatter Performance:${NC}"
   jq -r '.tests | to_entries | .[] | select(.key | startswith("format")) | "  \(.key): \(.value.avg)s avg"' "$RESULTS_FILE"
-
+  
   echo -e "\n${GREEN}Results saved to: $RESULTS_FILE${NC}"
 else
   echo -e "${YELLOW}Install jq for better result formatting${NC}"
