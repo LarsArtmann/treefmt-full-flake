@@ -5,102 +5,48 @@
   ...
 }: let
   cfg = config.treefmtFlake;
-  legacyCfg = config._legacyOptions or {};
 
-  # Check if any legacy options are set
-  hasLegacyOptions = lib.any (name: legacyCfg.${name} != null) (lib.attrNames legacyCfg);
-
-  # Migration function from legacy to new format
-  migrateLegacyConfig = legacy: {
-    projectRootFile = legacy.projectRootFile or "flake.nix";
-    autoDetection = {
-      enable = legacy.autoDetect or true;
-      aggressive = false;
-      override = "merge";
-    };
-    formatters = {
-      nix = {
-        enable = legacy.nix or false;
-        formatter = legacy.nixFormatter or "nixfmt-rfc-style";
-        linting = {
-          deadnix = true;
-          statix = true;
-        };
-      };
-      web.enable = legacy.web or false;
-      python.enable = legacy.python or false;
-      rust.enable = legacy.rust or false;
-      shell.enable = legacy.shell or false;
-      markdown.enable = legacy.markdown or false;
-      yaml.enable = legacy.yaml or false;
-      json.enable = legacy.json or false;
-      misc.enable = legacy.misc or false;
-    };
-    behavior = {
-      performance = legacy.performance or "balanced";
-      allowMissingFormatter = legacy.allowMissingFormatter or false;
-      enableDefaultExcludes = legacy.enableDefaultExcludes or true;
-    };
-    incremental =
-      (legacy.incremental or {})
-      // {
-        cache = (legacy.incremental or {}).cache or "./.cache/treefmt";
-      };
-    git = legacy.gitOptions or {};
-  };
-
-  # Merge configs: new takes precedence over migrated legacy
-  finalConfig =
-    lib.recursiveUpdate
-    (lib.optionalAttrs hasLegacyOptions (migrateLegacyConfig legacyCfg))
-    cfg;
-
-  # Extract which formatters are enabled
   formatterStates = {
-    nix = finalConfig.formatters.nix.enable;
-    web = finalConfig.formatters.web.enable;
-    python = finalConfig.formatters.python.enable;
-    shell = finalConfig.formatters.shell.enable;
-    rust = finalConfig.formatters.rust.enable;
-    yaml = finalConfig.formatters.yaml.enable;
-    markdown = finalConfig.formatters.markdown.enable;
-    json = finalConfig.formatters.json.enable;
-    misc = finalConfig.formatters.misc.enable;
+    nix = cfg.formatters.nix.enable;
+    web = cfg.formatters.web.enable;
+    python = cfg.formatters.python.enable;
+    shell = cfg.formatters.shell.enable;
+    rust = cfg.formatters.rust.enable;
+    yaml = cfg.formatters.yaml.enable;
+    markdown = cfg.formatters.markdown.enable;
+    json = cfg.formatters.json.enable;
+    misc = cfg.formatters.misc.enable;
   };
 
-  # Load formatter configurations
   nixFormatterModule =
     import
     ./formatters/${
-      if finalConfig.formatters.nix.formatter == "nixfmt-rfc-style"
+      if cfg.formatters.nix.formatter == "nixfmt-rfc-style"
       then "nix-nixfmt.nix"
       else "nix.nix"
     };
 
-  formatterModules = lib.mkMerge (
-    lib.optional formatterStates.nix nixFormatterModule
-    ++ lib.optional formatterStates.web (import ./formatters/web.nix)
-    ++ lib.optional formatterStates.python (import ./formatters/python.nix)
-    ++ lib.optional formatterStates.shell (import ./formatters/shell.nix)
-    ++ lib.optional formatterStates.rust (import ./formatters/rust.nix)
-    ++ lib.optional formatterStates.yaml (import ./formatters/yaml.nix)
-    ++ lib.optional formatterStates.markdown (import ./formatters/markdown.nix)
-    ++ lib.optional formatterStates.json (import ./formatters/json.nix)
-    ++ lib.optional formatterStates.misc (import ./formatters/misc.nix)
-  );
+  formatterModules =
+    {}
+    // lib.optionalAttrs formatterStates.nix nixFormatterModule
+    // lib.optionalAttrs formatterStates.web (import ./formatters/web.nix)
+    // lib.optionalAttrs formatterStates.python (import ./formatters/python.nix)
+    // lib.optionalAttrs formatterStates.shell (import ./formatters/shell.nix)
+    // lib.optionalAttrs formatterStates.rust (import ./formatters/rust.nix)
+    // lib.optionalAttrs formatterStates.yaml (import ./formatters/yaml.nix)
+    // lib.optionalAttrs formatterStates.markdown (import ./formatters/markdown.nix)
+    // lib.optionalAttrs formatterStates.json (import ./formatters/json.nix)
+    // lib.optionalAttrs formatterStates.misc (import ./formatters/misc.nix);
 in {
   imports = [
     ./modules/options.nix
   ];
-
-  # Note: Legacy warnings are printed at runtime via the treefmt-validate tool
 
   perSystem = {
     config,
     pkgs,
     ...
   }: let
-    # Create incremental wrapper script
     incrementalWrapper = pkgs.writeShellScriptBin "treefmt-incremental" ''
       set -euo pipefail
 
@@ -112,13 +58,13 @@ in {
         elif [[ -n "''${TREEFMT_SINCE_COMMIT:-}" ]]; then
           git diff --name-only --diff-filter=ACMR "$TREEFMT_SINCE_COMMIT"
         else
-          git diff --name-only --diff-filter=ACMR "origin/${finalConfig.git.branch}...HEAD" 2>/dev/null || \
-          git diff --name-only --diff-filter=ACMR "${finalConfig.git.branch}...HEAD" 2>/dev/null || \
+          git diff --name-only --diff-filter=ACMR "origin/${cfg.git.branch}...HEAD" 2>/dev/null || \
+          git diff --name-only --diff-filter=ACMR "${cfg.git.branch}...HEAD" 2>/dev/null || \
           git diff --name-only --diff-filter=ACMR HEAD~1
         fi
       }
 
-      if [[ "${toString finalConfig.incremental.enable}" == "true" && ("${finalConfig.incremental.mode}" == "git" || "${toString finalConfig.incremental.gitBased}" == "true") ]]; then
+      if [[ "${toString cfg.incremental.enable}" == "true" && ("${cfg.incremental.mode}" == "git" || "${toString cfg.incremental.gitBased}" == "true") ]]; then
         changed_files=$(get_changed_files) || {
           echo "Warning: Could not determine changed files, falling back to full formatting"
           exec "$TREEFMT_CMD" "$@"
@@ -140,48 +86,32 @@ in {
       fi
     '';
   in {
-    # Export the formatter (use incremental if enabled)
     formatter =
-      if finalConfig.incremental.enable
+      if cfg.incremental.enable
       then incrementalWrapper
       else config.treefmt.build.wrapper;
 
-    # Configure treefmt-nix
     treefmt = {
-      inherit (finalConfig) projectRootFile;
-      enableDefaultExcludes = finalConfig.behavior.enableDefaultExcludes;
+      inherit (cfg) projectRootFile;
+      enableDefaultExcludes = cfg.behavior.enableDefaultExcludes;
       settings =
         {
-          allowMissingTools = finalConfig.behavior.allowMissingFormatter;
+          allowMissingTools = cfg.behavior.allowMissingFormatter;
         }
-        // lib.optionalAttrs (finalConfig.incremental.enable && finalConfig.incremental.cache != "./.cache/treefmt") {
-          cache-dir = finalConfig.incremental.cache;
-        }
-        // lib.optionalAttrs formatterStates.misc {
-          formatter.typespec = {
-            command = "${pkgs.typespec}/bin/tsp";
-            options = ["format"];
-            includes = ["*.tsp"];
-          };
+        // lib.optionalAttrs (cfg.incremental.enable && cfg.incremental.cache != "./.cache/treefmt") {
+          cache-dir = cfg.incremental.cache;
         };
       programs = formatterModules;
     };
 
-    # Define packages
     packages =
       {
         treefmt-debug = pkgs.writeShellScriptBin "treefmt-debug" ''
           echo "treefmt-flake Debug Information"
           echo "==============================="
-          echo "Project Root: ${finalConfig.projectRootFile}"
-          echo "Auto-Detection: ${
-            if finalConfig.autoDetection.enable
-            then "enabled"
-            else "disabled"
-          }"
-          echo "Performance: ${finalConfig.behavior.performance}"
+          echo "Project Root: ${cfg.projectRootFile}"
           echo "Incremental: ${
-            if finalConfig.incremental.enable
+            if cfg.incremental.enable
             then "enabled"
             else "disabled"
           }"
@@ -191,7 +121,7 @@ in {
           echo "Configuration validation complete"
         '';
       }
-      // lib.optionalAttrs finalConfig.incremental.enable {
+      // lib.optionalAttrs cfg.incremental.enable {
         treefmt-incremental = incrementalWrapper;
 
         treefmt-staged = pkgs.writeShellScriptBin "treefmt-staged" ''
@@ -207,16 +137,13 @@ in {
         '';
       };
 
-    # CI checks
     checks = {
-      # Verify treefmt configuration is valid
       treefmt-config = pkgs.runCommand "treefmt-config-check" {} ''
         echo "Checking treefmt configuration..."
         ${config.treefmt.build.wrapper}/bin/treefmt --fail-on-change --no-cache || true
         touch $out
       '';
 
-      # Verify packages build
       treefmt-packages =
         pkgs.runCommand "treefmt-packages-check" {
           buildInputs = [config.treefmt.build.wrapper];
@@ -226,7 +153,6 @@ in {
           touch $out
         '';
 
-      # Verify formatter modules exist
       treefmt-modules = pkgs.runCommand "treefmt-modules-check" {} ''
         echo "Checking formatter modules..."
         ${lib.optionalString formatterStates.nix "echo '  Nix formatter: OK'"}

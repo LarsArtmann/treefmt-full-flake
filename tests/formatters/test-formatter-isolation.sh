@@ -29,14 +29,14 @@ test_formatter() {
   local test_file=$3
   local test_content=$4
   local expected_pattern=$5
-  
+
   echo -ne "Testing ${formatter_name}... "
-  
+
   # Create test directory
   local test_subdir="$TEST_DIR/$formatter_name"
   mkdir -p "$test_subdir"
   cd "$test_subdir"
-  
+
   # Create flake.nix that only enables this formatter
   cat >flake.nix <<EOF
 {
@@ -56,29 +56,31 @@ test_formatter() {
       
       imports = [
         inputs.treefmt-nix.flakeModule
-        inputs.treefmt-flake.flakeModule
+        inputs.treefmt-flake.flakeModules.default
       ];
       
       treefmtFlake = {
-        $formatter_module = true;
+        formatters.$formatter_module.enable = true;
         projectRootFile = "flake.nix";
-        enableDefaultExcludes = true;
-        allowMissingFormatter = false;
+        behavior = {
+          enableDefaultExcludes = true;
+          allowMissingFormatter = false;
+        };
       };
     };
 }
 EOF
-  
+
   # Initialize git repo (required by treefmt)
   git init -q
   git config user.email "test@example.com"
   git config user.name "Test User"
   git add flake.nix
-  
+
   # Create test file
   echo -e "$test_content" >"$test_file"
   git add "$test_file"
-  
+
   # Run formatter with --no-update-lock-file to prevent unintended updates
   if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
     # Check if formatting was applied

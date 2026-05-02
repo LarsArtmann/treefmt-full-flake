@@ -19,7 +19,6 @@
 
       treefmtFlake = {
         projectRootFile = "flake.nix";
-        autoDetection.enable = true;
 
         formatters = {
           nix.enable = true;
@@ -32,7 +31,6 @@
         };
 
         behavior = {
-          performance = "balanced";
           allowMissingFormatter = false;
           enableDefaultExcludes = true;
         };

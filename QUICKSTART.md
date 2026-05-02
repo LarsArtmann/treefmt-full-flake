@@ -91,10 +91,13 @@ git diff  # Should show formatting changes
 
 **Note**: The default template includes these formatters:
 
-- ✅ **Nix**: alejandra
-- ✅ **Web**: prettier (JS, TS, JSON, CSS, HTML, MD)
+- ✅ **Nix**: nixfmt-rfc-style (default)
+- ✅ **Web**: biome (JS, TS, CSS, JSON)
 - ✅ **Shell**: shfmt
 - ✅ **YAML**: yamlfmt
+- ✅ **Markdown**: mdformat
+- ✅ **JSON**: jsonfmt
+- ✅ **Python**: black, isort, ruff
 
 For more formatters (Python, Rust, etc.), use the full templates or configure manually.
 
@@ -158,15 +161,9 @@ treefmtFlake = {
 
 ```nix
 treefmtFlake = {
-  # Enable incremental formatting for large projects
   incremental = {
     enable = true;
-    mode = "auto";  # or "git" or "cache"
-  };
-
-  # Performance tuning
-  behavior = {
-    performance = "balanced";  # or "fast" or "thorough"
+    mode = "auto"; # or "git" or "cache"
   };
 };
 ```

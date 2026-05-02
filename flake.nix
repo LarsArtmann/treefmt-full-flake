@@ -100,7 +100,6 @@
         devShells.default = pkgs.mkShell {
           buildInputs = [
             config.treefmt.build.wrapper
-            pkgs.typespec
           ];
 
           shellHook = ''

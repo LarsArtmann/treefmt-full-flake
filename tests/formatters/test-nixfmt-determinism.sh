@@ -23,9 +23,9 @@ trap cleanup EXIT
 # Test nixfmt-rfc-style determinism
 test_nixfmt_determinism() {
   echo -e "\n${YELLOW}Setting up test environment...${NC}"
-  
+
   cd "$TEST_DIR"
-  
+
   # Create flake.nix with nixfmt-rfc-style
   cat >flake.nix <<'EOF'
 {
@@ -51,29 +51,33 @@ test_nixfmt_determinism() {
 
       imports = [
         inputs.treefmt-nix.flakeModule
-        inputs.treefmt-flake.flakeModule
+        inputs.treefmt-flake.flakeModules.default
       ];
 
       treefmtFlake = {
-        nix = true;
-        nixFormatter = "nixfmt-rfc-style";
+        formatters.nix = {
+          enable = true;
+          formatter = "nixfmt-rfc-style";
+        };
         projectRootFile = "flake.nix";
-        enableDefaultExcludes = true;
-        allowMissingFormatter = false;
+        behavior = {
+          enableDefaultExcludes = true;
+          allowMissingFormatter = false;
+        };
       };
     };
 }
 EOF
-  
+
   # Replace REPO_ROOT placeholder
   sed -i.bak "s|REPO_ROOT|$REPO_ROOT|" flake.nix
   rm -f flake.nix.bak
-  
+
   # Initialize git repo
   git init -q
   git config user.email "test@example.com"
   git config user.name "Test User"
-  
+
   # Create test file with potentially problematic formatting
   cat >test.nix <<'EOF'
 {
@@ -110,11 +114,11 @@ EOF
   };
 }
 EOF
-  
+
   git add .
-  
+
   echo -e "\n${YELLOW}Running formatter multiple times to test determinism...${NC}"
-  
+
   # First run
   echo -n "First run: "
   if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
@@ -124,7 +128,7 @@ EOF
     echo -e "${RED}✗ Failed${NC}"
     return 1
   fi
-  
+
   # Second run
   echo -n "Second run: "
   if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
@@ -134,7 +138,7 @@ EOF
     echo -e "${RED}✗ Failed${NC}"
     return 1
   fi
-  
+
   # Third run
   echo -n "Third run: "
   if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
@@ -144,10 +148,10 @@ EOF
     echo -e "${RED}✗ Failed${NC}"
     return 1
   fi
-  
+
   # Compare outputs
   echo -e "\n${YELLOW}Comparing outputs...${NC}"
-  
+
   if diff -q test.nix.run1 test.nix.run2 >/dev/null && diff -q test.nix.run2 test.nix.run3 >/dev/null; then
     echo -e "${GREEN}✓ All runs produced identical output - formatter is deterministic!${NC}"
     return 0
@@ -165,22 +169,22 @@ compare_formatters() {
   echo -e "\n${BLUE}========================================${NC}"
   echo -e "${BLUE}Comparing formatters side by side${NC}"
   echo -e "${BLUE}========================================${NC}"
-  
+
   local COMPARE_DIR="$TEST_DIR/compare"
   mkdir -p "$COMPARE_DIR"
-  
+
   # Create test file
   cat >"$COMPARE_DIR/test.nix" <<'EOF'
 {foo={bar="baz";nested={deeply={value=42;};};};myFunction={arg1,arg2,...}@args:let helper=x:x+1;in helper arg1+arg2;}
 EOF
-  
+
   # Test with alejandra
   echo -e "\n${YELLOW}Testing Alejandra...${NC}"
   cd "$COMPARE_DIR"
   cp "$REPO_ROOT/flake.nix" flake-alejandra.nix
   sed -i.bak 's/nixFormatter = "nixfmt-rfc-style"/nixFormatter = "alejandra"/' flake-alejandra.nix 2>/dev/null || true
   rm -f flake-alejandra.nix.bak
-  
+
   # Create temporary flake for alejandra
   mkdir alejandra-test
   cd alejandra-test
@@ -209,23 +213,25 @@ EOF
 
       imports = [
         inputs.treefmt-nix.flakeModule
-        inputs.treefmt-flake.flakeModule
+        inputs.treefmt-flake.flakeModules.default
       ];
 
       treefmtFlake = {
-        nix = true;
-        nixFormatter = "alejandra";  # Explicitly use alejandra
+        formatters.nix = {
+          enable = true;
+          formatter = "alejandra";
+        };
         projectRootFile = "flake.nix";
       };
     };
 }
 EOF
-  
+
   git init -q
   git config user.email "test@example.com"
   git config user.name "Test User"
   git add .
-  
+
   echo "Running alejandra formatter..."
   if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
     cp test.nix ../alejandra-output.nix
@@ -233,9 +239,9 @@ EOF
   else
     echo -e "${RED}✗ Alejandra failed${NC}"
   fi
-  
+
   cd ..
-  
+
   echo -e "\n${YELLOW}Summary:${NC}"
   echo "Original file: $(wc -l <test.nix) lines"
   if [ -f alejandra-output.nix ]; then

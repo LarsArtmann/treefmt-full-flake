@@ -1,29 +1,29 @@
 # Test configuration demonstrating nixfmt-rfc-style option
 {
-  imports = [../flake-module.nix];
-
-  # Test 1: Default (alejandra)
+  # Test 1: Default formatter (nixfmt-rfc-style)
   test-default = {
     treefmtFlake = {
-      nix = true;
+      formatters.nix.enable = true;
     };
-    # Should use alejandra
   };
 
   # Test 2: Explicitly set alejandra
   test-alejandra = {
     treefmtFlake = {
-      nix = true;
-      nixFormatter = "alejandra";
+      formatters.nix = {
+        enable = true;
+        formatter = "alejandra";
+      };
     };
   };
 
   # Test 3: Use nixfmt-rfc-style
   test-nixfmt = {
     treefmtFlake = {
-      nix = true;
-      nixFormatter = "nixfmt-rfc-style";
+      formatters.nix = {
+        enable = true;
+        formatter = "nixfmt-rfc-style";
+      };
     };
-    # Should use nixfmt instead of alejandra
   };
 }

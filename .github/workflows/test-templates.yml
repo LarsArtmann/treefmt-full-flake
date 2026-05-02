@@ -29,20 +29,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: cachix/install-nix-action@v27
         with:
-          extra-conf: |
-            experimental-features = nix-command flakes
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
             accept-flake-config = true
-      - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
+            experimental-features = nix-command flakes
       - name: Setup CI environment
         run: |
           ./tests/setup-ci.sh
       - name: Run minimal template test
         run: |
           echo "Testing minimal template on ${{ matrix.os }}"
-          source ./tests/templates/test-wrapper.sh
+          source ./tests/templates/wrapper.sh
           ./tests/templates/test-minimal.sh
         timeout-minutes: 10
   test-default:
@@ -54,20 +53,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: cachix/install-nix-action@v27
         with:
-          extra-conf: |
-            experimental-features = nix-command flakes
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
             accept-flake-config = true
-      - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
+            experimental-features = nix-command flakes
       - name: Setup CI environment
         run: |
           ./tests/setup-ci.sh
       - name: Run default template test
         run: |
           echo "Testing default template on ${{ matrix.os }}"
-          source ./tests/templates/test-wrapper.sh
+          source ./tests/templates/wrapper.sh
           ./tests/templates/test-default.sh
         timeout-minutes: 15
   test-complete:
@@ -79,20 +77,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: cachix/install-nix-action@v27
         with:
-          extra-conf: |
-            experimental-features = nix-command flakes
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
             accept-flake-config = true
-      - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
+            experimental-features = nix-command flakes
       - name: Setup CI environment
         run: |
           ./tests/setup-ci.sh
       - name: Run complete template test
         run: |
           echo "Testing complete template on ${{ matrix.os }}"
-          source ./tests/templates/test-wrapper.sh
+          source ./tests/templates/wrapper.sh
           ./tests/templates/test-complete.sh
         timeout-minutes: 20
   integration-test:
@@ -102,20 +99,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: cachix/install-nix-action@v27
         with:
-          extra-conf: |
-            experimental-features = nix-command flakes
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
             accept-flake-config = true
-      - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
+            experimental-features = nix-command flakes
       - name: Setup CI environment
         run: |
           ./tests/setup-ci.sh
       - name: Run all template tests
         run: |
           echo "Running integration test for all templates"
-          source ./tests/templates/test-wrapper.sh
+          source ./tests/templates/wrapper.sh
           ./tests/run-all-tests.sh
         timeout-minutes: 30
   validate-formatters:
@@ -124,23 +120,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: cachix/install-nix-action@v27
         with:
-          extra-conf: |
-            experimental-features = nix-command flakes
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
             accept-flake-config = true
-      - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
+            experimental-features = nix-command flakes
       - name: Check flake
         run: |
           echo "Checking flake configuration..."
           nix flake check --all-systems
-        timeout-minutes: 10
-      - name: Build formatter modules
-        run: |
-          echo "Building individual formatter modules..."
-          for formatter in nix web python shell rust yaml markdown json misc; do
-              echo "Building formatter module: $formatter"
-              nix build .#formatterModules.$formatter --no-link
-          done
         timeout-minutes: 10

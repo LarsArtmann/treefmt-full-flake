@@ -21,11 +21,6 @@ jobs:
         run: |
           nix flake show
           nix flake metadata
-      - name: Build formatter modules
-        run: |
-          nix build .#formatterModules.nix --no-link
-          nix build .#formatterModules.web --no-link
-          nix build .#formatterModules.python --no-link
   test-local:
     name: Test with Local Path
     runs-on: ["self-hosted", "linux", "x64"]
@@ -41,7 +36,7 @@ jobs:
       - name: Test local template
         run: |
           chmod +x ./tests/test-local-template.sh
-          ./tests/test-local-template.sh || true  # Allow failure for now
+          ./tests/test-local-template.sh
   format-check:
     name: Format Check
     runs-on: ["self-hosted", "linux", "x64"]
@@ -56,4 +51,4 @@ jobs:
             experimental-features = nix-command flakes
       - name: Check formatting
         run: |
-          nix fmt -- --check || echo "::warning::Some files need formatting"
+          nix fmt -- --fail-on-change

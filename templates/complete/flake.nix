@@ -20,76 +20,22 @@
       treefmtFlake = {
         projectRootFile = "flake.nix";
 
-        autoDetection = {
-          enable = true;
-          aggressive = false;
-          override = "merge";
-        };
-
         formatters = {
           nix = {
             enable = true;
             formatter = "nixfmt-rfc-style";
-            linting = {
-              deadnix = true;
-              statix = true;
-            };
           };
-          web = {
-            enable = true;
-            formatter = "biome";
-            languages = {
-              javascript = true;
-              typescript = true;
-              css = true;
-              scss = true;
-              json = true;
-            };
-          };
-          python = {
-            enable = true;
-            formatters = {
-              black = true;
-              isort = true;
-              ruff = true;
-            };
-          };
-          shell = {
-            enable = true;
-            formatters = {
-              shfmt = true;
-              shellcheck = true;
-            };
-          };
-          rust = {
-            enable = true;
-            formatters = {rustfmt = true;};
-          };
-          yaml = {
-            enable = true;
-            formatters = {yamlfmt = true;};
-          };
-          markdown = {
-            enable = true;
-            formatters = {mdformat = true;};
-          };
-          json = {
-            enable = true;
-            formatters = {jsonfmt = true;};
-          };
-          misc = {
-            enable = true;
-            tools = {
-              buf = true;
-              taplo = true;
-              just = true;
-              actionlint = true;
-            };
-          };
+          web.enable = true;
+          python.enable = true;
+          shell.enable = true;
+          rust.enable = true;
+          yaml.enable = true;
+          markdown.enable = true;
+          json.enable = true;
+          misc.enable = true;
         };
 
         behavior = {
-          performance = "balanced";
           allowMissingFormatter = false;
           enableDefaultExcludes = true;
         };
@@ -99,19 +45,10 @@
           mode = "git";
           cache = "./.cache/treefmt";
           gitBased = true;
-          performance = {
-            parallel = true;
-            maxJobs = 4;
-          };
         };
 
         git = {
           branch = "main";
-          stagedOnly = false;
-          hooks = {
-            preCommit = false;
-            prePush = false;
-          };
         };
       };
 

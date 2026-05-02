@@ -30,16 +30,16 @@ measure_time() {
   local name=$1
   local cmd=$2
   local times=()
-  
+
   echo -e "${YELLOW}Measuring: $name${NC}"
-  
+
   for i in $(seq 1 $ITERATIONS); do
     echo -n "  Iteration $i/$ITERATIONS... "
-    
+
     # Create temporary directory for test
     local test_dir=$(mktemp -d)
     cd "$test_dir"
-    
+
     # Measure execution time
     local start_time=$(date +%s.%N)
     if eval "$cmd" >/dev/null 2>&1; then
@@ -51,17 +51,17 @@ measure_time() {
       echo -e "${RED}Failed${NC}"
       times+=(0)
     fi
-    
+
     # Cleanup
     cd - >/dev/null
     rm -rf "$test_dir"
   done
-  
+
   # Calculate statistics
   local sum=0
   local min=${times[0]}
   local max=${times[0]}
-  
+
   for time in "${times[@]}"; do
     sum=$(echo "$sum + $time" | bc)
     if (($(echo "$time < $min" | bc -l))); then
@@ -71,12 +71,12 @@ measure_time() {
       max=$time
     fi
   done
-  
+
   local avg=$(echo "scale=3; $sum / $ITERATIONS" | bc)
-  
+
   echo -e "  ${GREEN}Average: ${avg}s, Min: ${min}s, Max: ${max}s${NC}"
   echo ""
-  
+
   # Add to results file
   if [ "$name" != "format-check" ]; then
     echo "," >>"$RESULTS_FILE"
@@ -155,10 +155,10 @@ print_banner "Performance Summary"
 if command -v jq >/dev/null 2>&1; then
   echo -e "${YELLOW}Template Initialization:${NC}"
   jq -r '.tests | to_entries | .[] | select(.key | startswith("template-init")) | "  \(.key): \(.value.avg)s avg"' "$RESULTS_FILE"
-  
+
   echo -e "\n${YELLOW}Formatter Performance:${NC}"
   jq -r '.tests | to_entries | .[] | select(.key | startswith("format")) | "  \(.key): \(.value.avg)s avg"' "$RESULTS_FILE"
-  
+
   echo -e "\n${GREEN}Results saved to: $RESULTS_FILE${NC}"
 else
   echo -e "${YELLOW}Install jq for better result formatting${NC}"

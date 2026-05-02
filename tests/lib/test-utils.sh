@@ -48,10 +48,10 @@ fi
 print_banner() {
   local title="$1"
   local width=44
-  local padding=$(( (width - ${#title} - 2) / 2 ))
-  
+  local padding=$(((width - ${#title} - 2) / 2))
+
   printf "${COLOR_BLUE}%${width}s%${NC}\n" | tr ' ' '═'
-  printf "${COLOR_BLUE}║%*s %s %*s║${NC}\n" "$padding" "" "$title" "$(( padding + (${#title} % 2) ))" ""
+  printf "${COLOR_BLUE}║%*s %s %*s║${NC}\n" "$padding" "" "$title" "$((padding + (${#title} % 2)))" ""
   printf "${COLOR_BLUE}%${width}s%${NC}\n" | tr ' ' '═'
 }
 
@@ -67,7 +67,7 @@ init_test_environment() {
   TEST_DIR=$(mktemp -d)
   REPO_ROOT=$(cd "${BASH_SOURCE[0]}/../../.." && pwd)
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  
+
   echo -e "${YELLOW}Testing ${TEST_NAME}...${NC}"
   echo "Test directory: $TEST_DIR"
 }
@@ -77,7 +77,7 @@ init_test_environment() {
 setup_git_repo() {
   local email="${1:-test@example.com}"
   local name="${2:-Test User}"
-  
+
   git init -q
   git config user.email "$email"
   git config user.name "$name"
@@ -90,22 +90,22 @@ init_template() {
   local template_name="$1"
   local timeout_secs="${2:-30}"
   local TEMPLATE_PATH="${REPO_ROOT}#${template_name}"
-  
+
   if type get_template_path >/dev/null 2>&1; then
     TEMPLATE_PATH=$(get_template_path "$template_name")
   fi
-  
+
   if ! run_with_timeout "$timeout_secs" "nix flake init -t ${TEMPLATE_PATH}"; then
     echo -e "${RED}Failed to initialize template${NC}"
     return 1
   fi
-  
+
   # Patch flake.nix to use local repository for testing
   if [ -f flake.nix ]; then
     sed -i '' "s|git+ssh://git@github.com/LarsArtmann/treefmt-full-flake.git|path:${REPO_ROOT}|g" flake.nix
     git add flake.nix
   fi
-  
+
   echo -e "${GREEN}✓ Template initialized${NC}"
   return 0
 }
@@ -114,13 +114,13 @@ init_template() {
 # Usage: check_flake_metadata [timeout_seconds]
 check_flake_metadata() {
   local timeout_secs="${1:-30}"
-  
+
   if ! run_with_timeout "$timeout_secs" "nix flake metadata --no-registries"; then
     echo -e "${RED}Failed to check flake metadata${NC}"
     return 1
   fi
   echo -e "${GREEN}✓ Flake metadata is valid${NC}"
-  
+
   # Add the generated lock file to git
   if [ -f "flake.lock" ]; then
     git add flake.lock
@@ -136,32 +136,32 @@ check_flake_metadata() {
 # Usage: run_formatter_test [timeout_seconds]
 run_formatter_test() {
   local timeout_secs="${1:-60}"
-  local formatter_timeout="${2:-$(( timeout_secs * 2 ))}"
-  
+  local formatter_timeout="${2:-$((timeout_secs * 2))}"
+
   # First, verify formatter is available
   if ! run_with_timeout "$timeout_secs" "nix fmt -- --version"; then
     echo -e "${RED}Formatter not available${NC}"
     return 1
   fi
-  
+
   # Run formatter first pass
   if ! run_with_timeout "$formatter_timeout" "nix fmt --no-update-lock-file"; then
     echo -e "${RED}Formatter failed${NC}"
     return 1
   fi
   echo -e "${GREEN}✓ Formatter ran successfully (pass 1)${NC}"
-  
+
   # Run formatter again to ensure idempotency
   if ! run_with_timeout "$formatter_timeout" "nix fmt --no-update-lock-file"; then
     echo -e "${RED}Formatter failed on second pass${NC}"
     return 1
   fi
   echo -e "${GREEN}✓ Formatter is idempotent (pass 2)${NC}"
-  
+
   # Commit the formatted changes to stabilize git state
   git add -A
   git commit -m "Format code" -q || true
-  
+
   return 0
 }
 
@@ -169,7 +169,7 @@ run_formatter_test() {
 # Usage: run_flake_check [timeout_seconds]
 run_flake_check() {
   local timeout_secs="${1:-60}"
-  
+
   if ! run_with_timeout "$timeout_secs" "nix flake check --no-update-lock-file"; then
     echo -e "${RED}Failed to check flake${NC}"
     return 1
@@ -182,7 +182,7 @@ run_flake_check() {
 # Usage: test_dev_shell [timeout_seconds]
 test_dev_shell() {
   local timeout_secs="${1:-30}"
-  
+
   if ! run_with_timeout "$timeout_secs" "nix develop --no-update-lock-file -c treefmt --version"; then
     echo -e "${RED}Development shell failed${NC}"
     return 1
@@ -195,7 +195,7 @@ test_dev_shell() {
 # Usage: run_format_check [timeout_seconds]
 run_format_check() {
   local timeout_secs="${1:-60}"
-  
+
   if ! run_with_timeout "$timeout_secs" "nix fmt --no-update-lock-file -- --ci --no-cache"; then
     echo -e "${RED}Format check failed after formatting${NC}"
     return 1
@@ -244,7 +244,7 @@ setup_cleanup() {
   # Define the cleanup trap if not already defined
   if [ -z "${CLEANUP_DEFINED:-}" ]; then
     CLEANUP_DEFINED=1
-    
+
     cleanup() {
       echo -e "${YELLOW}Cleaning up test directory...${NC}"
       if command -v trash >/dev/null 2>&1; then
@@ -278,14 +278,14 @@ TOTAL_TIME=0
 run_and_track_test() {
   local test_script="$1"
   local test_name="$2"
-  
+
   local start_time=$(date +%s)
-  
+
   if "$test_script"; then
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     TOTAL_TIME=$((TOTAL_TIME + duration))
-    
+
     echo -e "${GREEN}✓ ${test_name} passed (${duration}s)${NC}"
     PASSED_TESTS+=("$test_name")
     return 0
@@ -293,7 +293,7 @@ run_and_track_test() {
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     TOTAL_TIME=$((TOTAL_TIME + duration))
-    
+
     echo -e "${RED}✗ ${test_name} failed (${duration}s)${NC}"
     FAILED_TESTS+=("$test_name")
     return 1
@@ -304,9 +304,9 @@ run_and_track_test() {
 # Usage: print_test_summary
 print_test_summary() {
   local total_tests=$((${#PASSED_TESTS[@]} + ${#FAILED_TESTS[@]}))
-  
+
   print_banner "Test Summary"
-  
+
   if [ ${#PASSED_TESTS[@]} -gt 0 ]; then
     echo -e "${GREEN}Passed tests (${#PASSED_TESTS[@]}/${total_tests}):${NC}"
     for test in "${PASSED_TESTS[@]}"; do
@@ -314,7 +314,7 @@ print_test_summary() {
     done
     echo ""
   fi
-  
+
   if [ ${#FAILED_TESTS[@]} -gt 0 ]; then
     echo -e "${RED}Failed tests (${#FAILED_TESTS[@]}/${total_tests}):${NC}"
     for test in "${FAILED_TESTS[@]}"; do
@@ -322,10 +322,10 @@ print_test_summary() {
     done
     echo ""
   fi
-  
+
   echo -e "Total time: ${TOTAL_TIME}s"
   echo ""
-  
+
   # Exit with appropriate code
   if [ ${#FAILED_TESTS[@]} -eq 0 ]; then
     echo -e "${GREEN}✅ All tests passed!${NC}"

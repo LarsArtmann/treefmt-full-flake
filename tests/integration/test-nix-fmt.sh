@@ -21,10 +21,10 @@ PASSED=0
 run_test() {
   local test_name="$1"
   local test_cmd="$2"
-  
+
   echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo -e "${YELLOW}Running: ${test_name}${NC}"
-  
+
   if eval "$test_cmd"; then
     echo -e "${GREEN}✓ ${test_name} passed${NC}"
     PASSED=$((PASSED + 1))

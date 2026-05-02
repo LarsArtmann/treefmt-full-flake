@@ -137,22 +137,17 @@ For large codebases, enable incremental formatting for dramatic performance impr
 
 ```nix
 treefmtFlake = {
-  # Enable incremental formatting
   incremental = {
     enable = true;
     mode = "git";
     cache = "./.cache/treefmt";
   };
-  behavior.performance = "balanced";
 };
 ```
 
 Then use specialized commands:
 
 ```bash
-# Ultra-fast formatting (no cache)
-nix run .#treefmt-fast
-
 # Format only staged files
 nix run .#treefmt-staged
 
@@ -222,21 +217,6 @@ perSystem = {
 
 ## Smart Script
 
-This repository includes an intelligent wrapper:
-
-### 🚀 **[smart-treefmt-v2.sh](./smart-treefmt-v2.sh)** - Next Generation
-
-- ⚡ **25x faster startup** with command caching
-- 🔧 **Auto-fix capabilities** - resolves issues automatically
-- ✨ **Configuration wizard** - generates optimal configs
-- 🎯 **Interactive mode** - guided problem resolution
-- 📊 **Progress indicators** - beautiful real-time feedback
-- 🔌 **Tool integration** - direnv, mise, asdf support
-- 📜 **History tracking** - logs all operations
-- 🔄 **Self-updating** - stays current automatically
-
-See [Documentation](./docs/smart-treefmt-v2.md)
-
 ## Troubleshooting
 
 ### Common Issues
@@ -257,7 +237,7 @@ See [Documentation](./docs/smart-treefmt-v2.md)
 
 **Solution**:
 
-- **Recommended**: Switch to `nixfmt-rfc-style` by setting `nixFormatter = "nixfmt-rfc-style"` in your configuration
+- **Recommended**: Switch to `nixfmt-rfc-style` (the default) by keeping the default configuration
 - Alternative: Run `nix fmt` twice to ensure stable formatting with Alejandra
 - This is a known issue with Alejandra (see [GitHub Issue #250](https://github.com/kamadorueda/alejandra/issues/250))
 - See [Alejandra Determinism Documentation](./docs/alejandra-determinism-issue.md) for detailed migration guide

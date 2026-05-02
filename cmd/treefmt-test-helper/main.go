@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -42,8 +43,7 @@ func loadConfig(path string) (*Config, error) {
 	}
 
 	content := string(data)
-	lines := strings.Split(content, "\n")
-	for _, line := range lines {
+	for _, line := range strings.Split(content, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
@@ -55,8 +55,7 @@ func loadConfig(path string) (*Config, error) {
 		}
 
 		key := strings.TrimSpace(parts[0])
-		value := strings.TrimSpace(parts[1])
-		value = strings.Trim(value, "\"")
+		value := strings.Trim(strings.TrimSpace(parts[1]), "\"")
 
 		switch key {
 		case "projectRoot":
@@ -90,10 +89,8 @@ func validateConfig(cfg *Config) error {
 		return validationError("Formatters", "at least one formatter must be specified")
 	}
 
-	for _, formatter := range cfg.Formatters {
-		if formatter == "" {
-			return validationError("Formatters", "formatter name cannot be empty")
-		}
+	if slices.Contains(cfg.Formatters, "") {
+		return validationError("Formatters", "formatter name cannot be empty")
 	}
 
 	return nil
@@ -110,16 +107,9 @@ func runFormatters(cfg *Config) ([]FormatterResult, error) {
 		}
 
 		switch formatter {
-		case "alejandra":
+		case "alejandra", "nixfmt", "biome", "black":
 			result.Formatted = 10
-		case "nixfmt":
-			result.Formatted = 5
-		case "biome":
-			result.Formatted = 20
-		case "black":
-			result.Formatted = 15
 		default:
-			result.Formatted = 0
 			result.Failed = 1
 			result.ErrorMsg = "unknown formatter"
 		}
@@ -140,7 +130,7 @@ func printResults(results []FormatterResult) {
 	}
 }
 
-func fatal(format string, args ...interface{}) {
+func fatal(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, format, args...)
 	os.Exit(1)
 }

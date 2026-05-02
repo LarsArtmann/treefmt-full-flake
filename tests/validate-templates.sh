@@ -18,9 +18,9 @@ echo ""
 validate_nix() {
   local file="$1"
   local name="$2"
-  
+
   echo -n "Validating $name... "
-  
+
   # Use nix-instantiate --parse for fast syntax check
   if nix-instantiate --parse "$file" >/dev/null 2>&1; then
     echo -e "${GREEN}OK${NC}"

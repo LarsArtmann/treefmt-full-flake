@@ -2,35 +2,37 @@
 {
   # Example 1: Simple migration using the flake module option
   example1-simple = {
-    imports = [treefmt-full-flake.flakeModule];
+    imports = [treefmt-full-flake.flakeModules.default];
 
     treefmtFlake = {
-      nix = true;
-      nixFormatter = "nixfmt-rfc-style"; # Switch from default alejandra
-
-      # Enable other formatters as needed
-      markdown = true;
-      yaml = true;
+      formatters = {
+        nix = {
+          enable = true;
+          formatter = "nixfmt-rfc-style";
+        };
+        markdown.enable = true;
+        yaml.enable = true;
+      };
     };
   };
 
   # Example 2: Gradual migration with exclusions
   example2-gradual = {
-    imports = [treefmt-full-flake.flakeModule];
+    imports = [treefmt-full-flake.flakeModules.default];
 
     treefmtFlake = {
-      nix = true;
-      nixFormatter = "nixfmt-rfc-style";
-
-      # Exclude directories not yet ready for migration
-      enableDefaultExcludes = true;
+      formatters.nix = {
+        enable = true;
+        formatter = "nixfmt-rfc-style";
+      };
+      behavior.enableDefaultExcludes = true;
     };
 
     perSystem = _: {
       treefmt.settings.excludes = [
-        "legacy/**/*.nix" # Old code not yet migrated
-        "vendor/**/*.nix" # Third-party code
-        "generated/**/*.nix" # Auto-generated files
+        "legacy/**/*.nix"
+        "vendor/**/*.nix"
+        "generated/**/*.nix"
       ];
     };
   };
@@ -42,7 +44,6 @@
         projectRootFile = "flake.nix";
 
         programs = {
-          # Use nixfmt-rfc-style instead of alejandra
           nixfmt = {
             enable = true;
             package = pkgs.nixfmt-rfc-style;
@@ -50,7 +51,6 @@
             excludes = ["**/hardware-configuration.nix"];
           };
 
-          # Keep other Nix tools
           deadnix = {
             enable = true;
             includes = ["**/*.nix"];
@@ -69,19 +69,15 @@
   example4-comparison = {
     perSystem = {pkgs, ...}: {
       packages = {
-        # Create formatter using alejandra
         format-alejandra = pkgs.writeShellScriptBin "format-alejandra" ''
           ${pkgs.alejandra}/bin/alejandra "$@"
         '';
 
-        # Create formatter using nixfmt-rfc-style
         format-nixfmt = pkgs.writeShellScriptBin "format-nixfmt" ''
           ${pkgs.nixfmt-rfc-style}/bin/nixfmt "$@"
         '';
 
-        # Compare formatters
         compare-formatters = pkgs.writeShellScriptBin "compare-formatters" ''
-          #!/usr/bin/env bash
           set -euo pipefail
 
           if [[ $# -eq 0 ]]; then
@@ -102,8 +98,6 @@
 
           echo "Showing differences..."
           ${pkgs.diffutils}/bin/diff -u "$TEMP_DIR/alejandra.nix" "$TEMP_DIR/nixfmt.nix" || true
-
-          rm -rf "$TEMP_DIR"
         '';
       };
     };
@@ -111,11 +105,13 @@
 
   # Example 5: CI/CD configuration with determinism check
   example5-ci = {
-    imports = [treefmt-full-flake.flakeModule];
+    imports = [treefmt-full-flake.flakeModules.default];
 
     treefmtFlake = {
-      nix = true;
-      nixFormatter = "nixfmt-rfc-style";
+      formatters.nix = {
+        enable = true;
+        formatter = "nixfmt-rfc-style";
+      };
     };
 
     perSystem = {
@@ -124,42 +120,34 @@
       ...
     }: {
       packages = {
-        # Check formatter determinism
         check-determinism = pkgs.writeShellScriptBin "check-determinism" ''
-          #!/usr/bin/env bash
           set -euo pipefail
 
           echo "Checking formatter determinism..."
 
-          # Create temporary directory
           TEMP_DIR=$(mktemp -d)
           cp -r . "$TEMP_DIR/test"
           cd "$TEMP_DIR/test"
 
-          # Format once
           echo "First formatting pass..."
           ${config.formatter}/bin/treefmt
           find . -name "*.nix" -type f -exec sha256sum {} \; | sort > ../first-pass.sha
 
-          # Format again
           echo "Second formatting pass..."
           ${config.formatter}/bin/treefmt
           find . -name "*.nix" -type f -exec sha256sum {} \; | sort > ../second-pass.sha
 
-          # Compare
           if diff ../first-pass.sha ../second-pass.sha > /dev/null; then
-            echo "✓ Formatter is deterministic!"
+            echo "Formatter is deterministic!"
             exit 0
           else
-            echo "✗ Formatter is NOT deterministic!"
-            echo "Files that changed between runs:"
+            echo "Formatter is NOT deterministic!"
             diff ../first-pass.sha ../second-pass.sha || true
             exit 1
           fi
         '';
       };
 
-      # Add to CI checks
       checks = {
         formatting-determinism = pkgs.runCommand "check-formatting-determinism" {} ''
           ${config.packages.check-determinism}/bin/check-determinism
@@ -167,18 +155,5 @@
         '';
       };
     };
-  };
-
-  # Example 6: Project template with nixfmt-rfc-style
-  example6-template = {
-    description = "Template using nixfmt-rfc-style";
-
-    path = ./template;
-
-    # Template files would include:
-    # - flake.nix with nixFormatter = "nixfmt-rfc-style"
-    # - .envrc for direnv integration
-    # - justfile with formatting commands
-    # - README.md explaining the formatter choice
   };
 }

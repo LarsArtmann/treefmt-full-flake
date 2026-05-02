@@ -16,13 +16,13 @@ print_banner "Template Test Suite Runner"
 run_test() {
   local test_script=$1
   local test_name=$(basename "$test_script" .sh)
-  
+
   echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo -e "${YELLOW}Running: ${test_name}${NC}"
   echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  
+
   run_and_track_test "$test_script" "$test_name"
-  
+
   echo ""
 }
 
@@ -40,7 +40,7 @@ if [ $# -gt 0 ]; then
         break
       fi
     done
-    
+
     if [ "$found" = false ]; then
       echo -e "${RED}Error: Test '${test_name}' not found${NC}"
       echo "Available tests:"
@@ -65,14 +65,14 @@ else
       run_test "$test_script"
     fi
   done
-  
+
   echo -e "${YELLOW}Running edge case tests...${NC}\n"
   for test_script in "${SCRIPT_DIR}"/edge-cases/test-*.sh; do
     if [ -f "$test_script" ]; then
       run_test "$test_script"
     fi
   done
-  
+
   echo -e "${YELLOW}Running formatter tests...${NC}\n"
   for test_script in "${SCRIPT_DIR}"/formatters/test-*.sh; do
     if [ -f "$test_script" ]; then

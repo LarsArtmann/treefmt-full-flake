@@ -33,4 +33,11 @@
     ];
     priority = 1;
   };
+
+  # TypeSpec formatter
+  typespec = {
+    enable = true;
+    includes = ["*.tsp"];
+    priority = 1;
+  };
 }
