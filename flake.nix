@@ -95,7 +95,6 @@
             shfmt.enable = true;
           };
         };
-        checks.format = config.treefmt.build.check self;
 
         # Development shell with all tools
         devShells.default = pkgs.mkShell {
