@@ -90,17 +90,17 @@
         treefmt = {
           projectRootFile = "flake.nix";
           programs = {
-            alejandra.enable = true;
+            nixfmt.enable = true;
             prettier.enable = true;
             shfmt.enable = true;
           };
         };
 
         # Development shell with all tools
-        devShells.default = pkgs.mkShell {
-          buildInputs = [
+        devShells.default = pkgs.mkShellNoCC {
+          packages = builtins.attrValues {
             config.treefmt.build.wrapper
-          ];
+          };  
 
           shellHook = ''
             echo "treefmt-flake development environment"

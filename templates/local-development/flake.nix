@@ -21,7 +21,7 @@
         treefmt = {
           projectRootFile = "flake.nix";
           programs = {
-            alejandra.enable = true;
+            nixfmt.enable = true;
             prettier.enable = true;
             shfmt.enable = true;
             yamlfmt.enable = true;
