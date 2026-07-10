@@ -98,9 +98,7 @@
 
         # Development shell with all tools
         devShells.default = pkgs.mkShellNoCC {
-          packages = builtins.attrValues {
-            config.treefmt.build.wrapper
-          };  
+          packages = [ config.treefmt.build.wrapper ];
 
           shellHook = ''
             echo "treefmt-flake development environment"
