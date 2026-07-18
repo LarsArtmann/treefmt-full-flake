@@ -140,33 +140,33 @@ Nothing. No regressions introduced. All changes verified:
 
 ## F) Top 25 Things We Should Get Done Next
 
-| #      | Priority | Item                                                                                                             |
+| # | Priority | Item |
 | ------ | -------- | ---------------------------------------------------------------------------------------------------------------- | --- | ------ |
-| 1      | **P0**   | Remove `flakeModule` backward-compat alias from `flake.nix`                                                      |
-| 2      | **P0**   | Move `formatterModules` under `lib` or remove it as a top-level flake output                                     |
-| 3      | **P0**   | Remove unused `lib/project-detection.nix` or wire it into the module                                             |
-| 4      | **P1**   | Add Nix-level module tests (nixosTests or derivation-based checks)                                               |
-| 5      | **P1**   | Make `treefmt-validate` actually validate config (check enabled formatters exist, detect conflicts)              |
-| 6      | **P1**   | Make `treefmt-config` check meaningful (fail if config is invalid, not `                                         |     | true`) |
-| 7      | **P1**   | Add per-formatter toggle support within groups (consume the sub-options we removed, but implement them properly) |
-| 8      | **P1**   | Replace bash string comparison for Nix booleans with proper conditional Nix generation                           |
-| 9      | **P1**   | Run full template test suite locally and fix any failures                                                        |
-| 10     | **P1**   | Remove `cmd/treefmt-test-helper` entirely (stub with no real use)                                                |
-| 11     | **P2**   | Add `treefmt-fast` package (currently documented but not defined unless incremental enabled)                     |
-| 12     | **P2**   | Wire up `git.hooks.preCommit` to actually create git hooks via the module                                        |
-| 13     | **P2**   | Add `default.overlays` input following for `treefmt-nix` in templates                                            |
-| 14     | **P2**   | Test templates on macOS (CI does, but verify locally)                                                            |
-| 15     | **P2**   | Add `nix flake show` output validation to CI                                                                     |
-| 16     | **P2**   | Fix `justfile` — remove `branching-flow` dependency or add it to devShell                                        |
-| 17     | **P2**   | Migrate `justfile` to flake.nix apps (per AGENTS.md: justfile is deprecated)                                     |
-| 18     | **P3**   | Add `CONTRIBUTING.md` section on the new reduced API surface                                                     |
-| 19     | **P3**   | Add ADR (Architecture Decision Record) for the option surface reduction                                          |
-| 20     | **P3**   | Add `CHANGELOG.md` or changelog entries for this breaking change                                                 |
-| 21     | **P3**   | Verify `templates/local-development/` still works (uses raw treefmt-nix, not the module)                         |
-| 22     | **P3**   | Add `nix fmt` to the `treefmt-config` check so it actually validates formatting                                  |
-| **P3** | **P3**   | Add version bump to `lib/default.nix` (currently `2.0.0`, should be `3.0.0` after breaking changes)              |
-| 24     | **P3**   | Update `tests/formatter-coverage-matrix.md` for current formatter state                                          |
-| 25     | **P3**   | Add a `treefmt-status` package that shows enabled formatters and their config                                    |
+| 1 | **P0** | Remove `flakeModule` backward-compat alias from `flake.nix` |
+| 2 | **P0** | Move `formatterModules` under `lib` or remove it as a top-level flake output |
+| 3 | **P0** | Remove unused `lib/project-detection.nix` or wire it into the module |
+| 4 | **P1** | Add Nix-level module tests (nixosTests or derivation-based checks) |
+| 5 | **P1** | Make `treefmt-validate` actually validate config (check enabled formatters exist, detect conflicts) |
+| 6 | **P1** | Make `treefmt-config` check meaningful (fail if config is invalid, not `                                         |     | true`) |
+| 7 | **P1** | Add per-formatter toggle support within groups (consume the sub-options we removed, but implement them properly) |
+| 8 | **P1** | Replace bash string comparison for Nix booleans with proper conditional Nix generation |
+| 9 | **P1** | Run full template test suite locally and fix any failures |
+| 10 | **P1** | Remove `cmd/treefmt-test-helper` entirely (stub with no real use) |
+| 11 | **P2** | Add `treefmt-fast` package (currently documented but not defined unless incremental enabled) |
+| 12 | **P2** | Wire up `git.hooks.preCommit` to actually create git hooks via the module |
+| 13 | **P2** | Add `default.overlays` input following for `treefmt-nix` in templates |
+| 14 | **P2** | Test templates on macOS (CI does, but verify locally) |
+| 15 | **P2** | Add `nix flake show` output validation to CI |
+| 16 | **P2** | Fix `justfile` — remove `branching-flow` dependency or add it to devShell |
+| 17 | **P2** | Migrate `justfile` to flake.nix apps (per AGENTS.md: justfile is deprecated) |
+| 18 | **P3** | Add `CONTRIBUTING.md` section on the new reduced API surface |
+| 19 | **P3** | Add ADR (Architecture Decision Record) for the option surface reduction |
+| 20 | **P3** | Add `CHANGELOG.md` or changelog entries for this breaking change |
+| 21 | **P3** | Verify `templates/local-development/` still works (uses raw treefmt-nix, not the module) |
+| 22 | **P3** | Add `nix fmt` to the `treefmt-config` check so it actually validates formatting |
+| **P3** | **P3** | Add version bump to `lib/default.nix` (currently `2.0.0`, should be `3.0.0` after breaking changes) |
+| 24 | **P3** | Update `tests/formatter-coverage-matrix.md` for current formatter state |
+| 25 | **P3** | Add a `treefmt-status` package that shows enabled formatters and their config |
 
 ---
 
