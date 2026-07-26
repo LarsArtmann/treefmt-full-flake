@@ -1,3 +1,3 @@
 module github.com/LarsArtmann/treefmt-full-flake/cmd/treefmt-test-helper
 
-go 1.22
+go 1.26.4
