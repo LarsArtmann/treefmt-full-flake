@@ -123,7 +123,7 @@ This is a test project.
 ## Installation
 
 ```bash
-npm install
+pnpm install
 ```
 EOF
 

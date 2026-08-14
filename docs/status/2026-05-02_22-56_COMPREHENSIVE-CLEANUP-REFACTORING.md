@@ -81,7 +81,7 @@ All templates, docs, and tests updated to match the new reduced option surface.
 ### #11 — `.gitignore` cleaned up
 
 - Reduced from 133 lines to 24 lines
-- Removed irrelevant sections: Node.js, TypeScript, npm, yarn, coverage, archives (_.7z, _.gz, \*.jar, etc.), duplicate IDE entries
+- Removed irrelevant sections: Node.js, TypeScript, pnpm, yarn, coverage, archives (_.7z, _.gz, \*.jar, etc.), duplicate IDE entries
 - Kept: Nix, treefmt cache, OS files, IDE files, temp files, test artifacts
 
 ### #12 — `cache.sh` cross-platform stat fixed
