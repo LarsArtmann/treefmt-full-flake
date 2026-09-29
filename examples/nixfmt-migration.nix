@@ -1,41 +1,48 @@
-# Example configurations for migrating from Alejandra to nixfmt-rfc-style
+# Example configurations for migrating from Alejandra to nixfmt-rfc-style.
+# Each example is a function of your `treefmt-full-flake` flake input, so it
+# evaluates standalone: apply it with the input, e.g.
+#   imports = [ (example1-simple inputs.treefmt-full-flake) ];
 {
   # Example 1: Simple migration using the flake module option
-  example1-simple = {
-    imports = [ treefmt-full-flake.flakeModules.default ];
+  example1-simple =
+    { treefmt-full-flake }:
+    {
+      imports = [ treefmt-full-flake.flakeModules.default ];
 
-    treefmtFlake = {
-      formatters = {
-        nix = {
+      treefmtFlake = {
+        formatters = {
+          nix = {
+            enable = true;
+            formatter = "nixfmt-rfc-style";
+          };
+          markdown.enable = true;
+          yaml.enable = true;
+        };
+      };
+    };
+
+  # Example 2: Gradual migration with exclusions
+  example2-gradual =
+    { treefmt-full-flake }:
+    {
+      imports = [ treefmt-full-flake.flakeModules.default ];
+
+      treefmtFlake = {
+        formatters.nix = {
           enable = true;
           formatter = "nixfmt-rfc-style";
         };
-        markdown.enable = true;
-        yaml.enable = true;
+        behavior.enableDefaultExcludes = true;
+      };
+
+      perSystem = _: {
+        treefmt.settings.excludes = [
+          "legacy/**/*.nix"
+          "vendor/**/*.nix"
+          "generated/**/*.nix"
+        ];
       };
     };
-  };
-
-  # Example 2: Gradual migration with exclusions
-  example2-gradual = {
-    imports = [ treefmt-full-flake.flakeModules.default ];
-
-    treefmtFlake = {
-      formatters.nix = {
-        enable = true;
-        formatter = "nixfmt-rfc-style";
-      };
-      behavior.enableDefaultExcludes = true;
-    };
-
-    perSystem = _: {
-      treefmt.settings.excludes = [
-        "legacy/**/*.nix"
-        "vendor/**/*.nix"
-        "generated/**/*.nix"
-      ];
-    };
-  };
 
   # Example 3: Custom formatter configuration
   example3-custom = {
@@ -104,58 +111,60 @@
   };
 
   # Example 5: CI/CD configuration with determinism check
-  example5-ci = {
-    imports = [ treefmt-full-flake.flakeModules.default ];
+  example5-ci =
+    { treefmt-full-flake }:
+    {
+      imports = [ treefmt-full-flake.flakeModules.default ];
 
-    treefmtFlake = {
-      formatters.nix = {
-        enable = true;
-        formatter = "nixfmt-rfc-style";
+      treefmtFlake = {
+        formatters.nix = {
+          enable = true;
+          formatter = "nixfmt-rfc-style";
+        };
       };
+
+      perSystem =
+        {
+          pkgs,
+          config,
+          ...
+        }:
+        {
+          packages = {
+            check-determinism = pkgs.writeShellScriptBin "check-determinism" ''
+              set -euo pipefail
+
+              echo "Checking formatter determinism..."
+
+              TEMP_DIR=$(mktemp -d)
+              cp -r . "$TEMP_DIR/test"
+              cd "$TEMP_DIR/test"
+
+              echo "First formatting pass..."
+              ${config.formatter}/bin/treefmt
+              find . -name "*.nix" -type f -exec sha256sum {} \; | sort > ../first-pass.sha
+
+              echo "Second formatting pass..."
+              ${config.formatter}/bin/treefmt
+              find . -name "*.nix" -type f -exec sha256sum {} \; | sort > ../second-pass.sha
+
+              if diff ../first-pass.sha ../second-pass.sha > /dev/null; then
+                echo "Formatter is deterministic!"
+                exit 0
+              else
+                echo "Formatter is NOT deterministic!"
+                diff ../first-pass.sha ../second-pass.sha || true
+                exit 1
+              fi
+            '';
+          };
+
+          checks = {
+            formatting-determinism = pkgs.runCommand "check-formatting-determinism" { } ''
+              ${config.packages.check-determinism}/bin/check-determinism
+              touch $out
+            '';
+          };
+        };
     };
-
-    perSystem =
-      {
-        pkgs,
-        config,
-        ...
-      }:
-      {
-        packages = {
-          check-determinism = pkgs.writeShellScriptBin "check-determinism" ''
-            set -euo pipefail
-
-            echo "Checking formatter determinism..."
-
-            TEMP_DIR=$(mktemp -d)
-            cp -r . "$TEMP_DIR/test"
-            cd "$TEMP_DIR/test"
-
-            echo "First formatting pass..."
-            ${config.formatter}/bin/treefmt
-            find . -name "*.nix" -type f -exec sha256sum {} \; | sort > ../first-pass.sha
-
-            echo "Second formatting pass..."
-            ${config.formatter}/bin/treefmt
-            find . -name "*.nix" -type f -exec sha256sum {} \; | sort > ../second-pass.sha
-
-            if diff ../first-pass.sha ../second-pass.sha > /dev/null; then
-              echo "Formatter is deterministic!"
-              exit 0
-            else
-              echo "Formatter is NOT deterministic!"
-              diff ../first-pass.sha ../second-pass.sha || true
-              exit 1
-            fi
-          '';
-        };
-
-        checks = {
-          formatting-determinism = pkgs.runCommand "check-formatting-determinism" { } ''
-            ${config.packages.check-determinism}/bin/check-determinism
-            touch $out
-          '';
-        };
-      };
-  };
 }

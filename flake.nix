@@ -86,9 +86,66 @@
         {
           config,
           pkgs,
+          lib,
           ...
         }:
+        let
+          # Eval-time guard: importing the examples evaluates their bodies.
+          # With an unbound identifier (they once referenced a bare
+          # `treefmt-full-flake`), this import aborts flake evaluation
+          # entirely — the failure cannot be silenced downstream.
+          nixfmtMigrationExamples = import ./examples/nixfmt-migration.nix;
+          exampleKinds = lib.concatStringsSep " " (
+            lib.mapAttrsToList (
+              name: value: "${name}:${if builtins.isFunction value then "function" else "attrset"}"
+            ) nixfmtMigrationExamples
+          );
+          # Only the examples that import our flakeModule must be functions
+          # of the input; example3-custom and example4-comparison use raw
+          # treefmt-nix options and take no input.
+          moduleExamples = lib.concatStringsSep " " (
+            map (name: if builtins.isFunction nixfmtMigrationExamples.${name} then "ok" else name) [
+              "example1-simple"
+              "example2-gradual"
+              "example5-ci"
+            ]
+          );
+        in
         {
+          checks.templateEval =
+            pkgs.runCommandLocal "template-eval-check"
+              {
+                nativeBuildInputs = [ pkgs.nix ];
+                inherit exampleKinds moduleExamples;
+              }
+              ''
+                set -euo pipefail
+                # nix-instantiate initializes user state on startup; point it
+                # at the sandbox scratch dir or it dies creating
+                # /nix/var/nix/profiles.
+                export HOME=$TMPDIR
+                export XDG_CONFIG_HOME=$TMPDIR/xdg-config
+                export XDG_CACHE_HOME=$TMPDIR/xdg-cache
+                # Migration examples: the import in this check's derivation
+                # already proved there are no unbound identifiers; the
+                # module-based examples must be functions of the input.
+                for ex in $moduleExamples; do
+                  if [ "$ex" != "ok" ]; then
+                    echo "templateEval FAIL: $ex must be a function of the treefmt-full-flake input"
+                    exit 1
+                  fi
+                done
+                echo "  examples/nixfmt-migration: $exampleKinds"
+                # Templates: every shipped template flake must parse.
+                for t in default minimal complete local-development; do
+                  nix-instantiate --parse ${./templates}/$t/flake.nix > /dev/null \
+                    || { echo "templateEval FAIL: templates/$t/flake.nix does not parse"; exit 1; }
+                  echo "  templates/$t: parse OK"
+                done
+                echo "templateEval OK"
+                touch $out
+              '';
+
           # Configure treefmt for this project
           treefmt = {
             projectRootFile = "flake.nix";
@@ -108,7 +165,7 @@
               echo ""
               echo "Available commands:"
               echo "  nix fmt              - Format all files"
-              echo "  nix fmt -- --check   - Check formatting without changes"
+              echo "  nix fmt -- --fail-on-change - Check formatting without changes"
               echo "  nix run .#treefmt-debug - Show debug information"
             '';
           };
