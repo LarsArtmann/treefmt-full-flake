@@ -232,7 +232,7 @@ test:
 format:
   nix fmt
 check:
-  nix fmt -- --check
+  nix fmt -- --fail-on-change
 EOF
 
 echo -e "${GREEN}✓ Test files created${NC}"

@@ -140,7 +140,7 @@ measure_time "format-check" '
     mkdir -p src &&
     echo "{ pkgs, ... }: { test = true; }" > src/test.nix &&
     nix fmt --no-update-lock-file &&
-    nix fmt --no-update-lock-file -- --check
+    nix fmt --no-update-lock-file -- --fail-on-change
 '
 
 # Close JSON
