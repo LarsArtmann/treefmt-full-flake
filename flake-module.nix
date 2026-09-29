@@ -138,34 +138,31 @@ in {
       };
 
     checks = {
-      treefmt-config = pkgs.runCommand "treefmt-config-check" {} ''
-        echo "Checking treefmt configuration..."
-        ${config.treefmt.build.wrapper}/bin/treefmt --fail-on-change --no-cache || true
-        touch $out
-      '';
-
+      # NOTE: the real "is the tree formatted" check already ships with
+      # treefmt-nix's flakeModule as `checks.treefmt`. The former
+      # `treefmt-config` and `treefmt-modules` checks were pure echo
+      # theatre (`|| true`, printf of eval-time booleans) and were
+      # removed; this one now asserts something real: every enabled
+      # formatter program resolves to a binary on the wrapper PATH.
       treefmt-packages =
         pkgs.runCommand "treefmt-packages-check" {
-          buildInputs = [config.treefmt.build.wrapper];
+          nativeBuildInputs =
+            [config.treefmt.build.wrapper]
+            ++ lib.attrValues config.treefmt.build.programs;
         } ''
+          set -euo pipefail
           echo "Checking treefmt packages..."
-          ${config.treefmt.build.wrapper}/bin/treefmt --version || true
+          treefmt --version > /dev/null
+          ${lib.concatStrings (lib.mapAttrsToList (name: _pkg: ''
+                  command -v ${name} > /dev/null || {
+                    echo "formatter '${name}' is enabled but its binary is not on the treefmt wrapper PATH" >&2
+                    exit 1
+                  }
+                  echo "  ${name}: OK"
+                '')
+                config.treefmt.build.programs)}
           touch $out
         '';
-
-      treefmt-modules = pkgs.runCommand "treefmt-modules-check" {} ''
-        echo "Checking formatter modules..."
-        ${lib.optionalString formatterStates.nix "echo '  Nix formatter: OK'"}
-        ${lib.optionalString formatterStates.web "echo '  Web formatter: OK'"}
-        ${lib.optionalString formatterStates.python "echo '  Python formatter: OK'"}
-        ${lib.optionalString formatterStates.shell "echo '  Shell formatter: OK'"}
-        ${lib.optionalString formatterStates.rust "echo '  Rust formatter: OK'"}
-        ${lib.optionalString formatterStates.yaml "echo '  YAML formatter: OK'"}
-        ${lib.optionalString formatterStates.markdown "echo '  Markdown formatter: OK'"}
-        ${lib.optionalString formatterStates.json "echo '  JSON formatter: OK'"}
-        ${lib.optionalString formatterStates.misc "echo '  Misc formatter: OK'"}
-        touch $out
-      '';
     };
   };
 }
