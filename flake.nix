@@ -15,8 +15,9 @@
     };
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "x86_64-darwin"
@@ -49,7 +50,7 @@
         };
 
         # Export lib functions for programmatic use
-        lib = import ./lib {inherit (inputs.nixpkgs) lib;};
+        lib = import ./lib { inherit (inputs.nixpkgs) lib; };
 
         # Export overlay for extending nixpkgs
         overlays.default = final: prev: {
@@ -81,34 +82,36 @@
         };
       };
 
-      perSystem = {
-        config,
-        pkgs,
-        ...
-      }: {
-        # Configure treefmt for this project
-        treefmt = {
-          projectRootFile = "flake.nix";
-          programs = {
-            nixfmt.enable = true;
-            prettier.enable = true;
-            shfmt.enable = true;
+      perSystem =
+        {
+          config,
+          pkgs,
+          ...
+        }:
+        {
+          # Configure treefmt for this project
+          treefmt = {
+            projectRootFile = "flake.nix";
+            programs = {
+              nixfmt.enable = true;
+              prettier.enable = true;
+              shfmt.enable = true;
+            };
+          };
+
+          # Development shell with all tools
+          devShells.default = pkgs.mkShellNoCC {
+            packages = [ config.treefmt.build.wrapper ];
+
+            shellHook = ''
+              echo "treefmt-flake development environment"
+              echo ""
+              echo "Available commands:"
+              echo "  nix fmt              - Format all files"
+              echo "  nix fmt -- --check   - Check formatting without changes"
+              echo "  nix run .#treefmt-debug - Show debug information"
+            '';
           };
         };
-
-        # Development shell with all tools
-        devShells.default = pkgs.mkShellNoCC {
-          packages = [ config.treefmt.build.wrapper ];
-
-          shellHook = ''
-            echo "treefmt-flake development environment"
-            echo ""
-            echo "Available commands:"
-            echo "  nix fmt              - Format all files"
-            echo "  nix fmt -- --check   - Check formatting without changes"
-            echo "  nix run .#treefmt-debug - Show debug information"
-          '';
-        };
-      };
     };
 }

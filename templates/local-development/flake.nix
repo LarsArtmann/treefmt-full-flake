@@ -7,30 +7,38 @@
     treefmt-nix.url = "github:numtide/treefmt-nix";
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
-      systems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
 
-      imports = [inputs.treefmt-nix.flakeModule];
+      imports = [ inputs.treefmt-nix.flakeModule ];
 
-      perSystem = {
-        config,
-        pkgs,
-        ...
-      }: {
-        treefmt = {
-          projectRootFile = "flake.nix";
-          programs = {
-            nixfmt.enable = true;
-            prettier.enable = true;
-            shfmt.enable = true;
-            yamlfmt.enable = true;
+      perSystem =
+        {
+          config,
+          pkgs,
+          ...
+        }:
+        {
+          treefmt = {
+            projectRootFile = "flake.nix";
+            programs = {
+              nixfmt.enable = true;
+              prettier.enable = true;
+              shfmt.enable = true;
+              yamlfmt.enable = true;
+            };
+          };
+
+          devShells.default = pkgs.mkShell {
+            buildInputs = [ config.treefmt.build.wrapper ];
           };
         };
-
-        devShells.default = pkgs.mkShell {
-          buildInputs = [config.treefmt.build.wrapper];
-        };
-      };
     };
 }

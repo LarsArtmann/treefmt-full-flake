@@ -91,7 +91,7 @@ git commit -m "Initial commit" -q
 # Test formatting
 echo -e "\n${YELLOW}Running formatter...${NC}"
 # Create flake metadata first to ensure lock file exists
-if ! run_with_timeout 30 "nix flake metadata --no-registries 2>&1 | grep -v 'Git tree.*dirty' || true"; then
+if ! run_with_timeout 30 "nix flake metadata --no-registries > /dev/null"; then
   echo -e "${RED}✗ Failed to create flake metadata${NC}"
   exit 1
 fi
@@ -117,6 +117,7 @@ if grep -q "enable = true;" src/test.nix && (grep -q "{pkgs, ...}:" src/test.nix
 else
   echo -e "${RED}✗ Nix file not formatted correctly${NC}"
   cat src/test.nix
+  exit 1
 fi
 
 if grep -q "^const x = 1;" web/test.js; then
@@ -124,6 +125,7 @@ if grep -q "^const x = 1;" web/test.js; then
 else
   echo -e "${RED}✗ JavaScript file not formatted correctly${NC}"
   cat web/test.js
+  exit 1
 fi
 
 if grep -q '"name": "test"' web/data.json; then
@@ -131,6 +133,7 @@ if grep -q '"name": "test"' web/data.json; then
 else
   echo -e "${RED}✗ JSON file not formatted correctly${NC}"
   cat web/data.json
+  exit 1
 fi
 
 # Commit formatted changes

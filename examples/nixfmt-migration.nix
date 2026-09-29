@@ -2,7 +2,7 @@
 {
   # Example 1: Simple migration using the flake module option
   example1-simple = {
-    imports = [treefmt-full-flake.flakeModules.default];
+    imports = [ treefmt-full-flake.flakeModules.default ];
 
     treefmtFlake = {
       formatters = {
@@ -18,7 +18,7 @@
 
   # Example 2: Gradual migration with exclusions
   example2-gradual = {
-    imports = [treefmt-full-flake.flakeModules.default];
+    imports = [ treefmt-full-flake.flakeModules.default ];
 
     treefmtFlake = {
       formatters.nix = {
@@ -39,7 +39,7 @@
 
   # Example 3: Custom formatter configuration
   example3-custom = {
-    perSystem = {pkgs, ...}: {
+    perSystem = { pkgs, ... }: {
       treefmt = {
         projectRootFile = "flake.nix";
 
@@ -47,18 +47,18 @@
           nixfmt = {
             enable = true;
             package = pkgs.nixfmt-rfc-style;
-            includes = ["**/*.nix"];
-            excludes = ["**/hardware-configuration.nix"];
+            includes = [ "**/*.nix" ];
+            excludes = [ "**/hardware-configuration.nix" ];
           };
 
           deadnix = {
             enable = true;
-            includes = ["**/*.nix"];
+            includes = [ "**/*.nix" ];
           };
 
           statix = {
             enable = true;
-            includes = ["**/*.nix"];
+            includes = [ "**/*.nix" ];
           };
         };
       };
@@ -67,7 +67,7 @@
 
   # Example 4: Side-by-side comparison setup
   example4-comparison = {
-    perSystem = {pkgs, ...}: {
+    perSystem = { pkgs, ... }: {
       packages = {
         format-alejandra = pkgs.writeShellScriptBin "format-alejandra" ''
           ${pkgs.alejandra}/bin/alejandra "$@"
@@ -105,7 +105,7 @@
 
   # Example 5: CI/CD configuration with determinism check
   example5-ci = {
-    imports = [treefmt-full-flake.flakeModules.default];
+    imports = [ treefmt-full-flake.flakeModules.default ];
 
     treefmtFlake = {
       formatters.nix = {
@@ -114,46 +114,48 @@
       };
     };
 
-    perSystem = {
-      pkgs,
-      config,
-      ...
-    }: {
-      packages = {
-        check-determinism = pkgs.writeShellScriptBin "check-determinism" ''
-          set -euo pipefail
+    perSystem =
+      {
+        pkgs,
+        config,
+        ...
+      }:
+      {
+        packages = {
+          check-determinism = pkgs.writeShellScriptBin "check-determinism" ''
+            set -euo pipefail
 
-          echo "Checking formatter determinism..."
+            echo "Checking formatter determinism..."
 
-          TEMP_DIR=$(mktemp -d)
-          cp -r . "$TEMP_DIR/test"
-          cd "$TEMP_DIR/test"
+            TEMP_DIR=$(mktemp -d)
+            cp -r . "$TEMP_DIR/test"
+            cd "$TEMP_DIR/test"
 
-          echo "First formatting pass..."
-          ${config.formatter}/bin/treefmt
-          find . -name "*.nix" -type f -exec sha256sum {} \; | sort > ../first-pass.sha
+            echo "First formatting pass..."
+            ${config.formatter}/bin/treefmt
+            find . -name "*.nix" -type f -exec sha256sum {} \; | sort > ../first-pass.sha
 
-          echo "Second formatting pass..."
-          ${config.formatter}/bin/treefmt
-          find . -name "*.nix" -type f -exec sha256sum {} \; | sort > ../second-pass.sha
+            echo "Second formatting pass..."
+            ${config.formatter}/bin/treefmt
+            find . -name "*.nix" -type f -exec sha256sum {} \; | sort > ../second-pass.sha
 
-          if diff ../first-pass.sha ../second-pass.sha > /dev/null; then
-            echo "Formatter is deterministic!"
-            exit 0
-          else
-            echo "Formatter is NOT deterministic!"
-            diff ../first-pass.sha ../second-pass.sha || true
-            exit 1
-          fi
-        '';
+            if diff ../first-pass.sha ../second-pass.sha > /dev/null; then
+              echo "Formatter is deterministic!"
+              exit 0
+            else
+              echo "Formatter is NOT deterministic!"
+              diff ../first-pass.sha ../second-pass.sha || true
+              exit 1
+            fi
+          '';
+        };
+
+        checks = {
+          formatting-determinism = pkgs.runCommand "check-formatting-determinism" { } ''
+            ${config.packages.check-determinism}/bin/check-determinism
+            touch $out
+          '';
+        };
       };
-
-      checks = {
-        formatting-determinism = pkgs.runCommand "check-formatting-determinism" {} ''
-          ${config.packages.check-determinism}/bin/check-determinism
-          touch $out
-        '';
-      };
-    };
   };
 }

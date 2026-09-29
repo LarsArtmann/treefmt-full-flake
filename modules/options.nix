@@ -1,11 +1,14 @@
 # Module options for treefmt-flake
-{lib, ...}: let
-  mkEnum = values: default: description:
+{ lib, ... }:
+let
+  mkEnum =
+    values: default: description:
     lib.mkOption {
       type = lib.types.enum values;
       inherit default description;
     };
-in {
+in
+{
   options.treefmtFlake = lib.mkOption {
     type = lib.types.submodule {
       options = {
@@ -22,10 +25,13 @@ in {
                 type = lib.types.submodule {
                   options = {
                     enable = lib.mkEnableOption "Nix formatters";
-                    formatter = mkEnum ["alejandra" "nixfmt-rfc-style"] "nixfmt-rfc-style" "Nix code formatter to use";
+                    formatter = mkEnum [
+                      "alejandra"
+                      "nixfmt-rfc-style"
+                    ] "nixfmt-rfc-style" "Nix code formatter to use";
                   };
                 };
-                default = {};
+                default = { };
                 description = "Nix language formatting and linting";
               };
 
@@ -35,7 +41,7 @@ in {
                     enable = lib.mkEnableOption "Web formatters (JS/TS/CSS)";
                   };
                 };
-                default = {};
+                default = { };
                 description = "Web development formatting (biome for JS/TS/CSS/JSON)";
               };
 
@@ -45,7 +51,7 @@ in {
                     enable = lib.mkEnableOption "Python formatters";
                   };
                 };
-                default = {};
+                default = { };
                 description = "Python code formatting (black, isort, ruff)";
               };
 
@@ -55,7 +61,7 @@ in {
                     enable = lib.mkEnableOption "Rust formatters";
                   };
                 };
-                default = {};
+                default = { };
                 description = "Rust code formatting (rustfmt)";
               };
 
@@ -65,7 +71,7 @@ in {
                     enable = lib.mkEnableOption "Shell formatters";
                   };
                 };
-                default = {};
+                default = { };
                 description = "Shell script formatting (shfmt, shellcheck)";
               };
 
@@ -75,7 +81,7 @@ in {
                     enable = lib.mkEnableOption "Markdown formatters";
                   };
                 };
-                default = {};
+                default = { };
                 description = "Markdown document formatting (mdformat)";
               };
 
@@ -85,7 +91,7 @@ in {
                     enable = lib.mkEnableOption "YAML formatters";
                   };
                 };
-                default = {};
+                default = { };
                 description = "YAML file formatting (yamlfmt)";
               };
 
@@ -95,7 +101,7 @@ in {
                     enable = lib.mkEnableOption "JSON formatters";
                   };
                 };
-                default = {};
+                default = { };
                 description = "JSON file formatting (jsonfmt)";
               };
 
@@ -105,12 +111,12 @@ in {
                     enable = lib.mkEnableOption "Miscellaneous formatters";
                   };
                 };
-                default = {};
+                default = { };
                 description = "Miscellaneous formatting tools (buf, taplo, just, actionlint, typespec)";
               };
             };
           };
-          default = {};
+          default = { };
           description = "Formatter configurations organized by domain";
         };
 
@@ -118,10 +124,12 @@ in {
           type = lib.types.submodule {
             options = {
               allowMissingFormatter = lib.mkEnableOption "allow missing formatters without failing";
-              enableDefaultExcludes = lib.mkEnableOption "default exclude patterns" // {default = true;};
+              enableDefaultExcludes = lib.mkEnableOption "default exclude patterns" // {
+                default = true;
+              };
             };
           };
-          default = {};
+          default = { };
           description = "Behavior configuration";
         };
 
@@ -129,7 +137,7 @@ in {
           type = lib.types.submodule {
             options = {
               enable = lib.mkEnableOption "incremental formatting";
-              mode = mkEnum ["auto" "cache" "git"] "auto" "Incremental mode";
+              mode = mkEnum [ "auto" "cache" "git" ] "auto" "Incremental mode";
               cache = lib.mkOption {
                 type = lib.types.str;
                 default = "./.cache/treefmt";
@@ -138,7 +146,7 @@ in {
               gitBased = lib.mkEnableOption "git for change detection";
             };
           };
-          default = {};
+          default = { };
           description = "Incremental formatting configuration";
         };
 
@@ -152,12 +160,12 @@ in {
               };
             };
           };
-          default = {};
+          default = { };
           description = "Git integration configuration";
         };
       };
     };
-    default = {};
+    default = { };
     description = "Configuration for treefmt-flake";
   };
 }

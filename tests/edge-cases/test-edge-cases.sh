@@ -56,6 +56,7 @@ echo "}" >>edge-cases/large.nix
 # Test 3: Binary file (should be ignored)
 echo -e "\n${YELLOW}Test 3: Binary file${NC}"
 dd if=/dev/urandom of=edge-cases/binary.dat bs=1024 count=1 2>/dev/null
+sha256sum edge-cases/binary.dat >binary.dat.sha256
 
 # Test 4: Symlink
 echo -e "\n${YELLOW}Test 4: Symlink${NC}"
@@ -127,11 +128,12 @@ for file in edge-cases/empty.*; do
 done
 echo -e "${GREEN}✓ Empty files handled correctly${NC}"
 
-# Binary file should be unchanged
-if ! cmp -s edge-cases/binary.dat <(dd if=/dev/urandom of=/dev/stdout bs=1024 count=1 2>/dev/null); then
+# Binary file should be unchanged (checksum captured before formatting)
+if sha256sum -c binary.dat.sha256 --quiet 2>/dev/null; then
   echo -e "${GREEN}✓ Binary file was correctly ignored${NC}"
 else
-  echo -e "${RED}Binary file may have been modified${NC}"
+  echo -e "${RED}Binary file was modified by the formatter${NC}"
+  exit 1
 fi
 
 # Large file should still be valid Nix

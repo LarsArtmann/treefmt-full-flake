@@ -8,9 +8,15 @@
     treefmt-flake.url = "github:LarsArtmann/treefmt-full-flake";
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
-      systems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
 
       imports = [
         inputs.treefmt-nix.flakeModule
@@ -36,18 +42,20 @@
         };
       };
 
-      perSystem = {
-        config,
-        pkgs,
-        ...
-      }: {
-        devShells.default = pkgs.mkShell {
-          buildInputs = [config.treefmt.build.wrapper];
-          shellHook = ''
-            echo "Development environment ready"
-            echo "Run 'nix fmt' to format all files"
-          '';
+      perSystem =
+        {
+          config,
+          pkgs,
+          ...
+        }:
+        {
+          devShells.default = pkgs.mkShell {
+            buildInputs = [ config.treefmt.build.wrapper ];
+            shellHook = ''
+              echo "Development environment ready"
+              echo "Run 'nix fmt' to format all files"
+            '';
+          };
         };
-      };
     };
 }

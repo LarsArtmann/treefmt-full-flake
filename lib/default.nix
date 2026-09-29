@@ -1,6 +1,6 @@
 # Library functions for treefmt-flake
 # Exports commonly used utilities for external consumers
-{lib}: {
+{ lib }: {
   # Import formatter modules
   formatterModules = {
     nix = import ../formatters/nix.nix;
@@ -16,7 +16,7 @@
   };
 
   # Project detection utilities
-  projectDetection = import ./project-detection.nix {inherit lib;};
+  projectDetection = import ./project-detection.nix { inherit lib; };
 
   # Version
   version = "2.0.0";
