@@ -17,28 +17,28 @@ echo "Test directory: $TEST_DIR"
 
 # Cleanup function
 cleanup() {
-  echo -e "\n${YELLOW}Cleaning up test directory...${NC}"
-  rm -rf "$TEST_DIR"
+	echo -e "\n${YELLOW}Cleaning up test directory...${NC}"
+	rm -rf "$TEST_DIR"
 }
 trap cleanup EXIT
 
 # Function to test a single formatter
 test_formatter() {
-  local formatter_name=$1
-  local formatter_module=$2
-  local test_file=$3
-  local test_content=$4
-  local expected_pattern=$5
+	local formatter_name=$1
+	local formatter_module=$2
+	local test_file=$3
+	local test_content=$4
+	local expected_pattern=$5
 
-  echo -ne "Testing ${formatter_name}... "
+	echo -ne "Testing ${formatter_name}... "
 
-  # Create test directory
-  local test_subdir="$TEST_DIR/$formatter_name"
-  mkdir -p "$test_subdir"
-  cd "$test_subdir"
+	# Create test directory
+	local test_subdir="$TEST_DIR/$formatter_name"
+	mkdir -p "$test_subdir"
+	cd "$test_subdir"
 
-  # Create flake.nix that only enables this formatter
-  cat >flake.nix <<EOF
+	# Create flake.nix that only enables this formatter
+	cat >flake.nix <<EOF
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -71,36 +71,36 @@ test_formatter() {
 }
 EOF
 
-  # Initialize git repo (required by treefmt)
-  git init -q
-  git config user.email "test@example.com"
-  git config user.name "Test User"
-  git add flake.nix
+	# Initialize git repo (required by treefmt)
+	git init -q
+	git config user.email "test@example.com"
+	git config user.name "Test User"
+	git add flake.nix
 
-  # Create test file
-  echo -e "$test_content" >"$test_file"
-  git add "$test_file"
+	# Create test file
+	echo -e "$test_content" >"$test_file"
+	git add "$test_file"
 
-  # Run formatter with --no-update-lock-file to prevent unintended updates
-  if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
-    # Check if formatting was applied
-    if grep -q "$expected_pattern" "$test_file"; then
-      echo -e "${GREEN}✓${NC}"
-      ((PASSED_TESTS++))
-      return 0
-    else
-      echo -e "${RED}✗ (formatting not applied correctly)${NC}"
-      echo "Expected pattern: $expected_pattern"
-      echo "File content:"
-      cat "$test_file"
-      ((FAILED_TESTS++))
-      return 1
-    fi
-  else
-    echo -e "${RED}✗ (formatter failed to run)${NC}"
-    ((FAILED_TESTS++))
-    return 1
-  fi
+	# Run formatter with --no-update-lock-file to prevent unintended updates
+	if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
+		# Check if formatting was applied
+		if grep -q "$expected_pattern" "$test_file"; then
+			echo -e "${GREEN}✓${NC}"
+			((PASSED_TESTS++))
+			return 0
+		else
+			echo -e "${RED}✗ (formatting not applied correctly)${NC}"
+			echo "Expected pattern: $expected_pattern"
+			echo "File content:"
+			cat "$test_file"
+			((FAILED_TESTS++))
+			return 1
+		fi
+	else
+		echo -e "${RED}✗ (formatter failed to run)${NC}"
+		((FAILED_TESTS++))
+		return 1
+	fi
 }
 
 # Test individual formatters
@@ -138,9 +138,9 @@ echo -e "  ${RED}Failed: $FAILED_TESTS${NC}"
 echo -e "${BLUE}========================================${NC}"
 
 if [ $FAILED_TESTS -eq 0 ]; then
-  echo -e "\n${GREEN}All formatter isolation tests passed!${NC}"
-  exit 0
+	echo -e "\n${GREEN}All formatter isolation tests passed!${NC}"
+	exit 0
 else
-  echo -e "\n${RED}Some formatter isolation tests failed!${NC}"
-  exit 1
+	echo -e "\n${RED}Some formatter isolation tests failed!${NC}"
+	exit 1
 fi

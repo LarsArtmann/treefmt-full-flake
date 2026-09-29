@@ -8,9 +8,9 @@ REPORT_FILE="${2:-$SCRIPT_DIR/test-report.html}"
 
 # Check if results directory exists
 if [ ! -d "$RESULTS_DIR" ]; then
-  echo "Error: Results directory not found: $RESULTS_DIR"
-  echo "Run tests first to generate results"
-  exit 1
+	echo "Error: Results directory not found: $RESULTS_DIR"
+	echo "Run tests first to generate results"
+	exit 1
 fi
 
 # Generate HTML report
@@ -186,26 +186,26 @@ echo "      tests: [" >>"$REPORT_FILE"
 
 first=true
 for result_file in "$RESULTS_DIR"/*.result; do
-  if [ -f "$result_file" ]; then
-    test_name=$(basename "$result_file" .result)
-    result=$(cat "$result_file")
-    status=$(echo "$result" | awk '{print $1}')
+	if [ -f "$result_file" ]; then
+		test_name=$(basename "$result_file" .result)
+		result=$(cat "$result_file")
+		status=$(echo "$result" | awk '{print $1}')
 
-    if [ "$first" = true ]; then
-      first=false
-    else
-      echo "," >>"$REPORT_FILE"
-    fi
+		if [ "$first" = true ]; then
+			first=false
+		else
+			echo "," >>"$REPORT_FILE"
+		fi
 
-    if [ "$status" = "PASS" ]; then
-      duration=$(echo "$result" | awk '{print $2}')
-      echo -n "        { name: '$test_name', status: 'passed', duration: $duration, exitCode: 0 }" >>"$REPORT_FILE"
-    else
-      exit_code=$(echo "$result" | awk '{print $2}')
-      duration=$(echo "$result" | awk '{print $3}')
-      echo -n "        { name: '$test_name', status: 'failed', duration: $duration, exitCode: $exit_code }" >>"$REPORT_FILE"
-    fi
-  fi
+		if [ "$status" = "PASS" ]; then
+			duration=$(echo "$result" | awk '{print $2}')
+			echo -n "        { name: '$test_name', status: 'passed', duration: $duration, exitCode: 0 }" >>"$REPORT_FILE"
+		else
+			exit_code=$(echo "$result" | awk '{print $2}')
+			duration=$(echo "$result" | awk '{print $3}')
+			echo -n "        { name: '$test_name', status: 'failed', duration: $duration, exitCode: $exit_code }" >>"$REPORT_FILE"
+		fi
+	fi
 done
 
 cat >>"$REPORT_FILE" <<'EOF'
@@ -315,15 +315,15 @@ passed=0
 failed=0
 
 for result_file in "$RESULTS_DIR"/*.result; do
-  if [ -f "$result_file" ]; then
-    result=$(cat "$result_file")
-    status=$(echo "$result" | awk '{print $1}')
-    if [ "$status" = "PASS" ]; then
-      ((passed++))
-    else
-      ((failed++))
-    fi
-  fi
+	if [ -f "$result_file" ]; then
+		result=$(cat "$result_file")
+		status=$(echo "$result" | awk '{print $1}')
+		if [ "$status" = "PASS" ]; then
+			((passed++))
+		else
+			((failed++))
+		fi
+	fi
 done
 
 cat >>"$SUMMARY_MD" <<EOF
@@ -340,19 +340,19 @@ EOF
 
 # Add individual results
 for result_file in "$RESULTS_DIR"/*.result; do
-  if [ -f "$result_file" ]; then
-    test_name=$(basename "$result_file" .result)
-    result=$(cat "$result_file")
-    status=$(echo "$result" | awk '{print $1}')
+	if [ -f "$result_file" ]; then
+		test_name=$(basename "$result_file" .result)
+		result=$(cat "$result_file")
+		status=$(echo "$result" | awk '{print $1}')
 
-    if [ "$status" = "PASS" ]; then
-      duration=$(echo "$result" | awk '{print $2}')
-      echo "| $test_name | ✅ PASS | ${duration}s |" >>"$SUMMARY_MD"
-    else
-      duration=$(echo "$result" | awk '{print $3}')
-      echo "| $test_name | ❌ FAIL | ${duration}s |" >>"$SUMMARY_MD"
-    fi
-  fi
+		if [ "$status" = "PASS" ]; then
+			duration=$(echo "$result" | awk '{print $2}')
+			echo "| $test_name | ✅ PASS | ${duration}s |" >>"$SUMMARY_MD"
+		else
+			duration=$(echo "$result" | awk '{print $3}')
+			echo "| $test_name | ❌ FAIL | ${duration}s |" >>"$SUMMARY_MD"
+		fi
+	fi
 done
 
 echo "Markdown summary generated: $SUMMARY_MD"

@@ -22,11 +22,11 @@ setup_git_repo
 echo -e "\n${YELLOW}Initializing minimal template...${NC}"
 TEMPLATE_PATH="${REPO_ROOT}#minimal"
 if type get_template_path >/dev/null 2>&1; then
-  TEMPLATE_PATH=$(get_template_path "minimal")
+	TEMPLATE_PATH=$(get_template_path "minimal")
 fi
 if ! run_with_timeout 30 "nix flake init -t ${TEMPLATE_PATH}"; then
-  echo -e "${RED}Failed to initialize template${NC}"
-  exit 1
+	echo -e "${RED}Failed to initialize template${NC}"
+	exit 1
 fi
 git add flake.nix
 
@@ -48,7 +48,7 @@ cat >edge-cases/large.nix <<'EOF'
   largeList = [
 EOF
 for i in {1..9998}; do
-  echo "    $i" >>edge-cases/large.nix
+	echo "    $i" >>edge-cases/large.nix
 done
 echo "  ];" >>edge-cases/large.nix
 echo "}" >>edge-cases/large.nix
@@ -84,7 +84,7 @@ EOF
 echo -e "\n${YELLOW}Test 7: Very long lines${NC}"
 echo -n '{ pkgs, ... }: { longLine = "' >edge-cases/longlines.nix
 for i in {1..500}; do
-  echo -n "very long line content " >>edge-cases/longlines.nix
+	echo -n "very long line content " >>edge-cases/longlines.nix
 done
 echo '"; }' >>edge-cases/longlines.nix
 
@@ -112,8 +112,8 @@ git commit -m "Add edge case test files" -q
 # Run formatter
 echo -e "\n${YELLOW}Running formatter on edge cases...${NC}"
 if ! run_with_timeout 120 "nix fmt --no-update-lock-file 2>&1"; then
-  echo -e "${RED}Formatter failed on edge cases${NC}"
-  exit 1
+	echo -e "${RED}Formatter failed on edge cases${NC}"
+	exit 1
 fi
 
 # Check results
@@ -121,53 +121,53 @@ echo -e "\n${YELLOW}Checking results...${NC}"
 
 # Empty files should remain empty or have minimal formatting
 for file in edge-cases/empty.*; do
-  if [ -s "$file" ] && [ $(wc -l <"$file") -gt 5 ]; then
-    echo -e "${RED}Empty file $file was unexpectedly modified${NC}"
-    exit 1
-  fi
+	if [ -s "$file" ] && [ $(wc -l <"$file") -gt 5 ]; then
+		echo -e "${RED}Empty file $file was unexpectedly modified${NC}"
+		exit 1
+	fi
 done
 echo -e "${GREEN}✓ Empty files handled correctly${NC}"
 
 # Binary file should be unchanged (checksum captured before formatting)
 if sha256sum -c binary.dat.sha256 --quiet 2>/dev/null; then
-  echo -e "${GREEN}✓ Binary file was correctly ignored${NC}"
+	echo -e "${GREEN}✓ Binary file was correctly ignored${NC}"
 else
-  echo -e "${RED}Binary file was modified by the formatter${NC}"
-  exit 1
+	echo -e "${RED}Binary file was modified by the formatter${NC}"
+	exit 1
 fi
 
 # Large file should still be valid Nix
 if ! nix-instantiate --parse edge-cases/large.nix >/dev/null 2>&1; then
-  echo -e "${RED}Large file is no longer valid Nix${NC}"
-  exit 1
+	echo -e "${RED}Large file is no longer valid Nix${NC}"
+	exit 1
 fi
 echo -e "${GREEN}✓ Large file formatted successfully${NC}"
 
 # Check symlink still works
 if [ ! -L edge-cases/symlink.nix ]; then
-  echo -e "${RED}Symlink was replaced with regular file${NC}"
-  exit 1
+	echo -e "${RED}Symlink was replaced with regular file${NC}"
+	exit 1
 fi
 echo -e "${GREEN}✓ Symlink preserved${NC}"
 
 # Check special character file exists and is valid
 if [ ! -f "edge-cases/special-@#$%-chars.nix" ]; then
-  echo -e "${RED}Special character file missing${NC}"
-  exit 1
+	echo -e "${RED}Special character file missing${NC}"
+	exit 1
 fi
 echo -e "${GREEN}✓ Special character filename handled${NC}"
 
 # Check unicode content preserved
 if ! grep -q "你好世界" edge-cases/unicode.nix; then
-  echo -e "${RED}Unicode content was corrupted${NC}"
-  exit 1
+	echo -e "${RED}Unicode content was corrupted${NC}"
+	exit 1
 fi
 echo -e "${GREEN}✓ Unicode content preserved${NC}"
 
 # Check deeply nested file
 if [ ! -f edge-cases/very/deeply/nested/directory/structure/file.nix ]; then
-  echo -e "${RED}Deeply nested file missing${NC}"
-  exit 1
+	echo -e "${RED}Deeply nested file missing${NC}"
+	exit 1
 fi
 echo -e "${GREEN}✓ Deeply nested files handled${NC}"
 
@@ -177,8 +177,8 @@ git add -A
 git commit -m "Format edge cases" -q || true
 
 if ! run_with_timeout 60 "nix fmt --no-update-lock-file -- --fail-on-change"; then
-  echo -e "${RED}Formatter is not idempotent on edge cases${NC}"
-  exit 1
+	echo -e "${RED}Formatter is not idempotent on edge cases${NC}"
+	exit 1
 fi
 echo -e "${GREEN}✓ Formatter is idempotent${NC}"
 

@@ -53,7 +53,7 @@
         lib = import ./lib { inherit (inputs.nixpkgs) lib; };
 
         # Export overlay for extending nixpkgs
-        overlays.default = final: prev: {
+        overlays.default = _final: _prev: {
           treefmt-flake = {
             formatterModules = inputs.self.formatterModules;
             flakeModule = inputs.self.flakeModule;

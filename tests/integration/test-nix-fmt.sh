@@ -19,20 +19,20 @@ PASSED=0
 
 # Test function
 run_test() {
-  local test_name="$1"
-  local test_cmd="$2"
+	local test_name="$1"
+	local test_cmd="$2"
 
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  echo -e "${YELLOW}Running: ${test_name}${NC}"
+	echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+	echo -e "${YELLOW}Running: ${test_name}${NC}"
 
-  if eval "$test_cmd"; then
-    echo -e "${GREEN}✓ ${test_name} passed${NC}"
-    PASSED=$((PASSED + 1))
-  else
-    echo -e "${RED}✗ ${test_name} failed${NC}"
-    FAILED=$((FAILED + 1))
-  fi
-  echo ""
+	if eval "$test_cmd"; then
+		echo -e "${GREEN}✓ ${test_name} passed${NC}"
+		PASSED=$((PASSED + 1))
+	else
+		echo -e "${RED}✗ ${test_name} failed${NC}"
+		FAILED=$((FAILED + 1))
+	fi
+	echo ""
 }
 
 cd "$PROJECT_ROOT"
@@ -61,9 +61,9 @@ echo -e "${RED}Failed: ${FAILED}${NC}"
 echo ""
 
 if [ $FAILED -eq 0 ]; then
-  echo -e "${GREEN}✓ All integration tests passed!${NC}"
-  exit 0
+	echo -e "${GREEN}✓ All integration tests passed!${NC}"
+	exit 0
 else
-  echo -e "${RED}✗ ${FAILED} test(s) failed${NC}"
-  exit 1
+	echo -e "${RED}✗ ${FAILED} test(s) failed${NC}"
+	exit 1
 fi

@@ -1,7 +1,7 @@
 # Treefmt-Flake Status Report
 
-**Date:** 2026-04-04 00:54  
-**Branch:** master  
+**Date:** 2026-04-04 00:54\
+**Branch:** master\
 **Commit Context:** Massive flake-parts refactoring to make project maximally Nix-native
 
 ---

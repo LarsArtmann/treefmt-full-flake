@@ -3,7 +3,6 @@
 {
   lib,
   pkgs,
-  treefmt-flake,
 }:
 let
   # Test that the library imports correctly
