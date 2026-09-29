@@ -23,7 +23,7 @@ fi
 
 # Quick check only - fail if formatting needed
 # Use --no-build to avoid evaluation overhead
-if ! nix fmt -- --check --no-cache 2>/dev/null; then
+if ! nix fmt -- --fail-on-change --no-cache 2>/dev/null; then
     echo -e "${RED}✗ Formatting check failed${NC}"
     echo "Run 'nix fmt' to fix formatting, then commit again"
     exit 1
