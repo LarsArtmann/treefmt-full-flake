@@ -150,7 +150,11 @@ in
               treefmt --version > /dev/null
               ${lib.concatStrings (
                 lib.mapAttrsToList (name: _pkg: ''
-                  command -v ${name} > /dev/null || {
+                  # Verify the formatter's COMMAND binary, not the program
+                  # name: treefmt-nix renamed programs.ruff to
+                  # programs.ruff-format while the binary stayed `ruff`, so
+                  # name-based probes false-fail on every rename-era bump.
+                  command -v ${lib.escapeShellArg config.treefmt.settings.formatter.${name}.command} > /dev/null || {
                     echo "formatter '${name}' is enabled but its binary is not on the treefmt wrapper PATH" >&2
                     exit 1
                   }
