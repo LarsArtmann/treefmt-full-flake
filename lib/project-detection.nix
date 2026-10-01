@@ -24,6 +24,5 @@
 
   # Merge user config with auto-detected config
   # User settings take precedence
-  mergeConfigs =
-    auto: user: lib.mapAttrs (name: autoValue: user.${name} or autoValue) auto;
+  mergeConfigs = auto: user: lib.mapAttrs (name: autoValue: user.${name} or autoValue) auto;
 }

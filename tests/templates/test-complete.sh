@@ -254,82 +254,82 @@ print_section "${YELLOW}Step 8: Verifying formatting changes...${NC}"
 
 # Check Nix file
 if ! grep -qE "(^{|{pkgs)" src/config.nix || ! grep -q "enable = true;" src/config.nix; then
-	echo -e "${RED}Nix file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Nix file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Nix file formatted${NC}"
 
 if ! grep -q "^from typing import Dict, List$" src/main.py; then
-	echo -e "${RED}Python file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Python file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Python file formatted${NC}"
 
 if ! grep -q "^interface User {" web/app.ts; then
-	echo -e "${RED}TypeScript file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}TypeScript file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ TypeScript file formatted${NC}"
 
 # Check CSS is formatted
 if grep -q "body{margin:0" web/styles.css || ! grep -q "body {" web/styles.css; then
-	echo -e "${RED}CSS file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}CSS file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ CSS file formatted${NC}"
 
 if ! grep -q '^  echo "Running production deployment"' scripts/deploy.sh; then
-	echo -e "${RED}Shell script was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Shell script was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Shell script formatted${NC}"
 
 if ! grep -q "^fn main() {" rust-src/main.rs; then
-	echo -e "${RED}Rust file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Rust file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Rust file formatted${NC}"
 
 if ! grep -q "^name: " config.yaml; then
-	echo -e "${RED}YAML file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}YAML file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ YAML file formatted${NC}"
 
 if ! grep -qE "^##[[:space:]]*Features" README.md; then
-	echo -e "${RED}Markdown file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Markdown file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Markdown file formatted${NC}"
 
 # Check JSON is formatted
 if ! grep -qE '"name"[[:space:]]*:[[:space:]]*"test-app"' package.json; then
-	echo -e "${RED}JSON file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}JSON file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ JSON file formatted${NC}"
 
 if ! grep -q '^name = "test-app"$' Cargo.toml; then
-	echo -e "${RED}TOML file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}TOML file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ TOML file formatted${NC}"
 
 # Check Protocol Buffer formatting (buf may not format, just validate)
 if [ -f proto/service.proto ]; then
-	echo -e "${GREEN}✓ Protocol buffer file exists${NC}"
+  echo -e "${GREEN}✓ Protocol buffer file exists${NC}"
 fi
 
 # Check GitHub Actions formatting (actionlint validates rather than formats)
 if [ -f .github/workflows/test.yml ]; then
-	echo -e "${GREEN}✓ GitHub Actions workflow exists${NC}"
+  echo -e "${GREEN}✓ GitHub Actions workflow exists${NC}"
 fi
 
 # Check Justfile formatting
 if grep -q "^default:$" justfile; then
-	echo -e "${GREEN}✓ Justfile formatted${NC}"
+  echo -e "${GREEN}✓ Justfile formatted${NC}"
 else
-	echo -e "${YELLOW}⚠ Justfile may not have been formatted${NC}"
+  echo -e "${YELLOW}⚠ Justfile may not have been formatted${NC}"
 fi
 
 # Step 9: Test format check
@@ -347,16 +347,16 @@ echo "# New comment" >>src/config.nix
 
 # Test treefmt-fast
 if ! run_with_timeout 30 "nix run --no-update-lock-file .#treefmt-fast 2>/dev/null || true"; then
-	echo -e "${YELLOW}treefmt-fast not available (expected for complete template)${NC}"
+  echo -e "${YELLOW}treefmt-fast not available (expected for complete template)${NC}"
 else
-	echo -e "${GREEN}✓ treefmt-fast available${NC}"
+  echo -e "${GREEN}✓ treefmt-fast available${NC}"
 fi
 
 # Test treefmt-staged
 if ! run_with_timeout 30 "nix run --no-update-lock-file .#treefmt-staged 2>/dev/null || true"; then
-	echo -e "${YELLOW}treefmt-staged not available (expected for complete template)${NC}"
+  echo -e "${YELLOW}treefmt-staged not available (expected for complete template)${NC}"
 else
-	echo -e "${GREEN}✓ treefmt-staged available${NC}"
+  echo -e "${GREEN}✓ treefmt-staged available${NC}"
 fi
 
 # Success

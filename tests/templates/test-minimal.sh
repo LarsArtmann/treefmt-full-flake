@@ -105,22 +105,22 @@ print_section "${YELLOW}Step 8: Verifying formatting changes...${NC}"
 
 # Check Nix file
 if ! grep -qE "(^{|{pkgs)" src/test.nix || ! grep -q "pkgs.hello" src/test.nix; then
-	echo -e "${RED}Nix file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Nix file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Nix file formatted${NC}"
 
 # Check Markdown file
 if ! grep -q "^- Item 1$" docs/README.md; then
-	echo -e "${RED}Markdown file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Markdown file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Markdown file formatted${NC}"
 
 # Check YAML file
 if ! grep -q "^name: " config.yaml && ! grep -q "^version: " config.yaml; then
-	echo -e "${RED}YAML file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}YAML file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ YAML file formatted${NC}"
 

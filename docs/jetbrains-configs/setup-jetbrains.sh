@@ -7,8 +7,8 @@ echo "🚀 Setting up JetBrains IDE integration for treefmt..."
 
 # Check if we're in a project with treefmt
 if [ ! -f "flake.nix" ]; then
-	echo "❌ Error: No flake.nix found. Run this from your project root."
-	exit 1
+  echo "❌ Error: No flake.nix found. Run this from your project root."
+  exit 1
 fi
 
 # Build treefmt to ensure result symlink exists
@@ -106,15 +106,15 @@ EOF
 
 # Add to .gitignore if needed
 if [ -f .gitignore ]; then
-	if ! grep -q "^.idea/workspace.xml" .gitignore; then
-		echo "" >>.gitignore
-		echo "# JetBrains IDE - User-specific files" >>.gitignore
-		echo ".idea/workspace.xml" >>.gitignore
-		echo ".idea/tasks.xml" >>.gitignore
-		echo ".idea/usage.statistics.xml" >>.gitignore
-		echo ".idea/dictionaries" >>.gitignore
-		echo ".idea/shelf" >>.gitignore
-	fi
+  if ! grep -q "^.idea/workspace.xml" .gitignore; then
+    echo "" >>.gitignore
+    echo "# JetBrains IDE - User-specific files" >>.gitignore
+    echo ".idea/workspace.xml" >>.gitignore
+    echo ".idea/tasks.xml" >>.gitignore
+    echo ".idea/usage.statistics.xml" >>.gitignore
+    echo ".idea/dictionaries" >>.gitignore
+    echo ".idea/shelf" >>.gitignore
+  fi
 fi
 
 echo "✅ JetBrains IDE integration setup complete!"

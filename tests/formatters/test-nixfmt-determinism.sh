@@ -15,19 +15,19 @@ echo "Test directory: $TEST_DIR"
 
 # Cleanup function
 cleanup() {
-	echo -e "\n${YELLOW}Cleaning up test directory...${NC}"
-	rm -rf "$TEST_DIR"
+  echo -e "\n${YELLOW}Cleaning up test directory...${NC}"
+  rm -rf "$TEST_DIR"
 }
 trap cleanup EXIT
 
 # Test nixfmt-rfc-style determinism
 test_nixfmt_determinism() {
-	echo -e "\n${YELLOW}Setting up test environment...${NC}"
+  echo -e "\n${YELLOW}Setting up test environment...${NC}"
 
-	cd "$TEST_DIR"
+  cd "$TEST_DIR"
 
-	# Create flake.nix with nixfmt-rfc-style
-	cat >flake.nix <<'EOF'
+  # Create flake.nix with nixfmt-rfc-style
+  cat >flake.nix <<'EOF'
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -69,17 +69,17 @@ test_nixfmt_determinism() {
 }
 EOF
 
-	# Replace REPO_ROOT placeholder
-	sed -i.bak "s|REPO_ROOT|$REPO_ROOT|" flake.nix
-	rm -f flake.nix.bak
+  # Replace REPO_ROOT placeholder
+  sed -i.bak "s|REPO_ROOT|$REPO_ROOT|" flake.nix
+  rm -f flake.nix.bak
 
-	# Initialize git repo
-	git init -q
-	git config user.email "test@example.com"
-	git config user.name "Test User"
+  # Initialize git repo
+  git init -q
+  git config user.email "test@example.com"
+  git config user.name "Test User"
 
-	# Create test file with potentially problematic formatting
-	cat >test.nix <<'EOF'
+  # Create test file with potentially problematic formatting
+  cat >test.nix <<'EOF'
 {
   # This is a test file with various formatting patterns
   foo = {
@@ -115,81 +115,81 @@ EOF
 }
 EOF
 
-	git add .
+  git add .
 
-	echo -e "\n${YELLOW}Running formatter multiple times to test determinism...${NC}"
+  echo -e "\n${YELLOW}Running formatter multiple times to test determinism...${NC}"
 
-	# First run
-	echo -n "First run: "
-	if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
-		echo -e "${GREEN}✓${NC}"
-		cp test.nix test.nix.run1
-	else
-		echo -e "${RED}✗ Failed${NC}"
-		return 1
-	fi
+  # First run
+  echo -n "First run: "
+  if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
+    echo -e "${GREEN}✓${NC}"
+    cp test.nix test.nix.run1
+  else
+    echo -e "${RED}✗ Failed${NC}"
+    return 1
+  fi
 
-	# Second run
-	echo -n "Second run: "
-	if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
-		echo -e "${GREEN}✓${NC}"
-		cp test.nix test.nix.run2
-	else
-		echo -e "${RED}✗ Failed${NC}"
-		return 1
-	fi
+  # Second run
+  echo -n "Second run: "
+  if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
+    echo -e "${GREEN}✓${NC}"
+    cp test.nix test.nix.run2
+  else
+    echo -e "${RED}✗ Failed${NC}"
+    return 1
+  fi
 
-	# Third run
-	echo -n "Third run: "
-	if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
-		echo -e "${GREEN}✓${NC}"
-		cp test.nix test.nix.run3
-	else
-		echo -e "${RED}✗ Failed${NC}"
-		return 1
-	fi
+  # Third run
+  echo -n "Third run: "
+  if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
+    echo -e "${GREEN}✓${NC}"
+    cp test.nix test.nix.run3
+  else
+    echo -e "${RED}✗ Failed${NC}"
+    return 1
+  fi
 
-	# Compare outputs
-	echo -e "\n${YELLOW}Comparing outputs...${NC}"
+  # Compare outputs
+  echo -e "\n${YELLOW}Comparing outputs...${NC}"
 
-	if diff -q test.nix.run1 test.nix.run2 >/dev/null && diff -q test.nix.run2 test.nix.run3 >/dev/null; then
-		echo -e "${GREEN}✓ All runs produced identical output - formatter is deterministic!${NC}"
-		return 0
-	else
-		echo -e "${RED}✗ Outputs differ - formatter is NOT deterministic${NC}"
-		echo -e "\n${YELLOW}Differences between runs:${NC}"
-		diff -u test.nix.run1 test.nix.run2 || true
-		diff -u test.nix.run2 test.nix.run3 || true
-		return 1
-	fi
+  if diff -q test.nix.run1 test.nix.run2 >/dev/null && diff -q test.nix.run2 test.nix.run3 >/dev/null; then
+    echo -e "${GREEN}✓ All runs produced identical output - formatter is deterministic!${NC}"
+    return 0
+  else
+    echo -e "${RED}✗ Outputs differ - formatter is NOT deterministic${NC}"
+    echo -e "\n${YELLOW}Differences between runs:${NC}"
+    diff -u test.nix.run1 test.nix.run2 || true
+    diff -u test.nix.run2 test.nix.run3 || true
+    return 1
+  fi
 }
 
 # Compare alejandra vs nixfmt-rfc-style
 compare_formatters() {
-	echo -e "\n${BLUE}========================================${NC}"
-	echo -e "${BLUE}Comparing formatters side by side${NC}"
-	echo -e "${BLUE}========================================${NC}"
+  echo -e "\n${BLUE}========================================${NC}"
+  echo -e "${BLUE}Comparing formatters side by side${NC}"
+  echo -e "${BLUE}========================================${NC}"
 
-	local COMPARE_DIR="$TEST_DIR/compare"
-	mkdir -p "$COMPARE_DIR"
+  local COMPARE_DIR="$TEST_DIR/compare"
+  mkdir -p "$COMPARE_DIR"
 
-	# Create test file
-	cat >"$COMPARE_DIR/test.nix" <<'EOF'
+  # Create test file
+  cat >"$COMPARE_DIR/test.nix" <<'EOF'
 {foo={bar="baz";nested={deeply={value=42;};};};myFunction={arg1,arg2,...}@args:let helper=x:x+1;in helper arg1+arg2;}
 EOF
 
-	# Test with alejandra
-	echo -e "\n${YELLOW}Testing Alejandra...${NC}"
-	cd "$COMPARE_DIR"
-	cp "$REPO_ROOT/flake.nix" flake-alejandra.nix
-	sed -i.bak 's/nixFormatter = "nixfmt-rfc-style"/nixFormatter = "alejandra"/' flake-alejandra.nix 2>/dev/null || true
-	rm -f flake-alejandra.nix.bak
+  # Test with alejandra
+  echo -e "\n${YELLOW}Testing Alejandra...${NC}"
+  cd "$COMPARE_DIR"
+  cp "$REPO_ROOT/flake.nix" flake-alejandra.nix
+  sed -i.bak 's/nixFormatter = "nixfmt-rfc-style"/nixFormatter = "alejandra"/' flake-alejandra.nix 2>/dev/null || true
+  rm -f flake-alejandra.nix.bak
 
-	# Create temporary flake for alejandra
-	mkdir alejandra-test
-	cd alejandra-test
-	cp ../test.nix .
-	cat >flake.nix <<EOF
+  # Create temporary flake for alejandra
+  mkdir alejandra-test
+  cd alejandra-test
+  cp ../test.nix .
+  cat >flake.nix <<EOF
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -227,40 +227,40 @@ EOF
 }
 EOF
 
-	git init -q
-	git config user.email "test@example.com"
-	git config user.name "Test User"
-	git add .
+  git init -q
+  git config user.email "test@example.com"
+  git config user.name "Test User"
+  git add .
 
-	echo "Running alejandra formatter..."
-	if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
-		cp test.nix ../alejandra-output.nix
-		echo -e "${GREEN}✓ Alejandra completed${NC}"
-	else
-		echo -e "${RED}✗ Alejandra failed${NC}"
-	fi
+  echo "Running alejandra formatter..."
+  if run_with_timeout 30 "nix fmt --no-update-lock-file 2>&1"; then
+    cp test.nix ../alejandra-output.nix
+    echo -e "${GREEN}✓ Alejandra completed${NC}"
+  else
+    echo -e "${RED}✗ Alejandra failed${NC}"
+  fi
 
-	cd ..
+  cd ..
 
-	echo -e "\n${YELLOW}Summary:${NC}"
-	echo "Original file: $(wc -l <test.nix) lines"
-	if [ -f alejandra-output.nix ]; then
-		echo "Alejandra output: $(wc -l <alejandra-output.nix) lines"
-	fi
-	if [ -f "$TEST_DIR/test.nix.run1" ]; then
-		echo "nixfmt-rfc-style output: $(wc -l <"$TEST_DIR/test.nix.run1") lines"
-	fi
+  echo -e "\n${YELLOW}Summary:${NC}"
+  echo "Original file: $(wc -l <test.nix) lines"
+  if [ -f alejandra-output.nix ]; then
+    echo "Alejandra output: $(wc -l <alejandra-output.nix) lines"
+  fi
+  if [ -f "$TEST_DIR/test.nix.run1" ]; then
+    echo "nixfmt-rfc-style output: $(wc -l <"$TEST_DIR/test.nix.run1") lines"
+  fi
 }
 
 # Main test execution
 echo -e "${BLUE}Running nixfmt-rfc-style determinism test...${NC}"
 
 if test_nixfmt_determinism; then
-	echo -e "\n${GREEN}✅ nixfmt-rfc-style is deterministic!${NC}"
-	RESULT=0
+  echo -e "\n${GREEN}✅ nixfmt-rfc-style is deterministic!${NC}"
+  RESULT=0
 else
-	echo -e "\n${RED}❌ nixfmt-rfc-style is NOT deterministic${NC}"
-	RESULT=1
+  echo -e "\n${RED}❌ nixfmt-rfc-style is NOT deterministic${NC}"
+  RESULT=1
 fi
 
 # Run comparison

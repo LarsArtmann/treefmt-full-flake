@@ -194,33 +194,33 @@ All critical functionality is working:
 
 ## F) Top #25 Things To Get Done Next! 📋
 
-| #  | Task                                                          | Priority | Effort    | Impact |
-| -- | ------------------------------------------------------------- | -------- | --------- | ------ |
-| 1  | Implement real auto-detection (scan files, enable formatters) | P0       | High      | High   |
-| 2  | Add deprecation warning system for old API                    | P0       | Medium    | High   |
-| 3  | Fix and enable template tests in CI                           | P0       | Medium    | High   |
-| 4  | Verify incremental formatting performance claims              | P0       | Low       | High   |
-| 5  | Write migration guide (v1 to v2)                              | P1       | Medium    | High   |
-| 6  | Create API reference documentation                            | P1       | Medium    | Medium |
-| 7  | Add unit tests for lib/ functions                             | P1       | Medium    | Medium |
-| 8  | Test legacy migration paths                                   | P1       | Medium    | Medium |
-| 9  | Clean up tests/ directory (remove stale scripts)              | P1       | Low       | Medium |
-| 10 | Add formatter-specific integration tests                      | P1       | High      | Medium |
-| 11 | Create advanced configuration examples                        | P2       | Low       | Medium |
-| 12 | Expand troubleshooting guide                                  | P2       | Low       | Medium |
-| 13 | Add VS Code settings template                                 | P2       | Low       | Low    |
-| 14 | Create language-specific project templates                    | P2       | Medium    | Medium |
-| 15 | Add performance benchmarking to CI                            | P2       | Medium    | Low    |
-| 16 | Implement formatter priority/conflict resolution              | P2       | Medium    | Medium |
-| 17 | Add custom formatter registration                             | P2       | High      | Medium |
-| 18 | Create video/quick demo                                       | P3       | High      | Low    |
-| 19 | Add NixOS module                                              | P3       | High      | Low    |
-| 20 | Support home-manager                                          | P3       | High      | Low    |
-| 21 | Create web-based config generator                             | P3       | High      | Low    |
-| 22 | Add telemetry (opt-in) for usage patterns                     | P3       | Medium    | Low    |
-| 23 | Implement distributed caching                                 | P3       | High      | Low    |
-| 24 | Add AI-powered formatter suggestions                          | P3       | High      | Low    |
-| 25 | Create treefmt marketplace for community formatters           | P3       | Very High | Low    |
+| #   | Task                                                          | Priority | Effort    | Impact |
+| --- | ------------------------------------------------------------- | -------- | --------- | ------ |
+| 1   | Implement real auto-detection (scan files, enable formatters) | P0       | High      | High   |
+| 2   | Add deprecation warning system for old API                    | P0       | Medium    | High   |
+| 3   | Fix and enable template tests in CI                           | P0       | Medium    | High   |
+| 4   | Verify incremental formatting performance claims              | P0       | Low       | High   |
+| 5   | Write migration guide (v1 to v2)                              | P1       | Medium    | High   |
+| 6   | Create API reference documentation                            | P1       | Medium    | Medium |
+| 7   | Add unit tests for lib/ functions                             | P1       | Medium    | Medium |
+| 8   | Test legacy migration paths                                   | P1       | Medium    | Medium |
+| 9   | Clean up tests/ directory (remove stale scripts)              | P1       | Low       | Medium |
+| 10  | Add formatter-specific integration tests                      | P1       | High      | Medium |
+| 11  | Create advanced configuration examples                        | P2       | Low       | Medium |
+| 12  | Expand troubleshooting guide                                  | P2       | Low       | Medium |
+| 13  | Add VS Code settings template                                 | P2       | Low       | Low    |
+| 14  | Create language-specific project templates                    | P2       | Medium    | Medium |
+| 15  | Add performance benchmarking to CI                            | P2       | Medium    | Low    |
+| 16  | Implement formatter priority/conflict resolution              | P2       | Medium    | Medium |
+| 17  | Add custom formatter registration                             | P2       | High      | Medium |
+| 18  | Create video/quick demo                                       | P3       | High      | Low    |
+| 19  | Add NixOS module                                              | P3       | High      | Low    |
+| 20  | Support home-manager                                          | P3       | High      | Low    |
+| 21  | Create web-based config generator                             | P3       | High      | Low    |
+| 22  | Add telemetry (opt-in) for usage patterns                     | P3       | Medium    | Low    |
+| 23  | Implement distributed caching                                 | P3       | High      | Low    |
+| 24  | Add AI-powered formatter suggestions                          | P3       | High      | Low    |
+| 25  | Create treefmt marketplace for community formatters           | P3       | Very High | Low    |
 
 ---
 

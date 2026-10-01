@@ -146,50 +146,50 @@ print_section "${YELLOW}Step 8: Verifying formatting changes...${NC}"
 
 # Check Nix formatting
 if ! grep -qE "(^{|{pkgs)" src/test.nix || ! grep -q "enable = true;" src/test.nix; then
-	echo -e "${RED}Nix file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Nix file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Nix file formatted${NC}"
 
 # Check Python formatting
 if ! grep -q "^def main():$" src/main.py; then
-	echo -e "${RED}Python file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Python file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Python file formatted${NC}"
 
 # Check TypeScript formatting
 if ! grep -q "^interface User {" web/app.ts; then
-	echo -e "${RED}TypeScript file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}TypeScript file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ TypeScript file formatted${NC}"
 
 # Check Shell formatting
 if ! grep -q '^  echo "Error: No environment specified"' scripts/deploy.sh; then
-	echo -e "${RED}Shell script was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Shell script was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Shell script formatted${NC}"
 
 # Check JSON formatting
 if ! grep -qE '"name"[[:space:]]*:[[:space:]]*"test-app"' config.json; then
-	echo -e "${RED}JSON file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}JSON file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ JSON file formatted${NC}"
 
 # Check YAML formatting
 if ! grep -q "^name: " config.yaml && ! grep -q "^version: " config.yaml; then
-	echo -e "${RED}YAML file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}YAML file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ YAML file formatted${NC}"
 
 # Check Markdown formatting
 if ! grep -q "^- Item 1$" README.md; then
-	echo -e "${RED}Markdown file was not formatted properly${NC}"
-	exit 1
+  echo -e "${RED}Markdown file was not formatted properly${NC}"
+  exit 1
 fi
 echo -e "${GREEN}✓ Markdown file formatted${NC}"
 
@@ -204,22 +204,22 @@ test_dev_shell 30 || exit 1
 # Step 11: Test justfile commands
 print_section "${YELLOW}Step 11: Testing justfile commands...${NC}"
 if ! command -v just >/dev/null 2>&1; then
-	echo -e "${YELLOW}just not installed, installing...${NC}"
-	if ! run_with_timeout 60 "nix profile install nixpkgs#just"; then
-		echo -e "${YELLOW}Skipping justfile tests (just not available)${NC}"
-	else
-		if ! run_with_timeout 30 "just --list"; then
-			echo -e "${RED}Failed to list just commands${NC}"
-		else
-			echo -e "${GREEN}✓ Justfile commands available${NC}"
-		fi
-	fi
+  echo -e "${YELLOW}just not installed, installing...${NC}"
+  if ! run_with_timeout 60 "nix profile install nixpkgs#just"; then
+    echo -e "${YELLOW}Skipping justfile tests (just not available)${NC}"
+  else
+    if ! run_with_timeout 30 "just --list"; then
+      echo -e "${RED}Failed to list just commands${NC}"
+    else
+      echo -e "${GREEN}✓ Justfile commands available${NC}"
+    fi
+  fi
 else
-	if ! run_with_timeout 30 "just --list"; then
-		echo -e "${RED}Failed to list just commands${NC}"
-	else
-		echo -e "${GREEN}✓ Justfile commands available${NC}"
-	fi
+  if ! run_with_timeout 30 "just --list"; then
+    echo -e "${RED}Failed to list just commands${NC}"
+  else
+    echo -e "${GREEN}✓ Justfile commands available${NC}"
+  fi
 fi
 
 # Success
